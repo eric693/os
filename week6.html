@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 6: 記憶體管理 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .memory-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 6: 記憶體管理</h1>
+            <p class="week-info">Memory Management</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第六週的課程！記憶體是計算機系統中最重要的資源之一。有效的記憶體管理直接影響系統的效能和穩定性。作業系統必須管理有限的實體記憶體，為多個行程分配和回收記憶體空間。</p>
+                <p>本週我們將學習記憶體管理的基本概念、不同的記憶體配置策略、分頁和分段技術，以及如何使用 C 語言進行動態記憶體管理。這些知識對理解現代作業系統的運作至關重要。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解記憶體階層架構</li>
+                    <li>掌握記憶體配置演算法（First Fit、Best Fit、Worst Fit）</li>
+                    <li>了解記憶體碎片問題及解決方法</li>
+                    <li>學習分頁（Paging）的基本概念</li>
+                    <li>理解分段（Segmentation）機制</li>
+                    <li>掌握 C 語言的動態記憶體管理</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、記憶體管理基礎</h2>
+                
+                <h3>1.1 記憶體階層</h3>
+                <p>現代計算機系統採用記憶體階層來平衡速度和成本：</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>層級</th>
+                            <th>類型</th>
+                            <th>容量</th>
+                            <th>速度</th>
+                            <th>成本</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>暫存器</td>
+                            <td>< 1 KB</td>
+                            <td>最快</td>
+                            <td>最高</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>快取 (L1/L2/L3)</td>
+                            <td>KB - MB</td>
+                            <td>很快</td>
+                            <td>高</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>主記憶體 (RAM)</td>
+                            <td>GB</td>
+                            <td>快</td>
+                            <td>中等</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>固態硬碟 (SSD)</td>
+                            <td>TB</td>
+                            <td>中等</td>
+                            <td>中低</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>硬碟 (HDD)</td>
+                            <td>TB</td>
+                            <td>慢</td>
+                            <td>低</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>1.2 位址綁定（Address Binding）</h3>
+                <p>程式中的位址在不同時期可能以不同形式存在：</p>
+
+                <ul>
+                    <li><strong>編譯時期（Compile Time）：</strong>如果編譯時就知道行程在記憶體中的位置，產生絕對位址</li>
+                    <li><strong>載入時期（Load Time）：</strong>如果編譯時不知道位置，產生可重定位的程式碼</li>
+                    <li><strong>執行時期（Execution Time）：</strong>如果行程在執行中可以移動，需要硬體支援（如 MMU）</li>
+                </ul>
+
+                <h3>1.3 邏輯位址 vs 實體位址</h3>
+
+                <div class="concept-box">
+                    <h4>位址空間</h4>
+                    <p><strong>邏輯位址（Logical Address）：</strong></p>
+                    <ul>
+                        <li>由 CPU 產生</li>
+                        <li>也稱為虛擬位址</li>
+                        <li>程式看到的位址</li>
+                    </ul>
+                    
+                    <p><strong>實體位址（Physical Address）：</strong></p>
+                    <ul>
+                        <li>記憶體單元實際看到的位址</li>
+                        <li>由記憶體管理單元（MMU）將邏輯位址轉換而來</li>
+                    </ul>
+                </div>
+
+                <h2>二、連續記憶體配置</h2>
+
+                <h3>2.1 固定分割（Fixed Partitioning）</h3>
+                <p>將記憶體劃分為固定大小的分割區，每個分割區可載入一個行程。</p>
+
+                <ul>
+                    <li><strong>優點：</strong>簡單、易於實作</li>
+                    <li><strong>缺點：</strong>內部碎片、分割數量固定</li>
+                </ul>
+
+                <h3>2.2 動態分割（Dynamic Partitioning）</h3>
+                <p>根據行程需求動態分配記憶體空間。</p>
+
+                <h4>記憶體配置演算法</h4>
+
+                <div class="concept-box">
+                    <h4>First Fit（首次適合）</h4>
+                    <p>分配第一個足夠大的空閒區塊。</p>
+                    <ul>
+                        <li>優點：速度快</li>
+                        <li>缺點：可能產生小碎片</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>Best Fit（最佳適合）</h4>
+                    <p>分配最小的足夠大空閒區塊。</p>
+                    <ul>
+                        <li>優點：節省記憶體</li>
+                        <li>缺點：需要搜尋整個列表、產生很多小碎片</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>Worst Fit（最差適合）</h4>
+                    <p>分配最大的空閒區塊。</p>
+                    <ul>
+                        <li>優點：剩餘空間較大，較有用</li>
+                        <li>缺點：需要搜尋整個列表</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 記憶體碎片</h3>
+
+                <div class="warning-box">
+                    <strong>碎片問題</strong>
+                    <p><strong>外部碎片（External Fragmentation）：</strong>總可用記憶體足夠，但不連續，無法滿足請求。</p>
+                    <p><strong>內部碎片（Internal Fragmentation）：</strong>分配給行程的記憶體比需要的多，多餘部分無法使用。</p>
+                    <p><strong>解決方法：</strong></p>
+                    <ul>
+                        <li>壓縮（Compaction）：移動行程使記憶體連續</li>
+                        <li>分頁（Paging）：允許非連續配置</li>
+                    </ul>
+                </div>
+
+                <h2>三、分頁（Paging）</h2>
+
+                <h3>3.1 分頁基本概念</h3>
+                <p>將實體記憶體分成固定大小的框架（Frame），將邏輯記憶體分成相同大小的頁面（Page）。</p>
+
+                <div class="concept-box">
+                    <h4>分頁的優點</h4>
+                    <ul>
+                        <li>消除外部碎片</li>
+                        <li>允許非連續配置</li>
+                        <li>易於管理</li>
+                    </ul>
+                    
+                    <h4>分頁的缺點</h4>
+                    <ul>
+                        <li>存在內部碎片（最後一頁）</li>
+                        <li>需要頁表（Page Table），佔用記憶體</li>
+                        <li>位址轉換開銷</li>
+                    </ul>
+                </div>
+
+                <h3>3.2 頁表（Page Table）</h3>
+                <p>用於將邏輯位址中的頁號轉換為實體位址中的框架號。</p>
+
+                <div class="memory-diagram">
+<strong>邏輯位址結構：</strong>
+┌──────────────┬──────────────┐
+│   頁號 (p)   │ 頁內偏移 (d) │
+└──────────────┴──────────────┘
+
+<strong>實體位址結構：</strong>
+┌──────────────┬──────────────┐
+│  框架號 (f)  │ 框內偏移 (d) │
+└──────────────┴──────────────┘
+
+<strong>轉換過程：</strong>
+1. 從邏輯位址提取頁號 p
+2. 查詢頁表，獲得框架號 f
+3. 將框架號與偏移量結合，得到實體位址
+                </div>
+
+                <h3>3.3 頁表的實作</h3>
+
+                <ul>
+                    <li><strong>簡單頁表：</strong>整個頁表存放在記憶體中</li>
+                    <li><strong>多層頁表：</strong>將頁表分層，減少記憶體使用</li>
+                    <li><strong>倒置頁表：</strong>每個框架一個條目，而非每個頁面</li>
+                </ul>
+
+                <h2>四、分段（Segmentation）</h2>
+
+                <h3>4.1 分段基本概念</h3>
+                <p>將程式的邏輯位址空間分成多個段（Segment），每個段代表一個邏輯單元（如程式碼、資料、堆疊）。</p>
+
+                <div class="concept-box">
+                    <h4>分段 vs 分頁</h4>
+                    <table>
+                        <tr>
+                            <th>特性</th>
+                            <th>分頁</th>
+                            <th>分段</th>
+                        </tr>
+                        <tr>
+                            <td>大小</td>
+                            <td>固定</td>
+                            <td>可變</td>
+                        </tr>
+                        <tr>
+                            <td>使用者可見</td>
+                            <td>否</td>
+                            <td>是</td>
+                        </tr>
+                        <tr>
+                            <td>目的</td>
+                            <td>物理組織</td>
+                            <td>邏輯組織</td>
+                        </tr>
+                        <tr>
+                            <td>碎片</td>
+                            <td>內部碎片</td>
+                            <td>外部碎片</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h2>五、動態記憶體管理</h2>
+
+                <h3>5.1 C 語言記憶體配置函數</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>函數</th>
+                            <th>功能</th>
+                            <th>特點</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>malloc()</td>
+                            <td>配置指定大小的記憶體</td>
+                            <td>內容未初始化</td>
+                        </tr>
+                        <tr>
+                            <td>calloc()</td>
+                            <td>配置並初始化為 0</td>
+                            <td>適合陣列</td>
+                        </tr>
+                        <tr>
+                            <td>realloc()</td>
+                            <td>調整已配置記憶體的大小</td>
+                            <td>可能移動位址</td>
+                        </tr>
+                        <tr>
+                            <td>free()</td>
+                            <td>釋放記憶體</td>
+                            <td>必須呼叫</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </section>
+
+            <section id="practice">
+                <h2>六、實作練習</h2>
+
+                <h3>6.1 First Fit 記憶體配置</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>first_fit.c</span>
+                        <span>First Fit 配置演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_BLOCKS 10
+#define MAX_PROCESSES 10
+
+typedef struct {
+    int size;
+    bool allocated;
+    int process_id;
+} MemoryBlock;
+
+typedef struct {
+    int id;
+    int size;
+    int allocated_block;
+} Process;
+
+void first_fit(MemoryBlock blocks[], int num_blocks, 
+               Process processes[], int num_processes) {
+    printf("\n=== First Fit 配置演算法 ===\n\n");
+    
+    for (int i = 0; i < num_processes; i++) {
+        printf("嘗試配置行程 %d (%d KB)...\n", 
+               processes[i].id, processes[i].size);
+        
+        bool allocated = false;
+        
+        for (int j = 0; j < num_blocks; j++) {
+            if (!blocks[j].allocated && blocks[j].size >= processes[i].size) {
+                // 找到第一個足夠大的區塊
+                blocks[j].allocated = true;
+                blocks[j].process_id = processes[i].id;
+                processes[i].allocated_block = j;
+                allocated = true;
+                
+                printf("  → 配置到區塊 %d (大小: %d KB, 浪費: %d KB)\n",
+                       j, blocks[j].size, 
+                       blocks[j].size - processes[i].size);
+                break;
+            }
+        }
+        
+        if (!allocated) {
+            printf("  → 配置失敗！沒有足夠大的區塊\n");
+            processes[i].allocated_block = -1;
+        }
+    }
+}
+
+void print_memory_status(MemoryBlock blocks[], int num_blocks) {
+    printf("\n=== 記憶體狀態 ===\n");
+    printf("區塊\t大小\t狀態\t\t行程ID\t浪費空間\n");
+    printf("----------------------------------------------------\n");
+    
+    for (int i = 0; i < num_blocks; i++) {
+        printf("%d\t%d KB\t", i, blocks[i].size);
+        
+        if (blocks[i].allocated) {
+            int waste = blocks[i].size;
+            // 計算實際浪費（需要知道行程大小，這裡簡化處理）
+            printf("已配置\t\tP%d\t-\n", blocks[i].process_id);
+        } else {
+            printf("可用\t\t-\t-\n");
+        }
+    }
+}
+
+void calculate_fragmentation(MemoryBlock blocks[], int num_blocks) {
+    int total_free = 0;
+    int largest_free = 0;
+    int num_free_blocks = 0;
+    
+    for (int i = 0; i < num_blocks; i++) {
+        if (!blocks[i].allocated) {
+            total_free += blocks[i].size;
+            num_free_blocks++;
+            if (blocks[i].size > largest_free) {
+                largest_free = blocks[i].size;
+            }
+        }
+    }
+    
+    printf("\n=== 碎片分析 ===\n");
+    printf("總可用空間: %d KB\n", total_free);
+    printf("最大可用區塊: %d KB\n", largest_free);
+    printf("可用區塊數: %d\n", num_free_blocks);
+    printf("外部碎片: %d KB\n", total_free - largest_free);
+}
+
+int main() {
+    MemoryBlock blocks[MAX_BLOCKS] = {
+        {100, false, -1},
+        {500, false, -1},
+        {200, false, -1},
+        {300, false, -1},
+        {600, false, -1}
+    };
+    
+    Process processes[MAX_PROCESSES] = {
+        {1, 212, -1},
+        {2, 417, -1},
+        {3, 112, -1},
+        {4, 426, -1}
+    };
+    
+    int num_blocks = 5;
+    int num_processes = 4;
+    
+    printf("初始記憶體配置：\n");
+    for (int i = 0; i < num_blocks; i++) {
+        printf("區塊 %d: %d KB\n", i, blocks[i].size);
+    }
+    
+    first_fit(blocks, num_blocks, processes, num_processes);
+    print_memory_status(blocks, num_blocks);
+    calculate_fragmentation(blocks, num_blocks);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>6.2 Best Fit 與 Worst Fit 比較</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>allocation_comparison.c</span>
+                        <span>比較三種配置演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_BLOCKS 10
+
+typedef struct {
+    int size;
+    bool allocated;
+    int process_id;
+} MemoryBlock;
+
+void reset_blocks(MemoryBlock dest[], MemoryBlock src[], int n) {
+    for (int i = 0; i < n; i++) {
+        dest[i] = src[i];
+    }
+}
+
+int first_fit_alloc(MemoryBlock blocks[], int num_blocks, int size, int pid) {
+    for (int i = 0; i < num_blocks; i++) {
+        if (!blocks[i].allocated && blocks[i].size >= size) {
+            blocks[i].allocated = true;
+            blocks[i].process_id = pid;
+            return i;
+        }
+    }
+    return -1;
+}
+
+int best_fit_alloc(MemoryBlock blocks[], int num_blocks, int size, int pid) {
+    int best_idx = -1;
+    int min_waste = 999999;
+    
+    for (int i = 0; i < num_blocks; i++) {
+        if (!blocks[i].allocated && blocks[i].size >= size) {
+            int waste = blocks[i].size - size;
+            if (waste < min_waste) {
+                min_waste = waste;
+                best_idx = i;
+            }
+        }
+    }
+    
+    if (best_idx != -1) {
+        blocks[best_idx].allocated = true;
+        blocks[best_idx].process_id = pid;
+    }
+    
+    return best_idx;
+}
+
+int worst_fit_alloc(MemoryBlock blocks[], int num_blocks, int size, int pid) {
+    int worst_idx = -1;
+    int max_waste = -1;
+    
+    for (int i = 0; i < num_blocks; i++) {
+        if (!blocks[i].allocated && blocks[i].size >= size) {
+            int waste = blocks[i].size - size;
+            if (waste > max_waste) {
+                max_waste = waste;
+                worst_idx = i;
+            }
+        }
+    }
+    
+    if (worst_idx != -1) {
+        blocks[worst_idx].allocated = true;
+        blocks[worst_idx].process_id = pid;
+    }
+    
+    return worst_idx;
+}
+
+void test_algorithm(const char* name, 
+                   int (*alloc_func)(MemoryBlock[], int, int, int),
+                   MemoryBlock original[], int num_blocks,
+                   int requests[], int num_requests) {
+    MemoryBlock blocks[MAX_BLOCKS];
+    reset_blocks(blocks, original, num_blocks);
+    
+    printf("\n=== %s ===\n", name);
+    
+    int successful = 0;
+    
+    for (int i = 0; i < num_requests; i++) {
+        int result = alloc_func(blocks, num_blocks, requests[i], i + 1);
+        
+        if (result != -1) {
+            printf("行程 %d (%d KB) → 區塊 %d\n", 
+                   i + 1, requests[i], result);
+            successful++;
+        } else {
+            printf("行程 %d (%d KB) → 配置失敗\n", i + 1, requests[i]);
+        }
+    }
+    
+    printf("\n成功配置: %d/%d\n", successful, num_requests);
+    
+    // 計算碎片
+    int total_free = 0;
+    for (int i = 0; i < num_blocks; i++) {
+        if (!blocks[i].allocated) {
+            total_free += blocks[i].size;
+        }
+    }
+    printf("剩餘空間: %d KB\n", total_free);
+}
+
+int main() {
+    MemoryBlock original_blocks[] = {
+        {100, false, -1},
+        {500, false, -1},
+        {200, false, -1},
+        {300, false, -1},
+        {600, false, -1}
+    };
+    
+    int requests[] = {212, 417, 112, 426};
+    int num_blocks = 5;
+    int num_requests = 4;
+    
+    printf("記憶體區塊: ");
+    for (int i = 0; i < num_blocks; i++) {
+        printf("%d KB ", original_blocks[i].size);
+    }
+    printf("\n");
+    
+    printf("配置請求: ");
+    for (int i = 0; i < num_requests; i++) {
+        printf("%d KB ", requests[i]);
+    }
+    printf("\n");
+    
+    test_algorithm("First Fit", first_fit_alloc, 
+                   original_blocks, num_blocks, requests, num_requests);
+    
+    test_algorithm("Best Fit", best_fit_alloc, 
+                   original_blocks, num_blocks, requests, num_requests);
+    
+    test_algorithm("Worst Fit", worst_fit_alloc, 
+                   original_blocks, num_blocks, requests, num_requests);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>6.3 動態記憶體管理</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>dynamic_memory.c</span>
+                        <span>動態記憶體配置示範</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct {
+    int id;
+    char name[50];
+    float score;
+} Student;
+
+void malloc_example() {
+    printf("=== malloc 範例 ===\n");
+    
+    int* numbers = (int*)malloc(5 * sizeof(int));
+    
+    if (numbers == NULL) {
+        fprintf(stderr, "記憶體配置失敗\n");
+        return;
+    }
+    
+    for (int i = 0; i < 5; i++) {
+        numbers[i] = i * 10;
+    }
+    
+    printf("數字: ");
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", numbers[i]);
+    }
+    printf("\n");
+    
+    free(numbers);
+    printf("記憶體已釋放\n\n");
+}
+
+void calloc_example() {
+    printf("=== calloc 範例 ===\n");
+    
+    int* zeros = (int*)calloc(5, sizeof(int));
+    
+    if (zeros == NULL) {
+        fprintf(stderr, "記憶體配置失敗\n");
+        return;
+    }
+    
+    printf("初始值 (應全為 0): ");
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", zeros[i]);
+    }
+    printf("\n");
+    
+    free(zeros);
+    printf("記憶體已釋放\n\n");
+}
+
+void realloc_example() {
+    printf("=== realloc 範例 ===\n");
+    
+    int* array = (int*)malloc(3 * sizeof(int));
+    
+    for (int i = 0; i < 3; i++) {
+        array[i] = i + 1;
+    }
+    
+    printf("原始陣列: ");
+    for (int i = 0; i < 3; i++) {
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+    
+    // 擴大陣列
+    array = (int*)realloc(array, 6 * sizeof(int));
+    
+    if (array == NULL) {
+        fprintf(stderr, "重新配置失敗\n");
+        return;
+    }
+    
+    for (int i = 3; i < 6; i++) {
+        array[i] = i + 1;
+    }
+    
+    printf("擴大後: ");
+    for (int i = 0; i < 6; i++) {
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+    
+    free(array);
+    printf("記憶體已釋放\n\n");
+}
+
+void struct_example() {
+    printf("=== 結構動態配置範例 ===\n");
+    
+    int num_students = 3;
+    Student* students = (Student*)malloc(num_students * sizeof(Student));
+    
+    if (students == NULL) {
+        fprintf(stderr, "記憶體配置失敗\n");
+        return;
+    }
+    
+    // 填入資料
+    students[0] = (Student){1, "張三", 85.5};
+    students[1] = (Student){2, "李四", 92.0};
+    students[2] = (Student){3, "王五", 78.5};
+    
+    printf("\n學生資料：\n");
+    for (int i = 0; i < num_students; i++) {
+        printf("ID: %d, 姓名: %s, 分數: %.1f\n",
+               students[i].id,
+               students[i].name,
+               students[i].score);
+    }
+    
+    free(students);
+    printf("\n記憶體已釋放\n\n");
+}
+
+void memory_leak_example() {
+    printf("=== 記憶體洩漏警告 ===\n");
+    
+    int* leak = (int*)malloc(100 * sizeof(int));
+    
+    printf("配置了 %zu bytes\n", 100 * sizeof(int));
+    
+    // 錯誤：沒有呼叫 free(leak)
+    // 這會造成記憶體洩漏
+    
+    printf("警告：未釋放記憶體！\n");
+    printf("正確做法應該呼叫 free(leak)\n\n");
+    
+    // 修正：
+    free(leak);
+    printf("記憶體已正確釋放\n\n");
+}
+
+int main() {
+    malloc_example();
+    calloc_example();
+    realloc_example();
+    struct_example();
+    memory_leak_example();
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>6.4 記憶體池實作</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>memory_pool.c</span>
+                        <span>簡單的記憶體池</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#define POOL_SIZE 1024
+#define BLOCK_SIZE 64
+#define MAX_BLOCKS (POOL_SIZE / BLOCK_SIZE)
+
+typedef struct {
+    char memory[POOL_SIZE];
+    int free_blocks[MAX_BLOCKS];
+    int num_free;
+} MemoryPool;
+
+void init_pool(MemoryPool* pool) {
+    pool->num_free = MAX_BLOCKS;
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        pool->free_blocks[i] = i;
+    }
+    printf("記憶體池已初始化\n");
+    printf("  總大小: %d bytes\n", POOL_SIZE);
+    printf("  區塊大小: %d bytes\n", BLOCK_SIZE);
+    printf("  區塊數量: %d\n", MAX_BLOCKS);
+}
+
+void* pool_alloc(MemoryPool* pool) {
+    if (pool->num_free == 0) {
+        printf("記憶體池已滿！\n");
+        return NULL;
+    }
+    
+    pool->num_free--;
+    int block_idx = pool->free_blocks[pool->num_free];
+    
+    void* ptr = pool->memory + (block_idx * BLOCK_SIZE);
+    
+    printf("配置區塊 %d (位址偏移: %d)\n", 
+           block_idx, block_idx * BLOCK_SIZE);
+    
+    return ptr;
+}
+
+void pool_free(MemoryPool* pool, void* ptr) {
+    if (ptr < (void*)pool->memory || 
+        ptr >= (void*)(pool->memory + POOL_SIZE)) {
+        printf("錯誤：指標不在記憶體池範圍內\n");
+        return;
+    }
+    
+    int offset = (char*)ptr - pool->memory;
+    int block_idx = offset / BLOCK_SIZE;
+    
+    pool->free_blocks[pool->num_free] = block_idx;
+    pool->num_free++;
+    
+    printf("釋放區塊 %d\n", block_idx);
+}
+
+void print_pool_status(MemoryPool* pool) {
+    printf("\n記憶體池狀態：\n");
+    printf("  可用區塊: %d/%d\n", pool->num_free, MAX_BLOCKS);
+    printf("  已使用: %d bytes\n", 
+           (MAX_BLOCKS - pool->num_free) * BLOCK_SIZE);
+}
+
+int main() {
+    MemoryPool pool;
+    init_pool(&pool);
+    
+    printf("\n--- 配置測試 ---\n");
+    
+    void* ptr1 = pool_alloc(&pool);
+    void* ptr2 = pool_alloc(&pool);
+    void* ptr3 = pool_alloc(&pool);
+    
+    print_pool_status(&pool);
+    
+    printf("\n--- 釋放測試 ---\n");
+    
+    pool_free(&pool, ptr2);
+    
+    print_pool_status(&pool);
+    
+    printf("\n--- 重新配置 ---\n");
+    
+    void* ptr4 = pool_alloc(&pool);
+    
+    print_pool_status(&pool);
+    
+    // 清理
+    pool_free(&pool, ptr1);
+    pool_free(&pool, ptr3);
+    pool_free(&pool, ptr4);
+    
+    print_pool_status(&pool);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：記憶體配置模擬器</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>建立互動式記憶體配置模擬器。</p>
+                        <ul>
+                            <li>支援配置和釋放記憶體</li>
+                            <li>實作 First Fit、Best Fit、Worst Fit</li>
+                            <li>視覺化顯示記憶體狀態</li>
+                            <li>計算內部和外部碎片</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：記憶體壓縮</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作記憶體壓縮演算法。</p>
+                        <ul>
+                            <li>移動已配置區塊使其連續</li>
+                            <li>更新所有指標</li>
+                            <li>測量壓縮前後的碎片情況</li>
+                            <li>計算壓縮的時間成本</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：分頁模擬</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作簡單的分頁系統。</p>
+                        <ul>
+                            <li>建立頁表結構</li>
+                            <li>實作邏輯位址到實體位址的轉換</li>
+                            <li>處理頁面錯誤（Page Fault）</li>
+                            <li>統計命中率</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：記憶體洩漏偵測器</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立簡單的記憶體洩漏偵測工具。</p>
+                        <ul>
+                            <li>包裝 malloc/free 函數</li>
+                            <li>追蹤所有配置和釋放</li>
+                            <li>報告未釋放的記憶體</li>
+                            <li>記錄配置的呼叫堆疊</li>
+                            <li>生成洩漏報告</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：Buddy System 實作</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作 Buddy System 記憶體配置器。</p>
+                        <ul>
+                            <li>支援 2 的冪次大小配置</li>
+                            <li>實作區塊分割和合併</li>
+                            <li>處理內部碎片</li>
+                            <li>比較與其他演算法的效能</li>
+                            <li>視覺化顯示 Buddy Tree</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 下列哪個不是記憶體配置演算法？</strong></p>
+                        <p>A. First Fit</p>
+                        <p>B. Best Fit</p>
+                        <p>C. Quick Fit</p>
+                        <p>D. Worst Fit</p>
+                        <p><em>答案：C（Quick Fit 不是標準的三種演算法之一）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 外部碎片是指？</strong></p>
+                        <p>A. 分配給行程但未使用的記憶體</p>
+                        <p>B. 總可用記憶體足夠但不連續</p>
+                        <p>C. 記憶體損壞</p>
+                        <p>D. 硬碟碎片</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 分頁的主要優點是？</strong></p>
+                        <p>A. 減少內部碎片</p>
+                        <p>B. 消除外部碎片</p>
+                        <p>C. 提高 CPU 速度</p>
+                        <p>D. 增加記憶體容量</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. malloc() 和 calloc() 的差異是？</strong></p>
+                        <p>A. malloc 更快</p>
+                        <p>B. calloc 會初始化為 0</p>
+                        <p>C. malloc 配置更多記憶體</p>
+                        <p>D. 沒有差異</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 頁表的作用是？</strong></p>
+                        <p>A. 儲存程式碼</p>
+                        <p>B. 將邏輯位址轉換為實體位址</p>
+                        <p>C. 管理 CPU 排程</p>
+                        <p>D. 控制 I/O</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 計算題：假設頁面大小為 4KB，邏輯位址 0x1234，計算頁號和偏移量</strong></p>
+                        <p><em>答案：頁面大小 4KB = 4096 bytes = 2^12。頁號 = 0x1234 / 4096 = 1，偏移量 = 0x1234 % 4096 = 564 (0x234)</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明記憶體洩漏的原因及如何避免</strong></p>
+                        <p><em>參考答案：記憶體洩漏是指配置的記憶體沒有被正確釋放，導致可用記憶體逐漸減少。原因包括：(1) 忘記呼叫 free()；(2) 在 free() 前失去指標；(3) 異常處理不當。避免方法：(1) 每個 malloc 都配對一個 free；(2) 使用記憶體管理工具如 Valgrind；(3) 使用智慧指標（C++）；(4) 建立清理函數；(5) 在函數結束前確保釋放所有配置的記憶體。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：比較分頁和分段的優缺點</strong></p>
+                        <p><em>參考答案：分頁優點：消除外部碎片、實作簡單、大小固定易於管理。缺點：存在內部碎片、對使用者不可見、難以共享。分段優點：符合程式邏輯結構、易於共享和保護、對使用者可見。缺點：存在外部碎片、大小可變管理複雜、需要壓縮。實務上現代系統多採用分段+分頁的混合方式。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week5.html" class="nav-button">上一週：行程同步</a>
+                <a href="week7.html" class="nav-button">下一週：虛擬記憶體</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 6 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

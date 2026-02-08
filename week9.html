@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 9: 檔案系統 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .fs-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 9: 檔案系統</h1>
+            <p class="week-info">File Systems</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第九週的課程！檔案系統是作業系統提供給使用者和應用程式最重要的服務之一。它提供了一個結構化的方式來儲存、組織和檢索資料。</p>
+                <p>本週我們將學習檔案系統的基本概念、不同的檔案配置方法、目錄結構，以及如何使用 C 語言進行檔案操作。這些知識對於理解資料如何在儲存裝置上組織和存取至關重要。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解檔案系統的概念與功能</li>
+                    <li>掌握檔案的屬性與操作</li>
+                    <li>學習不同的檔案配置方法</li>
+                    <li>了解目錄結構的實作</li>
+                    <li>掌握 C 語言的檔案 I/O 操作</li>
+                    <li>認識常見的檔案系統（ext4、NTFS、FAT）</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、檔案系統基礎</h2>
+                
+                <h3>1.1 什麼是檔案？</h3>
+                <p>檔案是儲存在次級儲存裝置上的相關資訊的具名集合。從使用者角度來看，檔案是資料的邏輯單位。</p>
+
+                <div class="concept-box">
+                    <h4>檔案屬性</h4>
+                    <ul>
+                        <li><strong>名稱：</strong>唯一的識別符號</li>
+                        <li><strong>識別碼：</strong>系統內部的唯一標籤（如 inode 號碼）</li>
+                        <li><strong>類型：</strong>文字檔、執行檔、目錄等</li>
+                        <li><strong>位置：</strong>檔案在儲存裝置上的位置</li>
+                        <li><strong>大小：</strong>檔案的當前大小</li>
+                        <li><strong>保護：</strong>存取控制資訊（讀、寫、執行權限）</li>
+                        <li><strong>時間與日期：</strong>建立、最後修改、最後存取時間</li>
+                        <li><strong>擁有者：</strong>使用者和群組資訊</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 檔案操作</h3>
+                <p>作業系統提供的基本檔案操作：</p>
+
+                <ul>
+                    <li><strong>建立（Create）：</strong>建立新檔案</li>
+                    <li><strong>寫入（Write）：</strong>將資料寫入檔案</li>
+                    <li><strong>讀取（Read）：</strong>從檔案讀取資料</li>
+                    <li><strong>重新定位（Reposition/Seek）：</strong>移動檔案指標</li>
+                    <li><strong>刪除（Delete）：</strong>刪除檔案</li>
+                    <li><strong>截斷（Truncate）：</strong>清空檔案內容但保留屬性</li>
+                    <li><strong>開啟（Open）：</strong>準備存取檔案</li>
+                    <li><strong>關閉（Close）：</strong>結束檔案存取</li>
+                </ul>
+
+                <h3>1.3 檔案類型</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>類型</th>
+                            <th>說明</th>
+                            <th>範例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>普通檔案</td>
+                            <td>包含使用者資訊</td>
+                            <td>文字檔、二進位檔</td>
+                        </tr>
+                        <tr>
+                            <td>目錄</td>
+                            <td>包含檔案和子目錄資訊</td>
+                            <td>/home, /usr</td>
+                        </tr>
+                        <tr>
+                            <td>特殊檔案</td>
+                            <td>代表裝置</td>
+                            <td>/dev/sda, /dev/null</td>
+                        </tr>
+                        <tr>
+                            <td>符號連結</td>
+                            <td>指向另一個檔案</td>
+                            <td>軟連結</td>
+                        </tr>
+                        <tr>
+                            <td>管道</td>
+                            <td>行程間通訊</td>
+                            <td>FIFO</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>二、檔案配置方法</h2>
+
+                <h3>2.1 連續配置（Contiguous Allocation）</h3>
+                <p>檔案佔用連續的磁碟區塊。</p>
+
+                <div class="concept-box">
+                    <h4>優點</h4>
+                    <ul>
+                        <li>簡單：只需記錄起始位置和長度</li>
+                        <li>循序存取快速</li>
+                        <li>隨機存取快速</li>
+                    </ul>
+                    
+                    <h4>缺點</h4>
+                    <ul>
+                        <li>外部碎片問題</li>
+                        <li>檔案大小難以增長</li>
+                        <li>需要預先知道檔案大小</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 鏈結配置（Linked Allocation）</h3>
+                <p>檔案是磁碟區塊的鏈結串列，每個區塊包含指向下一個區塊的指標。</p>
+
+                <div class="concept-box">
+                    <h4>優點</h4>
+                    <ul>
+                        <li>沒有外部碎片</li>
+                        <li>檔案可以動態增長</li>
+                        <li>不需要預先知道檔案大小</li>
+                    </ul>
+                    
+                    <h4>缺點</h4>
+                    <ul>
+                        <li>只適合循序存取</li>
+                        <li>隨機存取效率低</li>
+                        <li>指標佔用空間</li>
+                        <li>可靠性問題（鏈結斷裂）</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 索引配置（Indexed Allocation）</h3>
+                <p>為每個檔案建立一個索引區塊，包含所有資料區塊的指標。</p>
+
+                <div class="concept-box">
+                    <h4>優點</h4>
+                    <ul>
+                        <li>支援直接存取</li>
+                        <li>沒有外部碎片</li>
+                        <li>檔案可以動態增長</li>
+                    </ul>
+                    
+                    <h4>缺點</h4>
+                    <ul>
+                        <li>索引區塊佔用空間</li>
+                        <li>小檔案浪費空間</li>
+                        <li>大檔案可能需要多層索引</li>
+                    </ul>
+                </div>
+
+                <div class="fs-diagram">
+<strong>索引配置示意圖：</strong>
+
+索引區塊
+┌──────┐
+│  0   │ → 資料區塊 19
+│  1   │ → 資料區塊 13
+│  2   │ → 資料區塊 4
+│  3   │ → 資料區塊 7
+│  4   │ → 資料區塊 2
+│ ...  │
+└──────┘
+                </div>
+
+                <h3>2.4 配置方法比較</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>循序存取</th>
+                            <th>直接存取</th>
+                            <th>外部碎片</th>
+                            <th>適用情境</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>連續配置</td>
+                            <td>快</td>
+                            <td>快</td>
+                            <td>有</td>
+                            <td>大小固定的檔案</td>
+                        </tr>
+                        <tr>
+                            <td>鏈結配置</td>
+                            <td>中等</td>
+                            <td>慢</td>
+                            <td>無</td>
+                            <td>循序存取的檔案</td>
+                        </tr>
+                        <tr>
+                            <td>索引配置</td>
+                            <td>中等</td>
+                            <td>快</td>
+                            <td>無</td>
+                            <td>大小可變的檔案</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>三、目錄結構</h2>
+
+                <h3>3.1 目錄操作</h3>
+                <ul>
+                    <li>搜尋檔案</li>
+                    <li>建立檔案</li>
+                    <li>刪除檔案</li>
+                    <li>列出目錄內容</li>
+                    <li>重新命名檔案</li>
+                    <li>遍歷檔案系統</li>
+                </ul>
+
+                <h3>3.2 目錄結構類型</h3>
+
+                <h4>單層目錄</h4>
+                <p>所有檔案都在同一個目錄中。</p>
+                <ul>
+                    <li>優點：簡單</li>
+                    <li>缺點：命名衝突、難以組織</li>
+                </ul>
+
+                <h4>兩層目錄</h4>
+                <p>每個使用者有自己的目錄。</p>
+                <ul>
+                    <li>優點：隔離使用者、避免命名衝突</li>
+                    <li>缺點：無法分組、不支援共享</li>
+                </ul>
+
+                <h4>樹狀目錄（現代系統）</h4>
+                <p>目錄可以包含子目錄，形成樹狀結構。</p>
+                <ul>
+                    <li>優點：靈活、易於組織</li>
+                    <li>缺點：複雜度較高</li>
+                </ul>
+
+                <h3>3.3 路徑名稱</h3>
+
+                <div class="concept-box">
+                    <h4>絕對路徑 vs 相對路徑</h4>
+                    <p><strong>絕對路徑：</strong>從根目錄開始的完整路徑</p>
+                    <ul>
+                        <li>範例：/home/user/documents/file.txt</li>
+                    </ul>
+                    
+                    <p><strong>相對路徑：</strong>從當前目錄開始的路徑</p>
+                    <ul>
+                        <li>範例：../parent/file.txt</li>
+                        <li>. 代表當前目錄</li>
+                        <li>.. 代表父目錄</li>
+                    </ul>
+                </div>
+
+                <h2>四、檔案系統實作</h2>
+
+                <h3>4.1 檔案系統層次</h3>
+
+                <div class="fs-diagram">
+<strong>檔案系統分層架構：</strong>
+
+應用程式
+    ↓
+邏輯檔案系統（目錄管理、檔案控制區塊）
+    ↓
+檔案組織模組（邏輯區塊 → 實體區塊）
+    ↓
+基本檔案系統（發出區塊讀寫指令）
+    ↓
+I/O 控制（裝置驅動程式）
+    ↓
+硬體（磁碟）
+                </div>
+
+                <h3>4.2 常見檔案系統</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>檔案系統</th>
+                            <th>作業系統</th>
+                            <th>特色</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ext4</td>
+                            <td>Linux</td>
+                            <td>日誌功能、大檔案支援、效能優良</td>
+                        </tr>
+                        <tr>
+                            <td>NTFS</td>
+                            <td>Windows</td>
+                            <td>安全性、壓縮、加密</td>
+                        </tr>
+                        <tr>
+                            <td>FAT32</td>
+                            <td>通用</td>
+                            <td>簡單、相容性高、檔案大小限制</td>
+                        </tr>
+                        <tr>
+                            <td>APFS</td>
+                            <td>macOS/iOS</td>
+                            <td>SSD 最佳化、快照、加密</td>
+                        </tr>
+                        <tr>
+                            <td>Btrfs</td>
+                            <td>Linux</td>
+                            <td>快照、壓縮、RAID 支援</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </section>
+
+            <section id="practice">
+                <h2>五、實作練習</h2>
+
+                <h3>5.1 基本檔案操作</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>file_basic.c</span>
+                        <span>基本檔案讀寫操作</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+// 寫入檔案
+void write_file(const char* filename) {
+    FILE* fp = fopen(filename, "w");
+    
+    if (fp == NULL) {
+        perror("無法開啟檔案進行寫入");
+        return;
+    }
+    
+    fprintf(fp, "這是第一行\n");
+    fprintf(fp, "這是第二行\n");
+    fprintf(fp, "這是第三行\n");
+    
+    printf("已寫入檔案: %s\n", filename);
+    
+    fclose(fp);
+}
+
+// 讀取檔案
+void read_file(const char* filename) {
+    FILE* fp = fopen(filename, "r");
+    char buffer[256];
+    
+    if (fp == NULL) {
+        perror("無法開啟檔案進行讀取");
+        return;
+    }
+    
+    printf("\n讀取檔案內容:\n");
+    printf("--------------------\n");
+    
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        printf("%s", buffer);
+    }
+    
+    printf("--------------------\n");
+    
+    fclose(fp);
+}
+
+// 附加到檔案
+void append_file(const char* filename) {
+    FILE* fp = fopen(filename, "a");
+    
+    if (fp == NULL) {
+        perror("無法開啟檔案進行附加");
+        return;
+    }
+    
+    fprintf(fp, "這是附加的一行\n");
+    
+    printf("已附加內容到檔案\n");
+    
+    fclose(fp);
+}
+
+int main() {
+    const char* filename = "test.txt";
+    
+    printf("=== 檔案操作示範 ===\n\n");
+    
+    // 寫入
+    write_file(filename);
+    
+    // 讀取
+    read_file(filename);
+    
+    // 附加
+    append_file(filename);
+    
+    // 再次讀取
+    printf("\n附加後的內容:\n");
+    read_file(filename);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.2 二進位檔案操作</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>binary_file.c</span>
+                        <span>二進位檔案讀寫</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct {
+    int id;
+    char name[50];
+    float score;
+} Student;
+
+void write_binary_file(const char* filename) {
+    FILE* fp = fopen(filename, "wb");
+    
+    if (fp == NULL) {
+        perror("無法開啟二進位檔案進行寫入");
+        return;
+    }
+    
+    Student students[] = {
+        {1, "張三", 85.5},
+        {2, "李四", 92.0},
+        {3, "王五", 78.5}
+    };
+    
+    int count = sizeof(students) / sizeof(students[0]);
+    
+    fwrite(students, sizeof(Student), count, fp);
+    
+    printf("已寫入 %d 筆學生資料\n", count);
+    
+    fclose(fp);
+}
+
+void read_binary_file(const char* filename) {
+    FILE* fp = fopen(filename, "rb");
+    Student student;
+    
+    if (fp == NULL) {
+        perror("無法開啟二進位檔案進行讀取");
+        return;
+    }
+    
+    printf("\n讀取學生資料:\n");
+    printf("ID\t姓名\t\t分數\n");
+    printf("--------------------------------\n");
+    
+    while (fread(&student, sizeof(Student), 1, fp) == 1) {
+        printf("%d\t%s\t\t%.1f\n", 
+               student.id, student.name, student.score);
+    }
+    
+    fclose(fp);
+}
+
+void random_access_example(const char* filename) {
+    FILE* fp = fopen(filename, "rb+");
+    Student student;
+    
+    if (fp == NULL) {
+        perror("無法開啟檔案");
+        return;
+    }
+    
+    // 讀取第二筆記錄
+    fseek(fp, sizeof(Student) * 1, SEEK_SET);
+    fread(&student, sizeof(Student), 1, fp);
+    
+    printf("\n第二筆記錄: %s, %.1f\n", student.name, student.score);
+    
+    // 修改分數
+    student.score = 95.0;
+    
+    // 回到第二筆記錄位置
+    fseek(fp, sizeof(Student) * 1, SEEK_SET);
+    fwrite(&student, sizeof(Student), 1, fp);
+    
+    printf("已修改第二筆記錄的分數為 %.1f\n", student.score);
+    
+    fclose(fp);
+}
+
+int main() {
+    const char* filename = "students.dat";
+    
+    printf("=== 二進位檔案操作示範 ===\n\n");
+    
+    // 寫入
+    write_binary_file(filename);
+    
+    // 讀取
+    read_binary_file(filename);
+    
+    // 隨機存取
+    random_access_example(filename);
+    
+    // 再次讀取確認
+    printf("\n修改後的資料:\n");
+    read_binary_file(filename);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.3 目錄操作</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>directory_ops.c</span>
+                        <span>目錄遍歷與操作</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;dirent.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;string.h&gt;
+
+void list_directory(const char* path) {
+    DIR* dir;
+    struct dirent* entry;
+    struct stat file_stat;
+    char full_path[1024];
+    
+    dir = opendir(path);
+    
+    if (dir == NULL) {
+        perror("無法開啟目錄");
+        return;
+    }
+    
+    printf("\n目錄內容: %s\n", path);
+    printf("類型\t大小\t\t名稱\n");
+    printf("--------------------------------------------\n");
+    
+    while ((entry = readdir(dir)) != NULL) {
+        // 跳過 . 和 ..
+        if (strcmp(entry->d_name, ".") == 0 || 
+            strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        
+        // 建立完整路徑
+        snprintf(full_path, sizeof(full_path), "%s/%s", 
+                 path, entry->d_name);
+        
+        if (stat(full_path, &file_stat) == 0) {
+            if (S_ISDIR(file_stat.st_mode)) {
+                printf("DIR\t%-12s\t%s\n", "-", entry->d_name);
+            } else {
+                printf("FILE\t%-12ld\t%s\n", 
+                       file_stat.st_size, entry->d_name);
+            }
+        }
+    }
+    
+    closedir(dir);
+}
+
+void recursive_list(const char* path, int depth) {
+    DIR* dir;
+    struct dirent* entry;
+    struct stat file_stat;
+    char full_path[1024];
+    
+    dir = opendir(path);
+    
+    if (dir == NULL) {
+        return;
+    }
+    
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || 
+            strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        
+        snprintf(full_path, sizeof(full_path), "%s/%s", 
+                 path, entry->d_name);
+        
+        // 縮排
+        for (int i = 0; i < depth; i++) {
+            printf("  ");
+        }
+        
+        if (stat(full_path, &file_stat) == 0) {
+            if (S_ISDIR(file_stat.st_mode)) {
+                printf("[DIR] %s\n", entry->d_name);
+                recursive_list(full_path, depth + 1);
+            } else {
+                printf("%s (%ld bytes)\n", 
+                       entry->d_name, file_stat.st_size);
+            }
+        }
+    }
+    
+    closedir(dir);
+}
+
+int main() {
+    printf("=== 目錄操作示範 ===\n");
+    
+    // 列出當前目錄
+    list_directory(".");
+    
+    // 遞迴列出
+    printf("\n\n=== 樹狀顯示 ===\n");
+    recursive_list(".", 0);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.4 檔案資訊查詢</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>file_info.c</span>
+                        <span>取得檔案詳細資訊</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;time.h&gt;
+#include &lt;pwd.h&gt;
+#include &lt;grp.h&gt;
+
+void print_file_info(const char* filename) {
+    struct stat file_stat;
+    
+    if (stat(filename, &file_stat) == -1) {
+        perror("無法取得檔案資訊");
+        return;
+    }
+    
+    printf("\n=== 檔案資訊: %s ===\n", filename);
+    
+    // 檔案類型
+    printf("類型: ");
+    if (S_ISREG(file_stat.st_mode)) {
+        printf("普通檔案\n");
+    } else if (S_ISDIR(file_stat.st_mode)) {
+        printf("目錄\n");
+    } else if (S_ISLNK(file_stat.st_mode)) {
+        printf("符號連結\n");
+    } else {
+        printf("其他\n");
+    }
+    
+    // 大小
+    printf("大小: %ld bytes\n", file_stat.st_size);
+    
+    // 權限
+    printf("權限: ");
+    printf((S_ISDIR(file_stat.st_mode)) ? "d" : "-");
+    printf((file_stat.st_mode & S_IRUSR) ? "r" : "-");
+    printf((file_stat.st_mode & S_IWUSR) ? "w" : "-");
+    printf((file_stat.st_mode & S_IXUSR) ? "x" : "-");
+    printf((file_stat.st_mode & S_IRGRP) ? "r" : "-");
+    printf((file_stat.st_mode & S_IWGRP) ? "w" : "-");
+    printf((file_stat.st_mode & S_IXGRP) ? "x" : "-");
+    printf((file_stat.st_mode & S_IROTH) ? "r" : "-");
+    printf((file_stat.st_mode & S_IWOTH) ? "w" : "-");
+    printf((file_stat.st_mode & S_IXOTH) ? "x" : "-");
+    printf("\n");
+    
+    // Inode
+    printf("Inode: %lu\n", file_stat.st_ino);
+    
+    // 連結數
+    printf("硬連結數: %lu\n", file_stat.st_nlink);
+    
+    // 擁有者
+    struct passwd* pw = getpwuid(file_stat.st_uid);
+    struct group* gr = getgrgid(file_stat.st_gid);
+    printf("擁有者: %s\n", pw ? pw->pw_name : "unknown");
+    printf("群組: %s\n", gr ? gr->gr_name : "unknown");
+    
+    // 時間
+    printf("最後存取: %s", ctime(&file_stat.st_atime));
+    printf("最後修改: %s", ctime(&file_stat.st_mtime));
+    printf("狀態變更: %s", ctime(&file_stat.st_ctime));
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("用法: %s <檔案名稱>\n", argv[0]);
+        return 1;
+    }
+    
+    print_file_info(argv[1]);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.5 檔案複製程式</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>file_copy.c</span>
+                        <span>檔案複製工具</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define BUFFER_SIZE 4096
+
+int copy_file(const char* source, const char* dest) {
+    FILE *src, *dst;
+    unsigned char buffer[BUFFER_SIZE];
+    size_t bytes;
+    size_t total_bytes = 0;
+    
+    // 開啟來源檔案
+    src = fopen(source, "rb");
+    if (src == NULL) {
+        perror("無法開啟來源檔案");
+        return -1;
+    }
+    
+    // 開啟目的檔案
+    dst = fopen(dest, "wb");
+    if (dst == NULL) {
+        perror("無法建立目的檔案");
+        fclose(src);
+        return -1;
+    }
+    
+    // 複製資料
+    printf("正在複製...\n");
+    
+    while ((bytes = fread(buffer, 1, BUFFER_SIZE, src)) > 0) {
+        fwrite(buffer, 1, bytes, dst);
+        total_bytes += bytes;
+        
+        // 顯示進度（每 1MB）
+        if (total_bytes % (1024 * 1024) == 0) {
+            printf("已複製: %zu MB\n", total_bytes / (1024 * 1024));
+        }
+    }
+    
+    printf("複製完成！總共 %zu bytes\n", total_bytes);
+    
+    fclose(src);
+    fclose(dst);
+    
+    return 0;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        printf("用法: %s <來源檔案> <目的檔案>\n", argv[0]);
+        return 1;
+    }
+    
+    return copy_file(argv[1], argv[2]);
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：文字檔案處理工具</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>建立文字檔案處理程式。</p>
+                        <ul>
+                            <li>計算檔案的行數、字數、字元數</li>
+                            <li>搜尋特定字串</li>
+                            <li>替換字串</li>
+                            <li>顯示檔案前 N 行或後 N 行</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：簡易資料庫系統</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>使用二進位檔案實作簡單的資料庫。</p>
+                        <ul>
+                            <li>支援新增、查詢、修改、刪除記錄</li>
+                            <li>使用結構體儲存記錄</li>
+                            <li>實作索引以加快搜尋</li>
+                            <li>支援多個欄位搜尋</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：檔案系統瀏覽器</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立互動式檔案系統瀏覽器。</p>
+                        <ul>
+                            <li>顯示目錄內容（含詳細資訊）</li>
+                            <li>支援切換目錄</li>
+                            <li>支援搜尋檔案</li>
+                            <li>計算目錄大小</li>
+                            <li>顯示檔案樹狀結構</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：檔案壓縮工具</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作簡單的檔案壓縮和解壓縮。</p>
+                        <ul>
+                            <li>實作 Run-Length Encoding (RLE)</li>
+                            <li>或實作霍夫曼編碼（Huffman Coding）</li>
+                            <li>計算壓縮率</li>
+                            <li>支援多個檔案打包</li>
+                            <li>驗證解壓縮正確性</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：簡易檔案系統模擬</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>模擬簡單的檔案系統。</p>
+                        <ul>
+                            <li>實作虛擬磁碟（使用一個大檔案）</li>
+                            <li>實作 i-node 結構</li>
+                            <li>支援目錄和檔案操作</li>
+                            <li>實作索引配置或鏈結配置</li>
+                            <li>實作空閒空間管理</li>
+                            <li>提供格式化、掛載、卸載功能</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 下列何者不是檔案的基本操作？</strong></p>
+                        <p>A. 建立</p>
+                        <p>B. 讀取</p>
+                        <p>C. 編譯</p>
+                        <p>D. 刪除</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 連續配置的主要缺點是？</strong></p>
+                        <p>A. 存取速度慢</p>
+                        <p>B. 外部碎片</p>
+                        <p>C. 實作複雜</p>
+                        <p>D. 浪費記憶體</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 索引配置適合哪種存取方式？</strong></p>
+                        <p>A. 只適合循序存取</p>
+                        <p>B. 只適合隨機存取</p>
+                        <p>C. 兩者都適合</p>
+                        <p>D. 兩者都不適合</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. fopen() 的 "a" 模式代表？</strong></p>
+                        <p>A. 讀取</p>
+                        <p>B. 寫入（覆蓋）</p>
+                        <p>C. 附加</p>
+                        <p>D. 讀寫</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. Linux 中 inode 不包含哪個資訊？</strong></p>
+                        <p>A. 檔案大小</p>
+                        <p>B. 檔案權限</p>
+                        <p>C. 檔案名稱</p>
+                        <p>D. 資料區塊位置</p>
+                        <p><em>答案：C（檔案名稱儲存在目錄中）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 問答題：比較連續配置、鏈結配置和索引配置的優缺點</strong></p>
+                        <p><em>參考答案：連續配置優點是簡單且存取快速，缺點是外部碎片和難以增長；鏈結配置優點是無外部碎片且可動態增長，缺點是只適合循序存取且可靠性問題；索引配置優點是支援直接存取且無外部碎片，缺點是索引區塊佔用空間且小檔案浪費空間。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明為什麼需要關閉檔案（fclose）</strong></p>
+                        <p><em>參考答案：關閉檔案的重要性包括：(1) 將緩衝區的資料寫入磁碟；(2) 釋放系統資源（檔案描述符）；(3) 解除檔案鎖定；(4) 更新檔案元資料。如果不關閉檔案，可能導致資料遺失、資源洩漏，系統可能耗盡可用的檔案描述符。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 實作題：寫出讀取文字檔並計算行數的程式碼</strong></p>
+                        <p><em>參考答案：</em></p>
+                        <pre><code class="language-c">FILE* fp = fopen("file.txt", "r");
+char buffer[256];
+int lines = 0;
+while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+    lines++;
+}
+printf("總行數: %d\n", lines);
+fclose(fp);</code></pre>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week8.html" class="nav-button">上一週：期中複習</a>
+                <a href="week10.html" class="nav-button">下一週：磁碟排程</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 9 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

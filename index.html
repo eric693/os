@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業系統課程 - 16週完整學習路徑</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --bg-main: #ffffff;
+            --bg-section: #f8fafc;
+            --bg-code: #f1f5f9;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --accent: #0ea5e9;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
+            color: var(--text-main);
+            background: var(--bg-main);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 3rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .nav-bar {
+            background: var(--bg-section);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 0;
+        }
+        
+        .nav-weeks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+        
+        .nav-weeks a {
+            display: block;
+            padding: 0.5rem 1rem;
+            background: white;
+            color: var(--primary);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-weeks a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+        
+        .content {
+            padding: 2rem 0;
+        }
+        
+        .week-section {
+            background: var(--bg-section);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .week-section h2 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .week-section h3 {
+            font-size: 1.375rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--text-main);
+        }
+        
+        .week-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .week-section ul {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+        
+        .week-section li {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            margin: 1.5rem 0;
+        }
+        
+        .code-title {
+            background: var(--primary-dark);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            border: 1px solid var(--border);
+            border-top: none;
+        }
+        
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .exercise-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0.5rem;
+        }
+        
+        .exercise-box h3 {
+            color: #92400e;
+            margin: 0 0 1rem;
+            font-size: 1.125rem;
+        }
+        
+        .exercise-box p {
+            color: #78350f;
+            margin-bottom: 0.5rem;
+        }
+        
+        .note-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0.5rem;
+        }
+        
+        .note-box strong {
+            color: #075985;
+        }
+        
+        .note-box p {
+            color: #0c4a6e;
+        }
+        
+        .side-project {
+            background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+            border: 3px solid #f97316;
+        }
+        
+        .side-project h2 {
+            color: #c2410c;
+            border-bottom-color: #f97316;
+        }
+        
+        .footer {
+            background: var(--bg-section);
+            border-top: 2px solid var(--border);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-weeks {
+                flex-direction: column;
+            }
+            
+            .week-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>作業系統課程</h1>
+            <p>16週完整學習路徑 - 從基礎概念到實作專案</p>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="container">
+            <ul class="nav-weeks">
+                <li><a href="#week1">Week 1</a></li>
+                <li><a href="#week2">Week 2</a></li>
+                <li><a href="#week3">Week 3</a></li>
+                <li><a href="#week4">Week 4</a></li>
+                <li><a href="#week5">Week 5</a></li>
+                <li><a href="#week6">Week 6</a></li>
+                <li><a href="#week7">Week 7</a></li>
+                <li><a href="#week8">Week 8</a></li>
+                <li><a href="#week9">Week 9</a></li>
+                <li><a href="#week10">Week 10</a></li>
+                <li><a href="#week11">Week 11</a></li>
+                <li><a href="#week12">Week 12</a></li>
+                <li><a href="#week13">Week 13</a></li>
+                <li><a href="#week14">Week 14</a></li>
+                <li><a href="#week15">Week 15</a></li>
+                <li><a href="#week16">Week 16</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container content">
+        
+        <section id="week1" class="week-section">
+            <h2>Week 1: 作業系統概論</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解作業系統的基本概念與功能</li>
+                <li>認識作業系統的歷史發展</li>
+                <li>學習作業系統的架構與組成</li>
+            </ul>
+
+            <h3>課程內容</h3>
+            <p>作業系統是管理計算機硬體與軟體資源的系統軟體，提供使用者與硬體之間的介面。主要功能包括行程管理、記憶體管理、檔案系統管理和輸入輸出管理。</p>
+
+            <h3>程式範例：取得系統資訊</h3>
+            
+            <div class="code-block">
+                <div class="code-title">system_info.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/utsname.h&gt;
+
+int main() {
+    struct utsname sys_info;
+    
+    if (uname(&sys_info) == 0) {
+        printf("系統名稱: %s\n", sys_info.sysname);
+        printf("節點名稱: %s\n", sys_info.nodename);
+        printf("版本: %s\n", sys_info.release);
+        printf("架構: %s\n", sys_info.machine);
+    }
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 研究你使用的作業系統，列出其主要特點</p>
+                <p>2. 撰寫程式顯示當前系統的基本資訊</p>
+                <p>3. 比較至少兩種不同的作業系統架構</p>
+            </div>
+        </section>
+
+        <section id="week2" class="week-section">
+            <h2>Week 2: 行程概念與系統呼叫</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>理解行程 (Process) 的概念</li>
+                <li>學習行程的狀態與生命週期</li>
+                <li>了解系統呼叫 (System Call) 的運作</li>
+            </ul>
+
+            <h3>行程狀態</h3>
+            <p>行程在執行過程中會經歷不同的狀態：新建、就緒、執行、等待和終止。</p>
+
+            <h3>程式範例：建立子行程</h3>
+            
+            <div class="code-block">
+                <div class="code-title">fork_example.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+int main() {
+    pid_t pid;
+    
+    printf("父行程開始，PID: %d\n", getpid());
+    
+    pid = fork();
+    
+    if (pid &lt; 0) {
+        fprintf(stderr, "建立行程失敗\n");
+        return 1;
+    }
+    else if (pid == 0) {
+        printf("子行程執行中，PID: %d，父PID: %d\n", 
+               getpid(), getppid());
+    }
+    else {
+        printf("父行程繼續執行，子行程PID: %d\n", pid);
+    }
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">exec_example.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    printf("執行 ls 命令：\n");
+    
+    execl("/bin/ls", "ls", "-l", NULL);
+    
+    printf("這行不會被印出\n");
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <strong>注意：</strong>
+                <p>fork() 會建立一個與父行程幾乎完全相同的子行程。exec 系列函數則會用新程式取代當前行程的映像。</p>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 撰寫程式建立多個子行程並顯示其 PID</p>
+                <p>2. 使用 wait() 讓父行程等待子行程結束</p>
+                <p>3. 實作簡單的 shell 程式，能夠執行基本命令</p>
+            </div>
+        </section>
+
+        <section id="week3" class="week-section">
+            <h2>Week 3: 行程排程</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解 CPU 排程的概念與目的</li>
+                <li>學習各種排程演算法</li>
+                <li>比較不同排程演算法的效能</li>
+            </ul>
+
+            <h3>常見排程演算法</h3>
+            <ul>
+                <li>先來先服務 (FCFS)</li>
+                <li>最短工作優先 (SJF)</li>
+                <li>優先權排程 (Priority)</li>
+                <li>循環排程 (Round Robin)</li>
+            </ul>
+
+            <h3>程式範例：FCFS 排程模擬</h3>
+            
+            <div class="code-block">
+                <div class="code-title">fcfs_scheduling.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+
+typedef struct {
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int waiting_time;
+    int turnaround_time;
+} Process;
+
+void calculate_fcfs(Process processes[], int n) {
+    int current_time = 0;
+    
+    for (int i = 0; i &lt; n; i++) {
+        if (current_time &lt; processes[i].arrival_time) {
+            current_time = processes[i].arrival_time;
+        }
+        
+        processes[i].waiting_time = current_time - processes[i].arrival_time;
+        current_time += processes[i].burst_time;
+        processes[i].turnaround_time = processes[i].waiting_time + processes[i].burst_time;
+    }
+}
+
+void print_results(Process processes[], int n) {
+    printf("PID\t到達\t爆發\t等待\t周轉\n");
+    
+    float total_waiting = 0, total_turnaround = 0;
+    
+    for (int i = 0; i &lt; n; i++) {
+        printf("%d\t%d\t%d\t%d\t%d\n",
+               processes[i].pid,
+               processes[i].arrival_time,
+               processes[i].burst_time,
+               processes[i].waiting_time,
+               processes[i].turnaround_time);
+        
+        total_waiting += processes[i].waiting_time;
+        total_turnaround += processes[i].turnaround_time;
+    }
+    
+    printf("\n平均等待時間: %.2f\n", total_waiting / n);
+    printf("平均周轉時間: %.2f\n", total_turnaround / n);
+}
+
+int main() {
+    Process processes[] = {
+        {1, 0, 5, 0, 0},
+        {2, 1, 3, 0, 0},
+        {3, 2, 8, 0, 0},
+        {4, 3, 6, 0, 0}
+    };
+    
+    int n = sizeof(processes) / sizeof(processes[0]);
+    
+    calculate_fcfs(processes, n);
+    print_results(processes, n);
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作 SJF (最短工作優先) 排程演算法</p>
+                <p>2. 實作 Round Robin 排程演算法</p>
+                <p>3. 比較 FCFS、SJF、Round Robin 的平均等待時間</p>
+            </div>
+        </section>
+
+        <section id="week4" class="week-section">
+            <h2>Week 4: 執行緒管理</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>理解執行緒 (Thread) 與行程的差異</li>
+                <li>學習多執行緒程式設計</li>
+                <li>了解執行緒同步的重要性</li>
+            </ul>
+
+            <h3>程式範例：建立 POSIX 執行緒</h3>
+            
+            <div class="code-block">
+                <div class="code-title">pthread_basic.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+void* thread_function(void* arg) {
+    int thread_num = *(int*)arg;
+    
+    printf("執行緒 %d 開始執行\n", thread_num);
+    sleep(1);
+    printf("執行緒 %d 結束執行\n", thread_num);
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[3];
+    int thread_args[3];
+    
+    for (int i = 0; i &lt; 3; i++) {
+        thread_args[i] = i + 1;
+        pthread_create(&threads[i], NULL, thread_function, &thread_args[i]);
+    }
+    
+    for (int i = 0; i &lt; 3; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
+    printf("所有執行緒已完成\n");
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 撰寫多執行緒程式計算陣列總和</p>
+                <p>2. 觀察 race condition 的發生</p>
+                <p>3. 比較單執行緒與多執行緒的執行時間</p>
+            </div>
+        </section>
+
+        <section id="week5" class="week-section">
+            <h2>Week 5: 行程同步</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解臨界區域問題</li>
+                <li>學習同步機制：Mutex、Semaphore</li>
+                <li>理解死結的概念</li>
+            </ul>
+
+            <h3>程式範例：使用 Mutex</h3>
+            
+            <div class="code-block">
+                <div class="code-title">mutex_example.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+
+int shared_counter = 0;
+pthread_mutex_t mutex;
+
+void* increment_counter(void* arg) {
+    for (int i = 0; i &lt; 100000; i++) {
+        pthread_mutex_lock(&mutex);
+        shared_counter++;
+        pthread_mutex_unlock(&mutex);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2;
+    
+    pthread_mutex_init(&mutex, NULL);
+    
+    pthread_create(&thread1, NULL, increment_counter, NULL);
+    pthread_create(&thread2, NULL, increment_counter, NULL);
+    
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+    
+    pthread_mutex_destroy(&mutex);
+    
+    printf("最終計數值: %d\n", shared_counter);
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作生產者-消費者問題</p>
+                <p>2. 撰寫避免死結的程式碼</p>
+                <p>3. 比較 Mutex 和 Semaphore 的使用場景</p>
+            </div>
+        </section>
+
+        <section id="week6" class="week-section">
+            <h2>Week 6: 記憶體管理基礎</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解記憶體階層架構</li>
+                <li>學習記憶體配置策略</li>
+                <li>理解虛擬記憶體的概念</li>
+            </ul>
+
+            <h3>記憶體配置演算法</h3>
+            <ul>
+                <li>First Fit (首次適合)</li>
+                <li>Best Fit (最佳適合)</li>
+                <li>Worst Fit (最差適合)</li>
+            </ul>
+
+            <h3>程式範例：動態記憶體配置</h3>
+            
+            <div class="code-block">
+                <div class="code-title">dynamic_memory.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct {
+    int id;
+    char name[50];
+    float gpa;
+} Student;
+
+int main() {
+    int n;
+    Student* students;
+    
+    printf("請輸入學生人數: ");
+    scanf("%d", &n);
+    
+    students = (Student*)malloc(n * sizeof(Student));
+    
+    if (students == NULL) {
+        fprintf(stderr, "記憶體配置失敗\n");
+        return 1;
+    }
+    
+    for (int i = 0; i &lt; n; i++) {
+        students[i].id = i + 1;
+        printf("輸入學生 %d 的姓名: ", i + 1);
+        scanf("%s", students[i].name);
+        printf("輸入 GPA: ");
+        scanf("%f", &students[i].gpa);
+    }
+    
+    printf("\n學生資料：\n");
+    for (int i = 0; i &lt; n; i++) {
+        printf("ID: %d, 姓名: %s, GPA: %.2f\n",
+               students[i].id,
+               students[i].name,
+               students[i].gpa);
+    }
+    
+    free(students);
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="note-box">
+                <strong>重要：</strong>
+                <p>動態配置的記憶體必須使用 free() 釋放，否則會造成記憶體洩漏。</p>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作 First Fit 記憶體配置演算法</p>
+                <p>2. 撰寫程式檢測記憶體洩漏</p>
+                <p>3. 比較三種配置演算法的效能</p>
+            </div>
+        </section>
+
+        <section id="week7" class="week-section">
+            <h2>Week 7: 虛擬記憶體</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>理解分頁機制</li>
+                <li>學習分頁置換演算法</li>
+                <li>了解分段概念</li>
+            </ul>
+
+            <h3>分頁置換演算法</h3>
+            <ul>
+                <li>FIFO (First-In-First-Out)</li>
+                <li>LRU (Least Recently Used)</li>
+                <li>Optimal (最佳置換)</li>
+            </ul>
+
+            <h3>程式範例：FIFO 分頁置換</h3>
+            
+            <div class="code-block">
+                <div class="code-title">fifo_page_replacement.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define FRAME_SIZE 3
+
+bool is_in_frames(int frames[], int num_frames, int page) {
+    for (int i = 0; i &lt; num_frames; i++) {
+        if (frames[i] == page) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    int pages[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2};
+    int n = sizeof(pages) / sizeof(pages[0]);
+    
+    int frames[FRAME_SIZE];
+    for (int i = 0; i &lt; FRAME_SIZE; i++) {
+        frames[i] = -1;
+    }
+    
+    int page_faults = 0;
+    int next_frame = 0;
+    
+    printf("FIFO 分頁置換模擬\n\n");
+    
+    for (int i = 0; i &lt; n; i++) {
+        printf("存取分頁 %d: ", pages[i]);
+        
+        if (!is_in_frames(frames, FRAME_SIZE, pages[i])) {
+            frames[next_frame] = pages[i];
+            next_frame = (next_frame + 1) % FRAME_SIZE;
+            page_faults++;
+            printf("分頁錯誤! ");
+        } else {
+            printf("命中! ");
+        }
+        
+        printf("框架: [");
+        for (int j = 0; j &lt; FRAME_SIZE; j++) {
+            if (frames[j] == -1) {
+                printf(" - ");
+            } else {
+                printf(" %d ", frames[j]);
+            }
+        }
+        printf("]\n");
+    }
+    
+    printf("\n總分頁錯誤次數: %d\n", page_faults);
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作 LRU 分頁置換演算法</p>
+                <p>2. 實作 Optimal 分頁置換演算法</p>
+                <p>3. 比較三種演算法的分頁錯誤率</p>
+            </div>
+        </section>
+
+        <section id="week8" class="week-section">
+            <h2>Week 8: 期中複習與整合</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>複習前七週的核心概念</li>
+                <li>整合多個概念完成專題</li>
+                <li>準備期中評量</li>
+            </ul>
+
+            <h3>期中專題選項</h3>
+            <ul>
+                <li>實作完整的行程排程模擬器</li>
+                <li>建立生產者-消費者系統</li>
+                <li>開發記憶體管理視覺化工具</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>期中專題</h3>
+                <p>選擇一個專題完成，展示你對作業系統核心概念的理解</p>
+            </div>
+        </section>
+
+        <section id="week9" class="week-section">
+            <h2>Week 9: 檔案系統概論</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解檔案系統的架構</li>
+                <li>學習檔案組織方式</li>
+                <li>理解目錄結構</li>
+            </ul>
+
+            <h3>程式範例：檔案操作</h3>
+            
+            <div class="code-block">
+                <div class="code-title">file_operations.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void write_file(const char* filename, const char* content) {
+    FILE* file = fopen(filename, "w");
+    
+    if (file == NULL) {
+        perror("開啟檔案失敗");
+        return;
+    }
+    
+    fprintf(file, "%s", content);
+    fclose(file);
+}
+
+void read_file(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    
+    if (file == NULL) {
+        perror("開啟檔案失敗");
+        return;
+    }
+    
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        printf("%s", buffer);
+    }
+    
+    fclose(file);
+}
+
+int main() {
+    write_file("test.txt", "Hello, OS Course!\n");
+    read_file("test.txt");
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作簡單的文字編輯器</p>
+                <p>2. 撰寫程式遞迴列出目錄結構</p>
+                <p>3. 建立檔案搜尋工具</p>
+            </div>
+        </section>
+
+        <section id="week10" class="week-section">
+            <h2>Week 10: 磁碟排程</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解磁碟排程演算法</li>
+                <li>學習檔案配置方法</li>
+                <li>理解 I/O 系統</li>
+            </ul>
+
+            <h3>磁碟排程演算法</h3>
+            <ul>
+                <li>FCFS (First-Come, First-Served)</li>
+                <li>SCAN (電梯演算法)</li>
+                <li>C-SCAN (循環 SCAN)</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作 SCAN 磁碟排程演算法</p>
+                <p>2. 比較不同磁碟排程演算法的效能</p>
+                <p>3. 模擬檔案配置表的運作</p>
+            </div>
+        </section>
+
+        <section id="week11" class="week-section">
+            <h2>Week 11: 安全性與保護</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解作業系統安全機制</li>
+                <li>學習使用者認證與授權</li>
+                <li>理解加密與解密基礎</li>
+            </ul>
+
+            <h3>安全機制</h3>
+            <ul>
+                <li>檔案權限管理</li>
+                <li>使用者身份驗證</li>
+                <li>加密技術應用</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作簡單的使用者登入系統</p>
+                <p>2. 撰寫程式檢查檔案權限</p>
+                <p>3. 實作基本的加密演算法</p>
+            </div>
+        </section>
+
+        <section id="week12" class="week-section">
+            <h2>Week 12: 分散式系統</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解分散式系統的特性</li>
+                <li>學習 Socket 程式設計</li>
+                <li>理解客戶端-伺服器架構</li>
+            </ul>
+
+            <h3>程式範例：TCP 伺服器</h3>
+            
+            <div class="code-block">
+                <div class="code-title">tcp_server.c</div>
+                <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define PORT 8080
+
+int main() {
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[1024] = {0};
+    
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    
+    bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    listen(server_fd, 3);
+    
+    printf("伺服器正在監聽 Port %d...\n", PORT);
+    
+    client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &addr_len);
+    read(client_fd, buffer, 1024);
+    printf("收到訊息: %s\n", buffer);
+    
+    send(client_fd, "訊息已收到", 16, 0);
+    
+    close(client_fd);
+    close(server_fd);
+    
+    return 0;
+}</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 實作支援多客戶端的聊天伺服器</p>
+                <p>2. 撰寫檔案傳輸程式</p>
+                <p>3. 建立簡單的遠端命令執行系統</p>
+            </div>
+        </section>
+
+        <section id="week13" class="week-section">
+            <h2>Week 13: 虛擬化技術</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解虛擬化的概念與類型</li>
+                <li>學習容器技術基礎</li>
+                <li>理解虛擬機器的運作原理</li>
+            </ul>
+
+            <h3>虛擬化類型</h3>
+            <ul>
+                <li>完全虛擬化</li>
+                <li>半虛擬化</li>
+                <li>作業系統層虛擬化 (容器)</li>
+            </ul>
+
+            <div class="note-box">
+                <strong>補充說明：</strong>
+                <p>容器技術利用 Linux 的命名空間和 cgroups 功能來提供隔離的執行環境。</p>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 研究 Docker 的基本使用方式</p>
+                <p>2. 比較虛擬機器與容器的差異</p>
+                <p>3. 撰寫程式模擬資源隔離</p>
+            </div>
+        </section>
+
+        <section id="week14" class="week-section">
+            <h2>Week 14: 效能監控與除錯</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>學習系統效能監控工具</li>
+                <li>了解除錯技巧</li>
+                <li>掌握效能優化方法</li>
+            </ul>
+
+            <h3>監控項目</h3>
+            <ul>
+                <li>CPU 使用率</li>
+                <li>記憶體使用量</li>
+                <li>磁碟 I/O</li>
+                <li>網路流量</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 撰寫系統監控工具</p>
+                <p>2. 實作簡單的效能分析器</p>
+                <p>3. 使用 gdb 除錯多執行緒程式</p>
+            </div>
+        </section>
+
+        <section id="week15" class="week-section">
+            <h2>Week 15: 雲端運算與現代作業系統</h2>
+            
+            <h3>學習目標</h3>
+            <ul>
+                <li>了解雲端運算的概念</li>
+                <li>學習現代作業系統的特性</li>
+                <li>探索作業系統的未來趨勢</li>
+            </ul>
+
+            <h3>雲端服務模型</h3>
+            <ul>
+                <li>IaaS (Infrastructure as a Service)</li>
+                <li>PaaS (Platform as a Service)</li>
+                <li>SaaS (Software as a Service)</li>
+            </ul>
+
+            <div class="note-box">
+                <strong>趨勢觀察：</strong>
+                <p>現代作業系統越來越重視容器化、微服務架構、以及雲端原生應用的支援。</p>
+            </div>
+
+            <div class="exercise-box">
+                <h3>練習作業</h3>
+                <p>1. 研究 Kubernetes 的基本概念</p>
+                <p>2. 比較主流作業系統的現代特性</p>
+                <p>3. 撰寫作業系統未來趨勢報告</p>
+            </div>
+        </section>
+
+        <section id="week16" class="week-section side-project">
+            <h2>Week 16: Side Project - 迷你作業系統模擬器</h2>
+            
+            <h3>專案目標</h3>
+            <p>整合本課程所學的知識，開發一個功能完整的迷你作業系統模擬器。這個專案將包含行程管理、記憶體管理、檔案系統等核心功能。</p>
+
+            <h3>專案需求</h3>
+            <ul>
+                <li>實作行程排程器（支援至少兩種演算法）</li>
+                <li>實作記憶體管理系統</li>
+                <li>實作簡單的檔案系統</li>
+                <li>提供互動式命令列介面</li>
+                <li>能夠監控系統狀態</li>
+            </ul>
+
+            <h3>專案架構</h3>
+            
+            <div class="code-block">
+                <div class="code-title">mini_os.h</div>
+                <pre><code class="language-c">#ifndef MINI_OS_H
+#define MINI_OS_H
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_PROCESSES 10
+#define MAX_MEMORY_BLOCKS 20
+#define MAX_FILES 50
+
+typedef enum {
+    READY,
+    RUNNING,
+    WAITING,
+    TERMINATED
+} ProcessState;
+
+typedef struct {
+    int pid;
+    char name[50];
+    int priority;
+    int burst_time;
+    int remaining_time;
+    ProcessState state;
+} Process;
+
+typedef struct {
+    int start;
+    int size;
+    bool allocated;
+    int process_id;
+} MemoryBlock;
+
+typedef struct {
+    char name[50];
+    int size;
+    char content[1024];
+    bool exists;
+} File;
+
+typedef struct {
+    Process processes[MAX_PROCESSES];
+    int process_count;
+    MemoryBlock memory[MAX_MEMORY_BLOCKS];
+    int memory_count;
+    File files[MAX_FILES];
+    int file_count;
+} MiniOS;
+
+void init_os(MiniOS* os);
+void create_process(MiniOS* os, const char* name, int priority, int burst_time);
+void schedule_processes(MiniOS* os);
+void list_processes(MiniOS* os);
+void list_memory(MiniOS* os);
+void list_files(MiniOS* os);
+
+#endif</code></pre>
+            </div>
+
+            <h3>功能展示</h3>
+            
+            <div class="code-block">
+                <div class="code-title">使用範例</div>
+                <pre><code class="language-bash"># 編譯專案
+make
+
+# 執行模擬器
+./mini_os
+
+# 在模擬器中輸入命令:
+mini-os> create proc1 5 10
+mini-os> create proc2 3 8
+mini-os> ps
+mini-os> schedule
+mini-os> mem
+mini-os> exit</code></pre>
+            </div>
+
+            <div class="exercise-box">
+                <h3>專案擴展建議</h3>
+                <p>1. 增加更多排程演算法選項</p>
+                <p>2. 實作檔案的讀取和寫入功能</p>
+                <p>3. 加入行程間通訊機制</p>
+                <p>4. 建立圖形化介面顯示系統狀態</p>
+                <p>5. 實作虛擬記憶體和分頁機制</p>
+            </div>
+
+            <div class="note-box">
+                <strong>專案評分標準：</strong>
+                <p>程式碼品質與組織 (30%)、功能完整性 (30%)、使用者介面 (20%)、創新性 (20%)</p>
+            </div>
+        </section>
+
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>作業系統課程 - 16週完整學習路徑</p>
+            <p>祝學習順利</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+        
+        document.querySelectorAll('.nav-weeks a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const offset = 80;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

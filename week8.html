@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 8: 期中複習與整合專案 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .review-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .review-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .project-box {
+            background: #e0e7ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #6366f1;
+        }
+
+        .project-box h3 {
+            color: #4338ca;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .checklist {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #10b981;
+        }
+
+        .checklist h4 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 8: 期中複習與整合專案</h1>
+            <p class="week-info">Midterm Review and Integration Project</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#review">重點複習</a></li>
+                <li><a href="#projects">整合專案</a></li>
+                <li><a href="#exam">模擬考題</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>恭喜你完成了前七週的學習！本週是期中複習週，我們將回顧前半學期所學的核心概念，並透過整合專案將這些知識融會貫通。</p>
+                <p>這週沒有新的理論內容，而是專注於複習、練習和實作。你將透過整合專案來實際應用所學的概念，並準備期中考試。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>本週目標</h3>
+                <ul>
+                    <li>複習 Week 1-7 的核心概念</li>
+                    <li>整合多個主題的知識</li>
+                    <li>完成一個綜合性專案</li>
+                    <li>準備期中考試</li>
+                    <li>鞏固程式設計能力</li>
+                </ul>
+            </div>
+
+            <section id="review">
+                <h2>一、核心概念複習</h2>
+
+                <h3>Week 1: 作業系統概論</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>作業系統的定義與功能</li>
+                        <li>系統呼叫的使用（uname, getpid, getuid）</li>
+                        <li>作業系統的組成（核心、系統呼叫、工具程式）</li>
+                        <li>系統資源監控</li>
+                    </ul>
+                </div>
+
+                <h3>Week 2: 行程管理與系統呼叫</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>行程的概念與組成（PCB）</li>
+                        <li>行程狀態轉換</li>
+                        <li>fork() 建立子行程</li>
+                        <li>exec() 系列函數</li>
+                        <li>wait() 和 waitpid()</li>
+                        <li>殭屍行程與孤兒行程</li>
+                    </ul>
+                    
+                    <h4>關鍵程式碼</h4>
+                    <pre><code class="language-c">pid_t pid = fork();
+if (pid == 0) {
+    // 子行程
+    execl("/bin/ls", "ls", "-l", NULL);
+} else {
+    // 父行程
+    wait(NULL);
+}</code></pre>
+                </div>
+
+                <h3>Week 3: 行程排程</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>CPU 排程的目的</li>
+                        <li>評估標準：周轉時間、等待時間、回應時間</li>
+                        <li>排程演算法：
+                            <ul>
+                                <li>FCFS：簡單但可能有護航效應</li>
+                                <li>SJF：最小平均等待時間</li>
+                                <li>Priority：可能造成飢餓</li>
+                                <li>Round Robin：公平，適合分時系統</li>
+                            </ul>
+                        </li>
+                        <li>搶占式 vs 非搶占式</li>
+                    </ul>
+                </div>
+
+                <h3>Week 4: 執行緒與並行程式設計</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>執行緒 vs 行程</li>
+                        <li>pthread 的使用：
+                            <ul>
+                                <li>pthread_create()</li>
+                                <li>pthread_join()</li>
+                                <li>pthread_exit()</li>
+                            </ul>
+                        </li>
+                        <li>競爭條件問題</li>
+                        <li>執行緒池概念</li>
+                    </ul>
+                    
+                    <h4>關鍵程式碼</h4>
+                    <pre><code class="language-c">pthread_t thread;
+pthread_create(&thread, NULL, thread_func, NULL);
+pthread_join(thread, NULL);</code></pre>
+                </div>
+
+                <h3>Week 5: 行程同步與互斥</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>臨界區域問題</li>
+                        <li>互斥鎖（Mutex）：
+                            <ul>
+                                <li>pthread_mutex_lock()</li>
+                                <li>pthread_mutex_unlock()</li>
+                            </ul>
+                        </li>
+                        <li>號誌（Semaphore）：sem_wait(), sem_post()</li>
+                        <li>條件變數（Condition Variable）</li>
+                        <li>經典問題：生產者-消費者、讀者-寫者</li>
+                        <li>死結的四個條件與預防</li>
+                    </ul>
+                    
+                    <h4>關鍵程式碼</h4>
+                    <pre><code class="language-c">pthread_mutex_lock(&mutex);
+// 臨界區域
+shared_variable++;
+pthread_mutex_unlock(&mutex);</code></pre>
+                </div>
+
+                <h3>Week 6: 記憶體管理</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>記憶體階層</li>
+                        <li>連續記憶體配置：
+                            <ul>
+                                <li>First Fit</li>
+                                <li>Best Fit</li>
+                                <li>Worst Fit</li>
+                            </ul>
+                        </li>
+                        <li>碎片問題：內部碎片 vs 外部碎片</li>
+                        <li>分頁與分段</li>
+                        <li>動態記憶體管理：malloc, calloc, realloc, free</li>
+                    </ul>
+                    
+                    <h4>關鍵程式碼</h4>
+                    <pre><code class="language-c">int* array = (int*)malloc(10 * sizeof(int));
+// 使用記憶體
+free(array);</code></pre>
+                </div>
+
+                <h3>Week 7: 虛擬記憶體</h3>
+                <div class="review-box">
+                    <h4>重點回顧</h4>
+                    <ul>
+                        <li>虛擬記憶體的優勢</li>
+                        <li>需求分頁（Demand Paging）</li>
+                        <li>頁面置換演算法：
+                            <ul>
+                                <li>FIFO：簡單但有 Belady's Anomaly</li>
+                                <li>LRU：效能好但實作複雜</li>
+                                <li>Optimal：理論最佳</li>
+                            </ul>
+                        </li>
+                        <li>TLB 的作用</li>
+                        <li>顛簸（Thrashing）</li>
+                    </ul>
+                </div>
+
+                <h2>二、知識整合</h2>
+
+                <h3>2.1 概念關聯圖</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>主題</th>
+                            <th>核心概念</th>
+                            <th>實作技術</th>
+                            <th>相關問題</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>行程管理</td>
+                            <td>PCB、狀態轉換</td>
+                            <td>fork, exec, wait</td>
+                            <td>殭屍行程</td>
+                        </tr>
+                        <tr>
+                            <td>排程</td>
+                            <td>時間量子、優先權</td>
+                            <td>FCFS, SJF, RR</td>
+                            <td>飢餓、護航效應</td>
+                        </tr>
+                        <tr>
+                            <td>並行</td>
+                            <td>執行緒、共享記憶體</td>
+                            <td>pthread</td>
+                            <td>競爭條件</td>
+                        </tr>
+                        <tr>
+                            <td>同步</td>
+                            <td>臨界區域</td>
+                            <td>Mutex, Semaphore</td>
+                            <td>死結</td>
+                        </tr>
+                        <tr>
+                            <td>記憶體</td>
+                            <td>配置、碎片</td>
+                            <td>First/Best/Worst Fit</td>
+                            <td>外部碎片</td>
+                        </tr>
+                        <tr>
+                            <td>虛擬記憶體</td>
+                            <td>分頁、置換</td>
+                            <td>FIFO, LRU</td>
+                            <td>顛簸</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.2 常見陷阱與錯誤</h3>
+
+                <div class="checklist">
+                    <h4>程式設計常見錯誤</h4>
+                    <ul>
+                        <li>忘記 pthread 程式要加 -pthread 編譯選項</li>
+                        <li>fork() 後沒有正確處理父子行程</li>
+                        <li>使用 mutex 後忘記 unlock</li>
+                        <li>malloc 後忘記 free（記憶體洩漏）</li>
+                        <li>競爭條件：多執行緒存取共享變數未加鎖</li>
+                        <li>死結：兩個執行緒互相等待對方釋放鎖</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="projects">
+                <h2>三、整合專案選項</h2>
+                <p>選擇以下其中一個專案完成，建議投入 10-15 小時。</p>
+
+                <div class="project-box">
+                    <h3>專案選項 1：多執行緒任務管理系統</h3>
+                    <h4>專案描述</h4>
+                    <p>建立一個多執行緒的任務管理系統，模擬作業系統的排程和資源管理。</p>
+                    
+                    <h4>需求</h4>
+                    <ul>
+                        <li>使用 pthread 建立工作執行緒池（至少 4 個執行緒）</li>
+                        <li>實作任務佇列，支援新增和移除任務</li>
+                        <li>實作至少兩種排程策略（如 FCFS 和 Priority）</li>
+                        <li>使用 mutex 和 condition variable 進行同步</li>
+                        <li>追蹤每個任務的等待時間和執行時間</li>
+                        <li>生成統計報告（平均等待時間、周轉時間等）</li>
+                    </ul>
+                    
+                    <h4>加分項</h4>
+                    <ul>
+                        <li>支援動態調整執行緒池大小</li>
+                        <li>實作工作竊取（Work Stealing）</li>
+                        <li>視覺化顯示執行緒狀態</li>
+                        <li>死結偵測機制</li>
+                    </ul>
+                </div>
+
+                <div class="project-box">
+                    <h3>專案選項 2：記憶體管理模擬器</h3>
+                    <h4>專案描述</h4>
+                    <p>建立完整的記憶體管理模擬器，整合記憶體配置和虛擬記憶體。</p>
+                    
+                    <h4>需求</h4>
+                    <ul>
+                        <li>實作動態記憶體配置（First Fit, Best Fit, Worst Fit）</li>
+                        <li>支援記憶體配置、釋放和壓縮</li>
+                        <li>實作分頁機制和頁表</li>
+                        <li>實作至少兩種頁面置換演算法（如 FIFO 和 LRU）</li>
+                        <li>模擬 TLB（至少 4 個項目）</li>
+                        <li>計算並顯示碎片、命中率、頁面錯誤率</li>
+                    </ul>
+                    
+                    <h4>加分項</h4>
+                    <ul>
+                        <li>視覺化顯示記憶體狀態</li>
+                        <li>支援多個並行行程</li>
+                        <li>實作工作集追蹤</li>
+                        <li>顛簸偵測和報告</li>
+                    </ul>
+                </div>
+
+                <div class="project-box">
+                    <h3>專案選項 3：簡易作業系統模擬器</h3>
+                    <h4>專案描述</h4>
+                    <p>建立一個整合多個作業系統功能的模擬器。</p>
+                    
+                    <h4>需求</h4>
+                    <ul>
+                        <li>行程管理：建立、終止、狀態查詢</li>
+                        <li>排程器：實作至少兩種排程演算法</li>
+                        <li>記憶體管理：實作簡單的記憶體配置</li>
+                        <li>同步機制：提供 mutex 和 semaphore</li>
+                        <li>互動式命令列介面</li>
+                        <li>支援基本命令（create, kill, ps, mem, help 等）</li>
+                    </ul>
+                    
+                    <h4>加分項</h4>
+                    <ul>
+                        <li>實作簡單的檔案系統模擬</li>
+                        <li>支援行程間通訊（IPC）</li>
+                        <li>系統狀態視覺化</li>
+                        <li>執行腳本檔案</li>
+                    </ul>
+                </div>
+
+                <h3>專案提交要求</h3>
+
+                <div class="checklist">
+                    <h4>必須包含</h4>
+                    <ul>
+                        <li>完整的原始碼（含註解）</li>
+                        <li>Makefile 或編譯說明</li>
+                        <li>README 文件：
+                            <ul>
+                                <li>專案簡介</li>
+                                <li>功能說明</li>
+                                <li>使用方式</li>
+                                <li>測試案例</li>
+                            </ul>
+                        </li>
+                        <li>測試報告：
+                            <ul>
+                                <li>測試案例和結果</li>
+                                <li>效能分析</li>
+                                <li>遇到的問題和解決方法</li>
+                            </ul>
+                        </li>
+                        <li>設計文件：
+                            <ul>
+                                <li>系統架構圖</li>
+                                <li>資料結構設計</li>
+                                <li>演算法說明</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>範例專案結構</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>project_structure</span>
+                        <span>建議的專案目錄結構</span>
+                    </div>
+                    <pre><code>midterm-project/
+├── src/
+│   ├── main.c
+│   ├── scheduler.c
+│   ├── memory.c
+│   ├── process.c
+│   └── sync.c
+├── include/
+│   ├── scheduler.h
+│   ├── memory.h
+│   ├── process.h
+│   └── sync.h
+├── tests/
+│   ├── test_scheduler.c
+│   ├── test_memory.c
+│   └── test_integration.c
+├── docs/
+│   ├── design.md
+│   └── report.md
+├── Makefile
+└── README.md</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exam">
+                <h2>四、期中模擬考題</h2>
+
+                <div class="quiz-section">
+                    <h3>選擇題（每題 4 分，共 40 分）</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 下列何者不是作業系統的主要功能？</strong></p>
+                        <p>A. 行程管理</p>
+                        <p>B. 記憶體管理</p>
+                        <p>C. 編譯程式</p>
+                        <p>D. 檔案系統管理</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. fork() 系統呼叫在子行程中的返回值是？</strong></p>
+                        <p>A. -1</p>
+                        <p>B. 0</p>
+                        <p>C. 子行程的 PID</p>
+                        <p>D. 父行程的 PID</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 下列哪個排程演算法可能產生飢餓問題？</strong></p>
+                        <p>A. FCFS</p>
+                        <p>B. Round Robin</p>
+                        <p>C. Priority Scheduling</p>
+                        <p>D. SJF</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. pthread_join() 的作用是？</strong></p>
+                        <p>A. 建立新執行緒</p>
+                        <p>B. 等待執行緒結束</p>
+                        <p>C. 終止執行緒</p>
+                        <p>D. 暫停執行緒</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 下列何者不是死結的必要條件？</strong></p>
+                        <p>A. 互斥</p>
+                        <p>B. 持有並等待</p>
+                        <p>C. 優先權反轉</p>
+                        <p>D. 循環等待</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. Best Fit 記憶體配置演算法是？</strong></p>
+                        <p>A. 選擇第一個足夠大的區塊</p>
+                        <p>B. 選擇最小的足夠大區塊</p>
+                        <p>C. 選擇最大的區塊</p>
+                        <p>D. 隨機選擇</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 虛擬記憶體的主要優勢是？</strong></p>
+                        <p>A. 加快程式執行</p>
+                        <p>B. 程式可以大於實體記憶體</p>
+                        <p>C. 減少硬碟使用</p>
+                        <p>D. 簡化程式設計</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. LRU 頁面置換演算法是置換？</strong></p>
+                        <p>A. 最早進入的頁面</p>
+                        <p>B. 最長時間未使用的頁面</p>
+                        <p>C. 未來最晚使用的頁面</p>
+                        <p>D. 隨機選擇的頁面</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>9. 下列何者會導致外部碎片？</strong></p>
+                        <p>A. 固定分割</p>
+                        <p>B. 分頁</p>
+                        <p>C. 動態分割</p>
+                        <p>D. 虛擬記憶體</p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>10. TLB 的作用是？</strong></p>
+                        <p>A. 儲存程式碼</p>
+                        <p>B. 快取頁表項目</p>
+                        <p>C. 管理 I/O</p>
+                        <p>D. 排程行程</p>
+                    </div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>簡答題（每題 10 分，共 30 分）</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 說明競爭條件（Race Condition）是什麼，並舉例說明如何使用 mutex 解決。</strong></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 比較 FIFO 和 LRU 頁面置換演算法的優缺點。</strong></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 解釋死結的四個必要條件，並說明如何破壞其中一個條件來預防死結。</strong></p>
+                    </div>
+                </div>
+
+                <div class="quiz-section">
+                    <h3>程式題（30 分）</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>撰寫一個多執行緒程式，實作生產者-消費者問題</strong></p>
+                        <p><strong>要求：</strong></p>
+                        <ul>
+                            <li>使用 pthread 建立 2 個生產者和 2 個消費者執行緒</li>
+                            <li>使用大小為 5 的環形緩衝區</li>
+                            <li>使用 semaphore 和 mutex 進行同步</li>
+                            <li>每個生產者生產 10 個物品</li>
+                            <li>顯示生產和消費的過程</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>模擬考參考答案</h3>
+
+                <div class="note-box">
+                    <strong>選擇題答案：</strong>
+                    <p>1.C  2.B  3.C  4.B  5.C  6.B  7.B  8.B  9.C  10.B</p>
+                </div>
+
+            </section>
+
+            <h2>五、學習資源</h2>
+
+            <div class="checklist">
+                <h4>推薦複習材料</h4>
+                <ul>
+                    <li>重新閱讀 Week 1-7 的課程內容</li>
+                    <li>複習所有程式範例，嘗試自己重新實作</li>
+                    <li>完成之前週次未完成的作業</li>
+                    <li>參考教科書：
+                        <ul>
+                            <li>Operating System Concepts (Silberschatz)</li>
+                            <li>Modern Operating Systems (Tanenbaum)</li>
+                        </ul>
+                    </li>
+                    <li>線上資源：
+                        <ul>
+                            <li>Linux Man Pages</li>
+                            <li>POSIX Threads Programming</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="navigation">
+                <a href="week7.html" class="nav-button">上一週：虛擬記憶體</a>
+                <a href="week9.html" class="nav-button">下一週：檔案系統</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 8 © 2026</p>
+        <p>建議學習時間：15-20 小時（含專案）</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

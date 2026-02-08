@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 5: 行程同步與互斥 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .important-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #d97706;
+        }
+
+        .important-box strong {
+            color: #92400e;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 5: 行程同步與互斥</h1>
+            <p class="week-info">Process Synchronization and Mutual Exclusion</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第五週的課程！在上週學習了多執行緒程式設計後，我們發現了一個嚴重的問題：競爭條件（Race Condition）。當多個執行緒或行程同時存取共享資源時，如果沒有適當的同步機制，就會導致資料不一致。</p>
+                <p>本週我們將深入探討行程同步的核心概念，學習如何使用互斥鎖（Mutex）、號誌（Semaphore）、條件變數等同步工具來解決並行程式設計中的同步問題。我們還會探討經典的同步問題，如生產者-消費者問題、讀者-寫者問題等。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解臨界區域（Critical Section）問題</li>
+                    <li>掌握互斥鎖（Mutex）的使用</li>
+                    <li>學習號誌（Semaphore）的原理與應用</li>
+                    <li>了解條件變數（Condition Variable）的使用</li>
+                    <li>解決經典的同步問題</li>
+                    <li>認識死結（Deadlock）問題及其預防</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、同步問題基礎</h2>
+                
+                <h3>1.1 臨界區域問題</h3>
+                <p>臨界區域（Critical Section）是指存取共享資源的程式碼段。當多個行程或執行緒需要存取相同的共享資源時，必須確保同一時間只有一個行程在臨界區域內執行。</p>
+
+                <div class="concept-box">
+                    <h4>臨界區域問題的解決方案必須滿足三個條件</h4>
+                    <ol>
+                        <li><strong>互斥（Mutual Exclusion）：</strong>同一時間只能有一個行程在臨界區域內執行</li>
+                        <li><strong>進展（Progress）：</strong>如果沒有行程在臨界區域內，且有行程想進入，則必須允許其中一個進入</li>
+                        <li><strong>有限等待（Bounded Waiting）：</strong>行程等待進入臨界區域的時間必須有上限</li>
+                    </ol>
+                </div>
+
+                <h3>1.2 競爭條件（Race Condition）</h3>
+                <p>當多個行程並行執行，且執行結果依賴於特定的執行順序時，就會發生競爭條件。</p>
+
+                <div class="warning-box">
+                    <strong>競爭條件的危害</strong>
+                    <p>競爭條件會導致：</p>
+                    <ul>
+                        <li>資料不一致</li>
+                        <li>程式行為不可預測</li>
+                        <li>難以重現和除錯的錯誤</li>
+                        <li>系統不穩定</li>
+                    </ul>
+                </div>
+
+                <h2>二、同步機制</h2>
+
+                <h3>2.1 互斥鎖（Mutex）</h3>
+                <p>Mutex（Mutual Exclusion）是最基本的同步機制，用於保護臨界區域。</p>
+
+                <div class="concept-box">
+                    <h4>Mutex 的基本操作</h4>
+                    <ul>
+                        <li><strong>pthread_mutex_lock()：</strong>鎖定 mutex，如果已被鎖定則等待</li>
+                        <li><strong>pthread_mutex_unlock()：</strong>解鎖 mutex</li>
+                        <li><strong>pthread_mutex_trylock()：</strong>嘗試鎖定，如果已被鎖定則立即返回</li>
+                    </ul>
+                    
+                    <p><strong>使用原則：</strong></p>
+                    <ul>
+                        <li>進入臨界區域前必須先 lock</li>
+                        <li>離開臨界區域後必須 unlock</li>
+                        <li>同一個執行緒不應該重複 lock 同一個 mutex（除非使用遞迴 mutex）</li>
+                        <li>持有 mutex 的時間應該盡可能短</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 號誌（Semaphore）</h3>
+                <p>號誌是一個整數變數，透過兩個原子操作來控制：</p>
+
+                <ul>
+                    <li><strong>wait() 或 P()：</strong>將號誌值減 1，如果結果為負則阻塞</li>
+                    <li><strong>signal() 或 V()：</strong>將號誌值加 1，喚醒等待的行程</li>
+                </ul>
+
+                <div class="concept-box">
+                    <h4>號誌的類型</h4>
+                    <p><strong>1. 二元號誌（Binary Semaphore）：</strong></p>
+                    <ul>
+                        <li>值只能是 0 或 1</li>
+                        <li>類似於 mutex</li>
+                        <li>用於互斥</li>
+                    </ul>
+                    
+                    <p><strong>2. 計數號誌（Counting Semaphore）：</strong></p>
+                    <ul>
+                        <li>值可以是任意非負整數</li>
+                        <li>表示可用資源的數量</li>
+                        <li>用於資源計數</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 條件變數（Condition Variable）</h3>
+                <p>條件變數用於讓執行緒等待某個條件成立。通常與 mutex 配合使用。</p>
+
+                <div class="concept-box">
+                    <h4>條件變數的操作</h4>
+                    <ul>
+                        <li><strong>pthread_cond_wait()：</strong>釋放 mutex 並等待條件</li>
+                        <li><strong>pthread_cond_signal()：</strong>喚醒一個等待的執行緒</li>
+                        <li><strong>pthread_cond_broadcast()：</strong>喚醒所有等待的執行緒</li>
+                    </ul>
+                </div>
+
+                <h3>2.4 Mutex vs Semaphore</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>Mutex</th>
+                            <th>Semaphore</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>用途</td>
+                            <td>互斥（保護臨界區域）</td>
+                            <td>同步、資源計數</td>
+                        </tr>
+                        <tr>
+                            <td>所有權</td>
+                            <td>有（誰 lock 誰 unlock）</td>
+                            <td>無（任何執行緒都可以操作）</td>
+                        </tr>
+                        <tr>
+                            <td>初始值</td>
+                            <td>未鎖定</td>
+                            <td>可設定為任意值</td>
+                        </tr>
+                        <tr>
+                            <td>遞迴鎖定</td>
+                            <td>可支援（遞迴 mutex）</td>
+                            <td>不適用</td>
+                        </tr>
+                        <tr>
+                            <td>效能</td>
+                            <td>通常較快（簡單）</td>
+                            <td>稍慢（更通用）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>三、經典同步問題</h2>
+
+                <h3>3.1 生產者-消費者問題</h3>
+                <p>一個或多個生產者產生資料放入緩衝區，一個或多個消費者從緩衝區取出資料。需要解決：</p>
+                <ul>
+                    <li>生產者不能在緩衝區滿時繼續生產</li>
+                    <li>消費者不能在緩衝區空時繼續消費</li>
+                    <li>同時只能有一個執行緒存取緩衝區</li>
+                </ul>
+
+                <h3>3.2 讀者-寫者問題</h3>
+                <p>多個讀者可以同時讀取共享資料，但寫者必須獨占存取。</p>
+                <ul>
+                    <li>多個讀者可以同時讀</li>
+                    <li>寫者必須獨占</li>
+                    <li>需要避免讀者或寫者飢餓</li>
+                </ul>
+
+                <h3>3.3 哲學家用餐問題</h3>
+                <p>五個哲學家圍坐圓桌，每人需要兩根筷子才能用餐。可能導致死結。</p>
+
+                <h2>四、死結（Deadlock）</h2>
+
+                <h3>4.1 死結的四個必要條件</h3>
+                <ol>
+                    <li><strong>互斥（Mutual Exclusion）：</strong>資源不能被共享</li>
+                    <li><strong>持有並等待（Hold and Wait）：</strong>行程持有資源同時等待其他資源</li>
+                    <li><strong>不可搶占（No Preemption）：</strong>資源不能被強制奪取</li>
+                    <li><strong>循環等待（Circular Wait）：</strong>存在行程的循環等待鏈</li>
+                </ol>
+
+                <div class="important-box">
+                    <strong>預防死結</strong>
+                    <p>只要破壞四個條件中的任何一個，就能預防死結：</p>
+                    <ul>
+                        <li>破壞互斥：使資源可共享（不總是可行）</li>
+                        <li>破壞持有並等待：要求一次申請所有資源</li>
+                        <li>破壞不可搶占：允許搶占資源</li>
+                        <li>破壞循環等待：為資源編號，按順序申請</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>五、實作練習</h2>
+
+                <h3>5.1 使用 Mutex 解決競爭條件</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>mutex_counter.c</span>
+                        <span>使用 Mutex 保護共享計數器</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+
+#define NUM_THREADS 5
+#define ITERATIONS 100000
+
+int shared_counter = 0;
+pthread_mutex_t counter_mutex;
+
+void* increment_counter(void* arg) {
+    int thread_id = *(int*)arg;
+    
+    for (int i = 0; i < ITERATIONS; i++) {
+        // 進入臨界區域前鎖定 mutex
+        pthread_mutex_lock(&counter_mutex);
+        
+        // 臨界區域
+        shared_counter++;
+        
+        // 離開臨界區域後解鎖 mutex
+        pthread_mutex_unlock(&counter_mutex);
+    }
+    
+    printf("執行緒 %d 完成\n", thread_id);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int thread_ids[NUM_THREADS];
+    
+    // 初始化 mutex
+    pthread_mutex_init(&counter_mutex, NULL);
+    
+    printf("初始計數: %d\n", shared_counter);
+    printf("每個執行緒遞增 %d 次\n", ITERATIONS);
+    printf("預期最終值: %d\n\n", NUM_THREADS * ITERATIONS);
+    
+    // 建立執行緒
+    for (int i = 0; i < NUM_THREADS; i++) {
+        thread_ids[i] = i + 1;
+        pthread_create(&threads[i], NULL, increment_counter, &thread_ids[i]);
+    }
+    
+    // 等待所有執行緒
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
+    printf("\n實際最終值: %d\n", shared_counter);
+    
+    if (shared_counter == NUM_THREADS * ITERATIONS) {
+        printf("結果正確！Mutex 成功保護了臨界區域。\n");
+    } else {
+        printf("結果錯誤（這不應該發生）\n");
+    }
+    
+    // 銷毀 mutex
+    pthread_mutex_destroy(&counter_mutex);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o mutex_counter mutex_counter.c -pthread
+<span class="prompt">$</span> ./mutex_counter
+<span class="output">初始計數: 0
+每個執行緒遞增 100000 次
+預期最終值: 500000
+
+執行緒 1 完成
+執行緒 2 完成
+執行緒 3 完成
+執行緒 4 完成
+執行緒 5 完成
+
+實際最終值: 500000
+結果正確！Mutex 成功保護了臨界區域。</span>
+                </div>
+
+                <h3>5.2 生產者-消費者問題（使用 Semaphore）</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>producer_consumer.c</span>
+                        <span>生產者-消費者問題實作</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+#include &lt;unistd.h&gt;
+
+#define BUFFER_SIZE 5
+#define NUM_ITEMS 20
+
+int buffer[BUFFER_SIZE];
+int in = 0;   // 生產者插入位置
+int out = 0;  // 消費者取出位置
+
+sem_t empty;  // 空位數量
+sem_t full;   // 已用位數量
+pthread_mutex_t mutex;  // 保護緩衝區
+
+void* producer(void* arg) {
+    int producer_id = *(int*)arg;
+    
+    for (int i = 0; i < NUM_ITEMS / 2; i++) {
+        int item = rand() % 100;
+        
+        // 等待空位
+        sem_wait(&empty);
+        
+        // 鎖定緩衝區
+        pthread_mutex_lock(&mutex);
+        
+        // 生產物品
+        buffer[in] = item;
+        printf("[生產者 %d] 生產物品 %d 於位置 %d\n", 
+               producer_id, item, in);
+        in = (in + 1) % BUFFER_SIZE;
+        
+        // 解鎖緩衝區
+        pthread_mutex_unlock(&mutex);
+        
+        // 增加已用位數量
+        sem_post(&full);
+        
+        // 模擬生產時間
+        usleep(rand() % 100000);
+    }
+    
+    return NULL;
+}
+
+void* consumer(void* arg) {
+    int consumer_id = *(int*)arg;
+    
+    for (int i = 0; i < NUM_ITEMS / 2; i++) {
+        // 等待物品
+        sem_wait(&full);
+        
+        // 鎖定緩衝區
+        pthread_mutex_lock(&mutex);
+        
+        // 消費物品
+        int item = buffer[out];
+        printf("[消費者 %d] 消費物品 %d 於位置 %d\n", 
+               consumer_id, item, out);
+        out = (out + 1) % BUFFER_SIZE;
+        
+        // 解鎖緩衝區
+        pthread_mutex_unlock(&mutex);
+        
+        // 增加空位數量
+        sem_post(&empty);
+        
+        // 模擬消費時間
+        usleep(rand() % 150000);
+    }
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t prod_thread, cons_thread;
+    int prod_id = 1, cons_id = 1;
+    
+    // 初始化號誌和 mutex
+    sem_init(&empty, 0, BUFFER_SIZE);  // 初始全為空
+    sem_init(&full, 0, 0);              // 初始無物品
+    pthread_mutex_init(&mutex, NULL);
+    
+    printf("緩衝區大小: %d\n", BUFFER_SIZE);
+    printf("總物品數: %d\n\n", NUM_ITEMS);
+    
+    // 建立生產者和消費者執行緒
+    pthread_create(&prod_thread, NULL, producer, &prod_id);
+    pthread_create(&cons_thread, NULL, consumer, &cons_id);
+    
+    // 等待執行緒完成
+    pthread_join(prod_thread, NULL);
+    pthread_join(cons_thread, NULL);
+    
+    printf("\n所有物品已生產和消費完畢\n");
+    
+    // 清理
+    sem_destroy(&empty);
+    sem_destroy(&full);
+    pthread_mutex_destroy(&mutex);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.3 讀者-寫者問題</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>readers_writers.c</span>
+                        <span>讀者-寫者問題實作</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+#include &lt;unistd.h&gt;
+
+#define NUM_READERS 5
+#define NUM_WRITERS 2
+
+int shared_data = 0;
+int reader_count = 0;
+
+pthread_mutex_t mutex;        // 保護 reader_count
+pthread_mutex_t write_mutex;  // 寫者互斥
+
+void* reader(void* arg) {
+    int reader_id = *(int*)arg;
+    
+    for (int i = 0; i < 3; i++) {
+        // 進入讀者區域
+        pthread_mutex_lock(&mutex);
+        reader_count++;
+        if (reader_count == 1) {
+            // 第一個讀者鎖定寫者
+            pthread_mutex_lock(&write_mutex);
+        }
+        pthread_mutex_unlock(&mutex);
+        
+        // 讀取資料
+        printf("[讀者 %d] 讀取資料: %d (讀者數: %d)\n", 
+               reader_id, shared_data, reader_count);
+        usleep(100000);  // 模擬讀取時間
+        
+        // 離開讀者區域
+        pthread_mutex_lock(&mutex);
+        reader_count--;
+        if (reader_count == 0) {
+            // 最後一個讀者解鎖寫者
+            pthread_mutex_unlock(&write_mutex);
+        }
+        pthread_mutex_unlock(&mutex);
+        
+        usleep(200000);  // 休息一下
+    }
+    
+    return NULL;
+}
+
+void* writer(void* arg) {
+    int writer_id = *(int*)arg;
+    
+    for (int i = 0; i < 3; i++) {
+        // 鎖定寫者互斥
+        pthread_mutex_lock(&write_mutex);
+        
+        // 寫入資料
+        shared_data++;
+        printf("[寫者 %d] 寫入資料: %d\n", writer_id, shared_data);
+        usleep(150000);  // 模擬寫入時間
+        
+        // 解鎖寫者互斥
+        pthread_mutex_unlock(&write_mutex);
+        
+        usleep(300000);  // 休息一下
+    }
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t readers[NUM_READERS];
+    pthread_t writers[NUM_WRITERS];
+    int reader_ids[NUM_READERS];
+    int writer_ids[NUM_WRITERS];
+    
+    // 初始化 mutex
+    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&write_mutex, NULL);
+    
+    printf("讀者-寫者問題模擬\n\n");
+    
+    // 建立讀者執行緒
+    for (int i = 0; i < NUM_READERS; i++) {
+        reader_ids[i] = i + 1;
+        pthread_create(&readers[i], NULL, reader, &reader_ids[i]);
+    }
+    
+    // 建立寫者執行緒
+    for (int i = 0; i < NUM_WRITERS; i++) {
+        writer_ids[i] = i + 1;
+        pthread_create(&writers[i], NULL, writer, &writer_ids[i]);
+    }
+    
+    // 等待所有執行緒
+    for (int i = 0; i < NUM_READERS; i++) {
+        pthread_join(readers[i], NULL);
+    }
+    for (int i = 0; i < NUM_WRITERS; i++) {
+        pthread_join(writers[i], NULL);
+    }
+    
+    printf("\n最終資料值: %d\n", shared_data);
+    
+    // 清理
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&write_mutex);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.4 使用條件變數</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>condition_variable.c</span>
+                        <span>條件變數使用示範</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+#define THRESHOLD 10
+
+int count = 0;
+pthread_mutex_t count_mutex;
+pthread_cond_t count_threshold_cv;
+
+void* increment_count(void* arg) {
+    for (int i = 0; i < 12; i++) {
+        pthread_mutex_lock(&count_mutex);
+        
+        count++;
+        printf("[遞增] count = %d\n", count);
+        
+        // 如果達到閾值，發送信號
+        if (count == THRESHOLD) {
+            printf("[遞增] 達到閾值 %d，發送信號\n", THRESHOLD);
+            pthread_cond_signal(&count_threshold_cv);
+        }
+        
+        pthread_mutex_unlock(&count_mutex);
+        usleep(100000);
+    }
+    
+    return NULL;
+}
+
+void* watch_count(void* arg) {
+    pthread_mutex_lock(&count_mutex);
+    
+    printf("[監視] 等待 count 達到 %d\n", THRESHOLD);
+    
+    // 等待條件成立
+    while (count < THRESHOLD) {
+        pthread_cond_wait(&count_threshold_cv, &count_mutex);
+    }
+    
+    printf("[監視] 條件滿足！count = %d\n", count);
+    
+    pthread_mutex_unlock(&count_mutex);
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t inc_thread, watch_thread;
+    
+    // 初始化
+    pthread_mutex_init(&count_mutex, NULL);
+    pthread_cond_init(&count_threshold_cv, NULL);
+    
+    // 建立執行緒
+    pthread_create(&watch_thread, NULL, watch_count, NULL);
+    sleep(1);  // 確保監視執行緒先執行
+    pthread_create(&inc_thread, NULL, increment_count, NULL);
+    
+    // 等待執行緒完成
+    pthread_join(inc_thread, NULL);
+    pthread_join(watch_thread, NULL);
+    
+    printf("\n程式結束，最終 count = %d\n", count);
+    
+    // 清理
+    pthread_mutex_destroy(&count_mutex);
+    pthread_cond_destroy(&count_threshold_cv);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.5 死結示範與預防</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>deadlock_demo.c</span>
+                        <span>死結示範（請勿在生產環境使用）</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
+
+void* thread1_func(void* arg) {
+    printf("[執行緒 1] 嘗試取得 mutex1\n");
+    pthread_mutex_lock(&mutex1);
+    printf("[執行緒 1] 已取得 mutex1\n");
+    
+    sleep(1);  // 增加死結發生的機會
+    
+    printf("[執行緒 1] 嘗試取得 mutex2\n");
+    pthread_mutex_lock(&mutex2);
+    printf("[執行緒 1] 已取得 mutex2\n");
+    
+    // 臨界區域
+    printf("[執行緒 1] 在臨界區域內\n");
+    
+    pthread_mutex_unlock(&mutex2);
+    pthread_mutex_unlock(&mutex1);
+    
+    return NULL;
+}
+
+void* thread2_func(void* arg) {
+    printf("[執行緒 2] 嘗試取得 mutex2\n");
+    pthread_mutex_lock(&mutex2);
+    printf("[執行緒 2] 已取得 mutex2\n");
+    
+    sleep(1);  // 增加死結發生的機會
+    
+    printf("[執行緒 2] 嘗試取得 mutex1\n");
+    pthread_mutex_lock(&mutex1);
+    printf("[執行緒 2] 已取得 mutex1\n");
+    
+    // 臨界區域
+    printf("[執行緒 2] 在臨界區域內\n");
+    
+    pthread_mutex_unlock(&mutex1);
+    pthread_mutex_unlock(&mutex2);
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+    
+    pthread_mutex_init(&mutex1, NULL);
+    pthread_mutex_init(&mutex2, NULL);
+    
+    printf("=== 死結示範 ===\n");
+    printf("執行緒 1: mutex1 -> mutex2\n");
+    printf("執行緒 2: mutex2 -> mutex1\n");
+    printf("這可能導致死結！\n\n");
+    
+    pthread_create(&t1, NULL, thread1_func, NULL);
+    pthread_create(&t2, NULL, thread2_func, NULL);
+    
+    // 設定超時
+    sleep(5);
+    
+    printf("\n如果程式卡在這裡，表示發生死結\n");
+    printf("請使用 Ctrl+C 終止程式\n");
+    
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    
+    pthread_mutex_destroy(&mutex1);
+    pthread_mutex_destroy(&mutex2);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>deadlock_prevention.c</span>
+                        <span>預防死結：資源排序</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+pthread_mutex_t mutex1;
+pthread_mutex_t mutex2;
+
+// 使用相同的鎖定順序來預防死結
+void* thread_func(void* arg) {
+    int thread_id = *(int*)arg;
+    
+    printf("[執行緒 %d] 嘗試取得 mutex1\n", thread_id);
+    pthread_mutex_lock(&mutex1);
+    printf("[執行緒 %d] 已取得 mutex1\n", thread_id);
+    
+    sleep(1);
+    
+    printf("[執行緒 %d] 嘗試取得 mutex2\n", thread_id);
+    pthread_mutex_lock(&mutex2);
+    printf("[執行緒 %d] 已取得 mutex2\n", thread_id);
+    
+    // 臨界區域
+    printf("[執行緒 %d] 在臨界區域內\n", thread_id);
+    
+    pthread_mutex_unlock(&mutex2);
+    pthread_mutex_unlock(&mutex1);
+    
+    printf("[執行緒 %d] 完成\n", thread_id);
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+    int id1 = 1, id2 = 2;
+    
+    pthread_mutex_init(&mutex1, NULL);
+    pthread_mutex_init(&mutex2, NULL);
+    
+    printf("=== 預防死結：統一鎖定順序 ===\n");
+    printf("兩個執行緒都按照 mutex1 -> mutex2 的順序\n\n");
+    
+    pthread_create(&t1, NULL, thread_func, &id1);
+    pthread_create(&t2, NULL, thread_func, &id2);
+    
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    
+    printf("\n程式正常結束，沒有死結\n");
+    
+    pthread_mutex_destroy(&mutex1);
+    pthread_mutex_destroy(&mutex2);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：銀行帳戶模擬</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>模擬多執行緒銀行帳戶操作。</p>
+                        <ul>
+                            <li>實作存款、提款、查詢餘額功能</li>
+                            <li>多個執行緒同時進行交易</li>
+                            <li>使用 mutex 確保交易的原子性</li>
+                            <li>記錄所有交易並驗證最終餘額正確</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：有界緩衝區</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作完整的生產者-消費者系統。</p>
+                        <ul>
+                            <li>支援多個生產者和多個消費者</li>
+                            <li>使用環形緩衝區</li>
+                            <li>使用 semaphore 和 mutex 進行同步</li>
+                            <li>統計生產和消費的物品數量</li>
+                            <li>實作優雅關閉機制</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：哲學家用餐問題</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>解決哲學家用餐問題並避免死結。</p>
+                        <ul>
+                            <li>實作 5 個哲學家和 5 根筷子</li>
+                            <li>使用資源排序法預防死結</li>
+                            <li>或使用服務生解決方案</li>
+                            <li>記錄每個哲學家的用餐次數</li>
+                            <li>確保不會發生飢餓</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：讀寫鎖實作</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>自行實作讀寫鎖（Read-Write Lock）。</p>
+                        <ul>
+                            <li>使用 mutex 和條件變數實作</li>
+                            <li>支援多個讀者同時讀取</li>
+                            <li>寫者獨占存取</li>
+                            <li>實作公平策略（避免讀者或寫者飢餓）</li>
+                            <li>提供 read_lock、read_unlock、write_lock、write_unlock 介面</li>
+                            <li>測試並比較與 pthread_rwlock 的效能</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：死結偵測器</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作簡單的死結偵測系統。</p>
+                        <ul>
+                            <li>追蹤所有 mutex 的鎖定和解鎖操作</li>
+                            <li>建立資源分配圖（Resource Allocation Graph）</li>
+                            <li>偵測循環等待</li>
+                            <li>報告可能的死結情況</li>
+                            <li>建議解決方案（如重新排序鎖定順序）</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 臨界區域問題的三個必要條件不包括？</strong></p>
+                        <p>A. 互斥</p>
+                        <p>B. 進展</p>
+                        <p>C. 公平性</p>
+                        <p>D. 有限等待</p>
+                        <p><em>答案：C（三個條件是互斥、進展、有限等待）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. Mutex 和 Binary Semaphore 的主要差異是？</strong></p>
+                        <p>A. Mutex 有所有權概念</p>
+                        <p>B. Semaphore 更快</p>
+                        <p>C. Mutex 不能用於同步</p>
+                        <p>D. 沒有差異</p>
+                        <p><em>答案：A</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 死結的四個必要條件不包括？</strong></p>
+                        <p>A. 互斥</p>
+                        <p>B. 持有並等待</p>
+                        <p>C. 優先權反轉</p>
+                        <p>D. 循環等待</p>
+                        <p><em>答案：C（四個條件是互斥、持有並等待、不可搶占、循環等待）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. pthread_cond_wait() 的作用是？</strong></p>
+                        <p>A. 只是等待</p>
+                        <p>B. 釋放 mutex 並等待條件</p>
+                        <p>C. 發送信號</p>
+                        <p>D. 鎖定 mutex</p>
+                        <p><em>答案：B（會自動釋放 mutex 並等待，被喚醒後重新獲得 mutex）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 在生產者-消費者問題中，empty semaphore 的初始值應該是？</strong></p>
+                        <p>A. 0</p>
+                        <p>B. 1</p>
+                        <p>C. 緩衝區大小</p>
+                        <p>D. 無限大</p>
+                        <p><em>答案：C（表示緩衝區初始全為空）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 實作題：寫出使用 mutex 保護共享變數的程式碼</strong></p>
+                        <p><em>參考答案：</em></p>
+                        <pre><code class="language-c">pthread_mutex_t mutex;
+int shared_var = 0;
+
+pthread_mutex_init(&mutex, NULL);
+
+pthread_mutex_lock(&mutex);
+shared_var++;  // 臨界區域
+pthread_mutex_unlock(&mutex);
+
+pthread_mutex_destroy(&mutex);</code></pre>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明如何使用資源排序法預防死結</strong></p>
+                        <p><em>參考答案：資源排序法為所有資源分配一個全域唯一的編號，規定所有行程必須按照編號遞增的順序申請資源。例如，如果有 mutex1（編號1）和 mutex2（編號2），所有執行緒都必須先鎖定 mutex1 再鎖定 mutex2，不能反過來。這樣就破壞了循環等待條件，從而預防死結。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：解釋條件變數為什麼要與 mutex 配合使用</strong></p>
+                        <p><em>參考答案：條件變數與 mutex 配合使用是為了避免競爭條件。在檢查條件和進入等待之間，如果沒有 mutex 保護，可能會發生信號丟失的問題：執行緒 A 檢查條件不滿足，準備等待；此時執行緒 B 改變條件並發送信號；但執行緒 A 還沒開始等待，錯過了信號。使用 mutex 可以確保檢查條件、進入等待、釋放 mutex 是原子操作，pthread_cond_wait() 會在進入等待前自動釋放 mutex，被喚醒後重新獲得 mutex。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week4.html" class="nav-button">上一週：執行緒</a>
+                <a href="week6.html" class="nav-button">下一週：記憶體管理</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 5 © 2026</p>
+        <p>建議學習時間：12-14 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

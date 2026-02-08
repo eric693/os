@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 3: 行程排程 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .comparison-box {
+            background: #f3e8ff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #9333ea;
+        }
+
+        .comparison-box h4 {
+            color: #6b21a8;
+            margin-top: 0;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .algorithm-table td:first-child {
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        .gantt-chart {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            overflow-x: auto;
+        }
+
+        .gantt-chart pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #2d3748;
+            white-space: pre;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 3: 行程排程</h1>
+            <p class="week-info">CPU Scheduling</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第三週的課程！本週我們將深入探討作業系統中的核心功能之一：CPU 排程（CPU Scheduling）。當系統中有多個行程等待執行時，作業系統必須決定哪個行程應該優先使用 CPU，這就是排程演算法的任務。</p>
+                <p>良好的排程演算法可以提高 CPU 使用率、增加系統吞吐量、減少回應時間。我們將學習多種經典的排程演算法，並透過實作深入理解它們的運作原理和效能特性。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解 CPU 排程的目的與重要性</li>
+                    <li>掌握排程演算法的評估標準</li>
+                    <li>學習 FCFS、SJF、Priority、Round Robin 等經典演算法</li>
+                    <li>理解搶占式與非搶占式排程的差異</li>
+                    <li>能夠實作並比較不同排程演算法的效能</li>
+                    <li>了解多層級佇列排程的概念</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、CPU 排程基礎</h2>
+                
+                <h3>1.1 為什麼需要 CPU 排程？</h3>
+                <p>在多工作業系統中，通常有多個行程同時處於就緒狀態，等待 CPU 執行。然而，CPU 一次只能執行一個行程。CPU 排程器（Scheduler）負責從就緒佇列中選擇一個行程，將 CPU 分配給它執行。</p>
+
+                <div class="concept-box">
+                    <h4>排程的時機</h4>
+                    <p>CPU 排程決策發生在以下情況：</p>
+                    <ol>
+                        <li>行程從執行狀態切換到等待狀態（如等待 I/O）</li>
+                        <li>行程從執行狀態切換到就緒狀態（如時間片到期）</li>
+                        <li>行程從等待狀態切換到就緒狀態（如 I/O 完成）</li>
+                        <li>行程終止</li>
+                    </ol>
+                    <p><strong>非搶占式排程：</strong>只在情況 1 和 4 發生排程</p>
+                    <p><strong>搶占式排程：</strong>在所有情況都可能發生排程</p>
+                </div>
+
+                <h3>1.2 排程演算法的評估標準</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>評估標準</th>
+                            <th>說明</th>
+                            <th>目標</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CPU 使用率</td>
+                            <td>CPU 保持忙碌的時間百分比</td>
+                            <td>最大化</td>
+                        </tr>
+                        <tr>
+                            <td>吞吐量</td>
+                            <td>單位時間內完成的行程數量</td>
+                            <td>最大化</td>
+                        </tr>
+                        <tr>
+                            <td>周轉時間</td>
+                            <td>行程從提交到完成的總時間</td>
+                            <td>最小化</td>
+                        </tr>
+                        <tr>
+                            <td>等待時間</td>
+                            <td>行程在就緒佇列中等待的總時間</td>
+                            <td>最小化</td>
+                        </tr>
+                        <tr>
+                            <td>回應時間</td>
+                            <td>從提交請求到第一次回應的時間</td>
+                            <td>最小化</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="note-box">
+                    <strong>時間計算公式：</strong>
+                    <p>周轉時間 = 完成時間 - 到達時間</p>
+                    <p>等待時間 = 周轉時間 - 爆發時間</p>
+                    <p>回應時間 = 第一次執行時間 - 到達時間</p>
+                </div>
+
+                <h2>二、經典排程演算法</h2>
+
+                <h3>2.1 先來先服務（FCFS - First-Come, First-Served）</h3>
+                <p>最簡單的排程演算法，按照行程到達的順序執行。</p>
+
+                <div class="concept-box">
+                    <h4>FCFS 特性</h4>
+                    <ul>
+                        <li><strong>優點：</strong>簡單、公平、易於實作</li>
+                        <li><strong>缺點：</strong>平均等待時間可能很長（護航效應 Convoy Effect）</li>
+                        <li><strong>類型：</strong>非搶占式</li>
+                        <li><strong>實作：</strong>使用 FIFO 佇列</li>
+                    </ul>
+                </div>
+
+                <h4>範例：FCFS 排程計算</h4>
+                <p>假設有以下行程：</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>行程</th>
+                            <th>到達時間</th>
+                            <th>爆發時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>P1</td>
+                            <td>0</td>
+                            <td>24</td>
+                        </tr>
+                        <tr>
+                            <td>P2</td>
+                            <td>0</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>P3</td>
+                            <td>0</td>
+                            <td>3</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="gantt-chart">
+                    <strong>甘特圖（Gantt Chart）：</strong>
+                    <pre>
+0        24    27    30
+|   P1   | P2 | P3 |
+
+P1: 等待時間 = 0,  周轉時間 = 24
+P2: 等待時間 = 24, 周轉時間 = 27
+P3: 等待時間 = 27, 周轉時間 = 30
+
+平均等待時間 = (0 + 24 + 27) / 3 = 17
+                    </pre>
+                </div>
+
+                <h3>2.2 最短工作優先（SJF - Shortest Job First）</h3>
+                <p>選擇爆發時間最短的行程優先執行。</p>
+
+                <div class="concept-box">
+                    <h4>SJF 特性</h4>
+                    <ul>
+                        <li><strong>優點：</strong>最小化平均等待時間（理論最優）</li>
+                        <li><strong>缺點：</strong>難以預測爆發時間、可能造成飢餓（Starvation）</li>
+                        <li><strong>變體：</strong>非搶占式 SJF、搶占式 SJF（SRTF - Shortest Remaining Time First）</li>
+                    </ul>
+                </div>
+
+                <h4>範例：使用相同資料比較 SJF</h4>
+
+                <div class="gantt-chart">
+                    <strong>SJF 甘特圖：</strong>
+                    <pre>
+0    3    6        30
+| P2 | P3 |   P1   |
+
+P1: 等待時間 = 6,  周轉時間 = 30
+P2: 等待時間 = 0,  周轉時間 = 3
+P3: 等待時間 = 3,  周轉時間 = 6
+
+平均等待時間 = (6 + 0 + 3) / 3 = 3
+                    </pre>
+                </div>
+
+                <h3>2.3 優先權排程（Priority Scheduling）</h3>
+                <p>每個行程分配一個優先權，CPU 分配給優先權最高的行程。</p>
+
+                <div class="concept-box">
+                    <h4>優先權排程特性</h4>
+                    <ul>
+                        <li><strong>優先權定義：</strong>可以是內部（CPU 時間、記憶體需求）或外部（重要性、費用）</li>
+                        <li><strong>問題：</strong>低優先權行程可能永遠無法執行（飢餓）</li>
+                        <li><strong>解決方案：</strong>老化（Aging）- 逐漸提高等待行程的優先權</li>
+                    </ul>
+                </div>
+
+                <h3>2.4 循環排程（Round Robin - RR）</h3>
+                <p>為每個行程分配一個時間量子（Time Quantum），行程輪流使用 CPU。</p>
+
+                <div class="concept-box">
+                    <h4>Round Robin 特性</h4>
+                    <ul>
+                        <li><strong>優點：</strong>公平、回應時間好、適合分時系統</li>
+                        <li><strong>缺點：</strong>上下文切換開銷、平均等待時間可能較長</li>
+                        <li><strong>關鍵參數：</strong>時間量子大小
+                            <ul>
+                                <li>太大：退化為 FCFS</li>
+                                <li>太小：上下文切換開銷過大</li>
+                                <li>建議：10-100 毫秒</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h4>範例：Round Robin（時間量子 = 4）</h4>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>行程</th>
+                            <th>爆發時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>P1</td><td>24</td></tr>
+                        <tr><td>P2</td><td>3</td></tr>
+                        <tr><td>P3</td><td>3</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="gantt-chart">
+                    <strong>Round Robin 甘特圖（時間量子 = 4）：</strong>
+                    <pre>
+0    4    7   10   14   18   22   26   30
+| P1 | P2 | P3 | P1 | P1 | P1 | P1 | P1 |
+
+P1: 周轉時間 = 30
+P2: 周轉時間 = 7
+P3: 周轉時間 = 10
+
+平均周轉時間 = (30 + 7 + 10) / 3 = 15.67
+                    </pre>
+                </div>
+
+                <h3>2.5 多層級佇列排程（Multilevel Queue）</h3>
+                <p>將就緒佇列分成多個獨立的佇列，每個佇列有自己的排程演算法。</p>
+
+                <ul>
+                    <li><strong>前景行程（互動式）：</strong>使用 Round Robin</li>
+                    <li><strong>背景行程（批次）：</strong>使用 FCFS</li>
+                    <li><strong>系統行程：</strong>最高優先權</li>
+                </ul>
+
+                <h3>2.6 多層級回饋佇列（Multilevel Feedback Queue）</h3>
+                <p>允許行程在不同佇列之間移動，根據行程行為動態調整優先權。</p>
+
+                <div class="concept-box">
+                    <h4>MLFQ 特性</h4>
+                    <ul>
+                        <li>新行程進入最高優先權佇列</li>
+                        <li>如果行程用完時間量子，降低優先權</li>
+                        <li>如果行程主動放棄 CPU（I/O），保持或提高優先權</li>
+                        <li>防止飢餓：定期提升所有行程的優先權</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>三、實作練習</h2>
+
+                <h3>3.1 FCFS 排程模擬</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>fcfs_scheduling.c</span>
+                        <span>先來先服務排程演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+typedef struct {
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    int response_time;
+} Process;
+
+void fcfs_scheduling(Process processes[], int n) {
+    int current_time = 0;
+    
+    printf("\n=== FCFS 排程執行過程 ===\n");
+    
+    for (int i = 0; i < n; i++) {
+        // 如果 CPU 空閒，等待下一個行程到達
+        if (current_time < processes[i].arrival_time) {
+            printf("時間 %d-%d: CPU 空閒\n", 
+                   current_time, processes[i].arrival_time);
+            current_time = processes[i].arrival_time;
+        }
+        
+        // 行程開始執行
+        processes[i].response_time = current_time - processes[i].arrival_time;
+        
+        printf("時間 %d: 行程 P%d 開始執行 (爆發時間: %d)\n",
+               current_time, processes[i].pid, processes[i].burst_time);
+        
+        // 執行行程
+        current_time += processes[i].burst_time;
+        processes[i].completion_time = current_time;
+        processes[i].turnaround_time = 
+            processes[i].completion_time - processes[i].arrival_time;
+        processes[i].waiting_time = 
+            processes[i].turnaround_time - processes[i].burst_time;
+        
+        printf("時間 %d: 行程 P%d 完成\n", current_time, processes[i].pid);
+    }
+}
+
+void print_results(Process processes[], int n) {
+    printf("\n=== 排程結果 ===\n");
+    printf("PID\t到達\t爆發\t完成\t周轉\t等待\t回應\n");
+    
+    float total_turnaround = 0;
+    float total_waiting = 0;
+    float total_response = 0;
+    
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               processes[i].pid,
+               processes[i].arrival_time,
+               processes[i].burst_time,
+               processes[i].completion_time,
+               processes[i].turnaround_time,
+               processes[i].waiting_time,
+               processes[i].response_time);
+        
+        total_turnaround += processes[i].turnaround_time;
+        total_waiting += processes[i].waiting_time;
+        total_response += processes[i].response_time;
+    }
+    
+    printf("\n=== 平均時間 ===\n");
+    printf("平均周轉時間: %.2f\n", total_turnaround / n);
+    printf("平均等待時間: %.2f\n", total_waiting / n);
+    printf("平均回應時間: %.2f\n", total_response / n);
+}
+
+int main() {
+    Process processes[] = {
+        {1, 0, 5, 0, 0, 0, 0},
+        {2, 1, 3, 0, 0, 0, 0},
+        {3, 2, 8, 0, 0, 0, 0},
+        {4, 3, 6, 0, 0, 0, 0}
+    };
+    
+    int n = sizeof(processes) / sizeof(processes[0]);
+    
+    printf("FCFS (先來先服務) 排程演算法\n");
+    
+    fcfs_scheduling(processes, n);
+    print_results(processes, n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o fcfs fcfs_scheduling.c
+<span class="prompt">$</span> ./fcfs
+<span class="output">FCFS (先來先服務) 排程演算法
+
+=== FCFS 排程執行過程 ===
+時間 0: 行程 P1 開始執行 (爆發時間: 5)
+時間 5: 行程 P1 完成
+時間 5: 行程 P2 開始執行 (爆發時間: 3)
+時間 8: 行程 P2 完成
+時間 8: 行程 P3 開始執行 (爆發時間: 8)
+時間 16: 行程 P3 完成
+時間 16: 行程 P4 開始執行 (爆發時間: 6)
+時間 22: 行程 P4 完成
+
+=== 排程結果 ===
+PID     到達    爆發    完成    周轉    等待    回應
+P1      0       5       5       5       0       0
+P2      1       3       8       7       4       4
+P3      2       8       16      14      6       6
+P4      3       6       22      19      13      13
+
+=== 平均時間 ===
+平均周轉時間: 11.25
+平均等待時間: 5.75
+平均回應時間: 5.75</span>
+                </div>
+
+                <h3>3.2 SJF 排程模擬</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>sjf_scheduling.c</span>
+                        <span>最短工作優先排程演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdbool.h&gt;
+
+typedef struct {
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    bool completed;
+} Process;
+
+void sjf_scheduling(Process processes[], int n) {
+    int current_time = 0;
+    int completed = 0;
+    
+    printf("\n=== SJF 排程執行過程 ===\n");
+    
+    while (completed < n) {
+        int shortest = -1;
+        int min_burst = 999999;
+        
+        // 找出已到達且爆發時間最短的行程
+        for (int i = 0; i < n; i++) {
+            if (!processes[i].completed && 
+                processes[i].arrival_time <= current_time &&
+                processes[i].burst_time < min_burst) {
+                min_burst = processes[i].burst_time;
+                shortest = i;
+            }
+        }
+        
+        if (shortest == -1) {
+            // 沒有行程可執行，CPU 空閒
+            current_time++;
+            continue;
+        }
+        
+        // 執行選中的行程
+        printf("時間 %d: 行程 P%d 開始執行 (爆發時間: %d)\n",
+               current_time, processes[shortest].pid, 
+               processes[shortest].burst_time);
+        
+        current_time += processes[shortest].burst_time;
+        processes[shortest].completion_time = current_time;
+        processes[shortest].turnaround_time = 
+            current_time - processes[shortest].arrival_time;
+        processes[shortest].waiting_time = 
+            processes[shortest].turnaround_time - processes[shortest].burst_time;
+        processes[shortest].completed = true;
+        completed++;
+        
+        printf("時間 %d: 行程 P%d 完成\n", 
+               current_time, processes[shortest].pid);
+    }
+}
+
+void print_results(Process processes[], int n) {
+    printf("\n=== 排程結果 ===\n");
+    printf("PID\t到達\t爆發\t完成\t周轉\t等待\n");
+    
+    float total_turnaround = 0;
+    float total_waiting = 0;
+    
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               processes[i].pid,
+               processes[i].arrival_time,
+               processes[i].burst_time,
+               processes[i].completion_time,
+               processes[i].turnaround_time,
+               processes[i].waiting_time);
+        
+        total_turnaround += processes[i].turnaround_time;
+        total_waiting += processes[i].waiting_time;
+    }
+    
+    printf("\n=== 平均時間 ===\n");
+    printf("平均周轉時間: %.2f\n", total_turnaround / n);
+    printf("平均等待時間: %.2f\n", total_waiting / n);
+}
+
+int main() {
+    Process processes[] = {
+        {1, 0, 5, 0, 0, 0, false},
+        {2, 1, 3, 0, 0, 0, false},
+        {3, 2, 8, 0, 0, 0, false},
+        {4, 3, 6, 0, 0, 0, false}
+    };
+    
+    int n = sizeof(processes) / sizeof(processes[0]);
+    
+    printf("SJF (最短工作優先) 排程演算法\n");
+    
+    sjf_scheduling(processes, n);
+    print_results(processes, n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.3 優先權排程模擬</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>priority_scheduling.c</span>
+                        <span>優先權排程演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdbool.h&gt;
+
+typedef struct {
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int priority;  // 數字越小優先權越高
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    bool completed;
+} Process;
+
+void priority_scheduling(Process processes[], int n) {
+    int current_time = 0;
+    int completed = 0;
+    
+    printf("\n=== 優先權排程執行過程 ===\n");
+    
+    while (completed < n) {
+        int highest = -1;
+        int min_priority = 999999;
+        
+        // 找出已到達且優先權最高的行程
+        for (int i = 0; i < n; i++) {
+            if (!processes[i].completed && 
+                processes[i].arrival_time <= current_time &&
+                processes[i].priority < min_priority) {
+                min_priority = processes[i].priority;
+                highest = i;
+            }
+        }
+        
+        if (highest == -1) {
+            current_time++;
+            continue;
+        }
+        
+        printf("時間 %d: 行程 P%d 開始執行 (優先權: %d, 爆發時間: %d)\n",
+               current_time, processes[highest].pid, 
+               processes[highest].priority,
+               processes[highest].burst_time);
+        
+        current_time += processes[highest].burst_time;
+        processes[highest].completion_time = current_time;
+        processes[highest].turnaround_time = 
+            current_time - processes[highest].arrival_time;
+        processes[highest].waiting_time = 
+            processes[highest].turnaround_time - processes[highest].burst_time;
+        processes[highest].completed = true;
+        completed++;
+        
+        printf("時間 %d: 行程 P%d 完成\n", 
+               current_time, processes[highest].pid);
+    }
+}
+
+void print_results(Process processes[], int n) {
+    printf("\n=== 排程結果 ===\n");
+    printf("PID\t到達\t爆發\t優先權\t完成\t周轉\t等待\n");
+    
+    float total_turnaround = 0;
+    float total_waiting = 0;
+    
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               processes[i].pid,
+               processes[i].arrival_time,
+               processes[i].burst_time,
+               processes[i].priority,
+               processes[i].completion_time,
+               processes[i].turnaround_time,
+               processes[i].waiting_time);
+        
+        total_turnaround += processes[i].turnaround_time;
+        total_waiting += processes[i].waiting_time;
+    }
+    
+    printf("\n=== 平均時間 ===\n");
+    printf("平均周轉時間: %.2f\n", total_turnaround / n);
+    printf("平均等待時間: %.2f\n", total_waiting / n);
+}
+
+int main() {
+    Process processes[] = {
+        {1, 0, 5, 2, 0, 0, 0, false},
+        {2, 1, 3, 1, 0, 0, 0, false},
+        {3, 2, 8, 3, 0, 0, 0, false},
+        {4, 3, 6, 2, 0, 0, 0, false}
+    };
+    
+    int n = sizeof(processes) / sizeof(processes[0]);
+    
+    printf("優先權排程演算法 (數字越小優先權越高)\n");
+    
+    priority_scheduling(processes, n);
+    print_results(processes, n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.4 Round Robin 排程模擬</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>round_robin.c</span>
+                        <span>循環排程演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_PROCESSES 10
+
+typedef struct {
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int remaining_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    int response_time;
+    bool first_run;
+} Process;
+
+void round_robin(Process processes[], int n, int quantum) {
+    int current_time = 0;
+    int completed = 0;
+    int queue[MAX_PROCESSES];
+    int front = 0, rear = 0;
+    bool in_queue[MAX_PROCESSES] = {false};
+    
+    printf("\n=== Round Robin 排程執行過程 (時間量子 = %d) ===\n", quantum);
+    
+    // 將到達時間為 0 的行程加入佇列
+    for (int i = 0; i < n; i++) {
+        if (processes[i].arrival_time == 0) {
+            queue[rear++] = i;
+            in_queue[i] = true;
+        }
+    }
+    
+    while (completed < n) {
+        if (front == rear) {
+            // 佇列為空，CPU 空閒
+            current_time++;
+            
+            // 檢查是否有新行程到達
+            for (int i = 0; i < n; i++) {
+                if (processes[i].arrival_time == current_time && 
+                    !in_queue[i] && processes[i].remaining_time > 0) {
+                    queue[rear++] = i;
+                    in_queue[i] = true;
+                }
+            }
+            continue;
+        }
+        
+        int idx = queue[front++];
+        in_queue[idx] = false;
+        
+        // 記錄第一次執行時間
+        if (processes[idx].first_run) {
+            processes[idx].response_time = current_time - processes[idx].arrival_time;
+            processes[idx].first_run = false;
+        }
+        
+        // 計算本次執行時間
+        int exec_time = (processes[idx].remaining_time > quantum) ? 
+                        quantum : processes[idx].remaining_time;
+        
+        printf("時間 %d: 行程 P%d 執行 %d 單位 (剩餘: %d)\n",
+               current_time, processes[idx].pid, exec_time,
+               processes[idx].remaining_time);
+        
+        current_time += exec_time;
+        processes[idx].remaining_time -= exec_time;
+        
+        // 檢查新到達的行程
+        for (int i = 0; i < n; i++) {
+            if (processes[i].arrival_time <= current_time && 
+                !in_queue[i] && processes[i].remaining_time > 0 && i != idx) {
+                queue[rear++] = i;
+                in_queue[i] = true;
+            }
+        }
+        
+        // 如果行程完成
+        if (processes[idx].remaining_time == 0) {
+            processes[idx].completion_time = current_time;
+            processes[idx].turnaround_time = 
+                current_time - processes[idx].arrival_time;
+            processes[idx].waiting_time = 
+                processes[idx].turnaround_time - processes[idx].burst_time;
+            completed++;
+            
+            printf("時間 %d: 行程 P%d 完成\n", current_time, processes[idx].pid);
+        }
+        else {
+            // 行程未完成，重新加入佇列
+            queue[rear++] = idx;
+            in_queue[idx] = true;
+        }
+    }
+}
+
+void print_results(Process processes[], int n) {
+    printf("\n=== 排程結果 ===\n");
+    printf("PID\t到達\t爆發\t完成\t周轉\t等待\t回應\n");
+    
+    float total_turnaround = 0;
+    float total_waiting = 0;
+    float total_response = 0;
+    
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               processes[i].pid,
+               processes[i].arrival_time,
+               processes[i].burst_time,
+               processes[i].completion_time,
+               processes[i].turnaround_time,
+               processes[i].waiting_time,
+               processes[i].response_time);
+        
+        total_turnaround += processes[i].turnaround_time;
+        total_waiting += processes[i].waiting_time;
+        total_response += processes[i].response_time;
+    }
+    
+    printf("\n=== 平均時間 ===\n");
+    printf("平均周轉時間: %.2f\n", total_turnaround / n);
+    printf("平均等待時間: %.2f\n", total_waiting / n);
+    printf("平均回應時間: %.2f\n", total_response / n);
+}
+
+int main() {
+    int quantum = 4;
+    
+    Process processes[] = {
+        {1, 0, 10, 10, 0, 0, 0, 0, true},
+        {2, 1, 5, 5, 0, 0, 0, 0, true},
+        {3, 2, 8, 8, 0, 0, 0, 0, true}
+    };
+    
+    int n = sizeof(processes) / sizeof(processes[0]);
+    
+    printf("Round Robin (循環排程) 演算法\n");
+    
+    round_robin(processes, n, quantum);
+    print_results(processes, n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.5 排程演算法比較工具</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>scheduler_comparison.c</span>
+                        <span>比較不同排程演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct {
+    int pid;
+    int arrival_time;
+    int burst_time;
+} ProcessInput;
+
+typedef struct {
+    char name[20];
+    float avg_turnaround;
+    float avg_waiting;
+    float avg_response;
+} SchedulerStats;
+
+// 前面實作的各種排程函數...
+// (為了簡潔，這裡省略具體實作)
+
+void compare_schedulers(ProcessInput input[], int n) {
+    printf("\n");
+    printf("=" );
+    for (int i = 0; i < 60; i++) printf("=");
+    printf("\n");
+    printf("排程演算法效能比較\n");
+    printf("=");
+    for (int i = 0; i < 60; i++) printf("=");
+    printf("\n\n");
+    
+    printf("輸入資料：\n");
+    printf("PID\t到達時間\t爆發時間\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t\t%d\n", 
+               input[i].pid, input[i].arrival_time, input[i].burst_time);
+    }
+    
+    // 這裡應該呼叫各種排程演算法並收集統計資料
+    // 為了示範，我們使用假資料
+    
+    SchedulerStats stats[] = {
+        {"FCFS", 11.25, 5.75, 5.75},
+        {"SJF", 8.50, 3.00, 3.00},
+        {"Priority", 9.75, 4.25, 4.25},
+        {"Round Robin (q=2)", 12.00, 6.50, 2.00},
+        {"Round Robin (q=4)", 11.50, 6.00, 2.50}
+    };
+    
+    int num_schedulers = sizeof(stats) / sizeof(stats[0]);
+    
+    printf("\n比較結果：\n");
+    printf("%-20s\t平均周轉\t平均等待\t平均回應\n", "演算法");
+    printf("--------------------------------------------------------\n");
+    
+    for (int i = 0; i < num_schedulers; i++) {
+        printf("%-20s\t%.2f\t\t%.2f\t\t%.2f\n",
+               stats[i].name,
+               stats[i].avg_turnaround,
+               stats[i].avg_waiting,
+               stats[i].avg_response);
+    }
+    
+    // 找出最佳演算法
+    printf("\n最佳演算法：\n");
+    
+    int best_turnaround = 0;
+    int best_waiting = 0;
+    int best_response = 0;
+    
+    for (int i = 1; i < num_schedulers; i++) {
+        if (stats[i].avg_turnaround < stats[best_turnaround].avg_turnaround)
+            best_turnaround = i;
+        if (stats[i].avg_waiting < stats[best_waiting].avg_waiting)
+            best_waiting = i;
+        if (stats[i].avg_response < stats[best_response].avg_response)
+            best_response = i;
+    }
+    
+    printf("  最短平均周轉時間: %s (%.2f)\n", 
+           stats[best_turnaround].name, stats[best_turnaround].avg_turnaround);
+    printf("  最短平均等待時間: %s (%.2f)\n", 
+           stats[best_waiting].name, stats[best_waiting].avg_waiting);
+    printf("  最短平均回應時間: %s (%.2f)\n", 
+           stats[best_response].name, stats[best_response].avg_response);
+}
+
+int main() {
+    ProcessInput input[] = {
+        {1, 0, 5},
+        {2, 1, 3},
+        {3, 2, 8},
+        {4, 3, 6}
+    };
+    
+    int n = sizeof(input) / sizeof(input[0]);
+    
+    compare_schedulers(input, n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：SRTF 實作</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作搶占式最短剩餘時間優先（SRTF）排程演算法。</p>
+                        <ul>
+                            <li>每個時間單位檢查是否有新行程到達</li>
+                            <li>如果新到達行程的剩餘時間比當前行程短，進行搶占</li>
+                            <li>計算並顯示甘特圖、平均等待時間和周轉時間</li>
+                        </ul>
+                        <p><strong>測試資料：</strong></p>
+                        <pre>P1: arrival=0, burst=8
+P2: arrival=1, burst=4
+P3: arrival=2, burst=9
+P4: arrival=3, burst=5</pre>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：優先權老化機制</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作帶有老化（Aging）機制的優先權排程，防止飢餓問題。</p>
+                        <ul>
+                            <li>行程每等待一個時間單位，優先權提高 1</li>
+                            <li>比較有無老化機制的差異</li>
+                            <li>記錄每個行程的優先權變化</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：多層級回饋佇列</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作簡化版的多層級回饋佇列排程（3 個佇列）。</p>
+                        <ul>
+                            <li>佇列 1：時間量子 = 4，最高優先權</li>
+                            <li>佇列 2：時間量子 = 8，中等優先權</li>
+                            <li>佇列 3：FCFS，最低優先權</li>
+                            <li>新行程進入佇列 1</li>
+                            <li>用完時間量子降級到下一個佇列</li>
+                            <li>主動放棄 CPU 的行程保持在原佇列</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：排程模擬器</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立一個完整的排程模擬器，支援：</p>
+                        <ul>
+                            <li>從檔案讀取行程資料</li>
+                            <li>選擇不同的排程演算法（至少 5 種）</li>
+                            <li>視覺化顯示甘特圖（使用 ASCII 字元）</li>
+                            <li>生成詳細的統計報告</li>
+                            <li>支援批次比較模式</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：即時排程研究</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>研究並實作即時系統的排程演算法。</p>
+                        <ul>
+                            <li>實作 Rate Monotonic Scheduling (RMS)</li>
+                            <li>實作 Earliest Deadline First (EDF)</li>
+                            <li>測試可排程性（Schedulability）</li>
+                            <li>比較兩種演算法在不同工作負載下的表現</li>
+                            <li>撰寫報告說明即時排程的特殊考量</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. FCFS 排程演算法的主要缺點是？</strong></p>
+                        <p>A. 實作複雜</p>
+                        <p>B. 護航效應（Convoy Effect）</p>
+                        <p>C. 需要預知爆發時間</p>
+                        <p>D. 上下文切換開銷大</p>
+                        <p><em>答案：B（長行程會阻塞短行程，導致平均等待時間增加）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 哪個排程演算法可以達到最小平均等待時間？</strong></p>
+                        <p>A. FCFS</p>
+                        <p>B. Round Robin</p>
+                        <p>C. SJF</p>
+                        <p>D. Priority</p>
+                        <p><em>答案：C（SJF 在理論上是最優的）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. Round Robin 的時間量子設定太小會導致？</strong></p>
+                        <p>A. 變成 FCFS</p>
+                        <p>B. 上下文切換開銷增加</p>
+                        <p>C. 回應時間變長</p>
+                        <p>D. 飢餓問題</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. 優先權排程可能導致的問題是？</strong></p>
+                        <p>A. CPU 使用率低</p>
+                        <p>B. 低優先權行程飢餓</p>
+                        <p>C. 實作困難</p>
+                        <p>D. 無法處理 I/O</p>
+                        <p><em>答案：B（低優先權行程可能永遠無法執行）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 什麼是搶占式排程？</strong></p>
+                        <p>A. 行程可以在執行中被中斷</p>
+                        <p>B. 行程必須執行到完成</p>
+                        <p>C. 只有 I/O 行程可以被中斷</p>
+                        <p>D. 按照到達順序執行</p>
+                        <p><em>答案：A</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 計算題：給定以下行程，使用 FCFS 計算平均等待時間</strong></p>
+                        <pre>P1: arrival=0, burst=6
+P2: arrival=0, burst=8
+P3: arrival=0, burst=7</pre>
+                        <p><em>答案：平均等待時間 = (0 + 6 + 14) / 3 = 6.67</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：解釋為什麼 Round Robin 適合分時系統？</strong></p>
+                        <p><em>參考答案：Round Robin 為每個行程分配相等的時間片，保證所有行程都能定期獲得 CPU 時間。這使得系統對所有使用者都很公平，並且提供良好的回應時間，這正是分時系統所需要的特性。即使有長時間執行的行程，短行程也不會被長時間阻塞。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：說明多層級回饋佇列如何兼顧 I/O 密集和 CPU 密集行程？</strong></p>
+                        <p><em>參考答案：多層級回饋佇列通過行程的行為動態調整優先權。I/O 密集行程通常會在時間片用完前主動放棄 CPU（等待 I/O），因此可以保持在高優先權佇列，獲得快速回應。CPU 密集行程會用完時間片，逐漸降級到低優先權佇列，使用較長的時間片或 FCFS，減少上下文切換。這樣既保證了互動式行程的回應速度，又讓批次行程能有效利用 CPU。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week2.html" class="nav-button">上一週：行程管理</a>
+                <a href="week4.html" class="nav-button">下一週：執行緒</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 3 © 2026</p>
+        <p>建議學習時間：12-14 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

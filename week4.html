@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 4: 執行緒與並行程式設計 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 4: 執行緒與並行程式設計</h1>
+            <p class="week-info">Threads and Concurrent Programming</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第四週的課程！本週我們將探討現代作業系統中至關重要的概念：執行緒（Thread）。執行緒是比行程更輕量級的執行單位，能夠在同一個行程內實現並行執行，大幅提升程式效能。</p>
+                <p>我們將學習執行緒的概念、使用 POSIX Threads (pthread) 程式庫進行多執行緒程式設計，並深入了解執行緒間的資料共享與競爭條件問題。這些知識是開發高效能、響應式應用程式的基礎。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解執行緒的概念與執行緒 vs 行程的差異</li>
+                    <li>掌握 POSIX Threads (pthread) 的使用</li>
+                    <li>學習執行緒的建立、執行和終止</li>
+                    <li>了解執行緒間的資料共享機制</li>
+                    <li>認識競爭條件（Race Condition）問題</li>
+                    <li>理解多執行緒程式設計的優勢與挑戰</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、執行緒基礎</h2>
+                
+                <h3>1.1 什麼是執行緒？</h3>
+                <p>執行緒（Thread）是行程內的執行單元。一個行程可以包含多個執行緒，這些執行緒共享行程的資源（如記憶體、檔案描述符），但各自有獨立的執行序列。</p>
+
+                <div class="concept-box">
+                    <h4>執行緒的組成</h4>
+                    <p>每個執行緒包含：</p>
+                    <ul>
+                        <li><strong>執行緒 ID（Thread ID）：</strong>唯一識別執行緒</li>
+                        <li><strong>程式計數器（Program Counter）：</strong>記錄下一條要執行的指令</li>
+                        <li><strong>暫存器組（Register Set）：</strong>保存執行緒的執行狀態</li>
+                        <li><strong>堆疊（Stack）：</strong>儲存區域變數和函數呼叫資訊</li>
+                    </ul>
+                    <p>執行緒共享：</p>
+                    <ul>
+                        <li>程式碼區段（Code Section）</li>
+                        <li>資料區段（Data Section）</li>
+                        <li>開啟的檔案和信號</li>
+                        <li>堆積（Heap）</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 執行緒 vs 行程</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>行程（Process）</th>
+                            <th>執行緒（Thread）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>定義</td>
+                            <td>執行中的程式實例</td>
+                            <td>行程內的執行單元</td>
+                        </tr>
+                        <tr>
+                            <td>記憶體空間</td>
+                            <td>獨立的位址空間</td>
+                            <td>共享行程的位址空間</td>
+                        </tr>
+                        <tr>
+                            <td>建立成本</td>
+                            <td>高（需要複製資源）</td>
+                            <td>低（共享大部分資源）</td>
+                        </tr>
+                        <tr>
+                            <td>切換成本</td>
+                            <td>高（需要切換上下文）</td>
+                            <td>低（共享位址空間）</td>
+                        </tr>
+                        <tr>
+                            <td>通訊方式</td>
+                            <td>IPC（管道、訊息佇列等）</td>
+                            <td>直接讀寫共享變數</td>
+                        </tr>
+                        <tr>
+                            <td>隔離性</td>
+                            <td>高（互不影響）</td>
+                            <td>低（一個執行緒崩潰可能影響整個行程）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>1.3 為什麼使用執行緒？</h3>
+
+                <div class="concept-box">
+                    <h4>執行緒的優勢</h4>
+                    <ol>
+                        <li><strong>回應性（Responsiveness）：</strong>多執行緒允許程式在等待 I/O 時繼續執行其他任務</li>
+                        <li><strong>資源共享（Resource Sharing）：</strong>執行緒自動共享記憶體和資源，無需額外機制</li>
+                        <li><strong>經濟性（Economy）：</strong>建立和切換執行緒比行程快得多</li>
+                        <li><strong>可擴展性（Scalability）：</strong>多執行緒可以充分利用多核心 CPU</li>
+                    </ol>
+                </div>
+
+                <h3>1.4 執行緒模型</h3>
+
+                <h4>使用者層級執行緒（User-Level Threads）</h4>
+                <ul>
+                    <li>在使用者空間實作，核心不知道執行緒的存在</li>
+                    <li>優點：快速、可移植</li>
+                    <li>缺點：無法利用多核心、阻塞系統呼叫會阻塞整個行程</li>
+                </ul>
+
+                <h4>核心層級執行緒（Kernel-Level Threads）</h4>
+                <ul>
+                    <li>由作業系統核心管理</li>
+                    <li>優點：可以利用多核心、阻塞不影響其他執行緒</li>
+                    <li>缺點：建立和切換開銷較大</li>
+                </ul>
+
+                <h4>混合模型</h4>
+                <ul>
+                    <li>結合使用者層級和核心層級執行緒</li>
+                    <li>多個使用者執行緒映射到少數核心執行緒</li>
+                </ul>
+
+                <h2>二、POSIX Threads (pthread)</h2>
+
+                <h3>2.1 pthread 基礎</h3>
+                <p>POSIX Threads（通常稱為 pthread）是 POSIX 定義的執行緒標準，在 Unix/Linux 系統中廣泛使用。</p>
+
+                <h4>主要函數</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>函數</th>
+                            <th>功能</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>pthread_create()</td>
+                            <td>建立新執行緒</td>
+                        </tr>
+                        <tr>
+                            <td>pthread_exit()</td>
+                            <td>終止執行緒</td>
+                        </tr>
+                        <tr>
+                            <td>pthread_join()</td>
+                            <td>等待執行緒結束</td>
+                        </tr>
+                        <tr>
+                            <td>pthread_detach()</td>
+                            <td>分離執行緒</td>
+                        </tr>
+                        <tr>
+                            <td>pthread_self()</td>
+                            <td>獲取當前執行緒 ID</td>
+                        </tr>
+                        <tr>
+                            <td>pthread_cancel()</td>
+                            <td>取消執行緒</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.2 執行緒屬性</h3>
+                <p>pthread 允許設定執行緒的各種屬性：</p>
+                <ul>
+                    <li><strong>分離狀態：</strong>joinable 或 detached</li>
+                    <li><strong>排程策略：</strong>SCHED_FIFO、SCHED_RR、SCHED_OTHER</li>
+                    <li><strong>排程優先權：</strong>執行緒的優先等級</li>
+                    <li><strong>堆疊大小：</strong>執行緒堆疊的大小</li>
+                </ul>
+
+                <h3>2.3 執行緒同步</h3>
+                <p>由於執行緒共享記憶體，需要同步機制來避免競爭條件：</p>
+                <ul>
+                    <li><strong>Mutex（互斥鎖）：</strong>保護臨界區域</li>
+                    <li><strong>Condition Variable（條件變數）：</strong>執行緒間的通知機制</li>
+                    <li><strong>Semaphore（號誌）：</strong>控制資源存取</li>
+                    <li><strong>Barrier（屏障）：</strong>同步多個執行緒</li>
+                </ul>
+
+                <div class="note-box">
+                    <strong>注意：</strong>
+                    <p>執行緒同步的詳細內容將在下週（Week 5）深入探討。本週我們先了解基本概念。</p>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>三、實作練習</h2>
+
+                <h3>3.1 建立基本執行緒</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>thread_basic.c</span>
+                        <span>基本執行緒建立與使用</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+// 執行緒函數
+void* thread_function(void* arg) {
+    int thread_num = *(int*)arg;
+    
+    printf("[執行緒 %d] 開始執行，TID: %lu\n", 
+           thread_num, pthread_self());
+    
+    // 模擬工作
+    for (int i = 1; i <= 3; i++) {
+        printf("[執行緒 %d] 工作進度: %d/3\n", thread_num, i);
+        sleep(1);
+    }
+    
+    printf("[執行緒 %d] 完成工作\n", thread_num);
+    
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[3];
+    int thread_args[3];
+    
+    printf("主執行緒開始，TID: %lu\n", pthread_self());
+    
+    // 建立三個執行緒
+    for (int i = 0; i < 3; i++) {
+        thread_args[i] = i + 1;
+        
+        if (pthread_create(&threads[i], NULL, thread_function, 
+                          &thread_args[i]) != 0) {
+            perror("建立執行緒失敗");
+            return 1;
+        }
+        
+        printf("已建立執行緒 %d\n", i + 1);
+    }
+    
+    // 等待所有執行緒完成
+    for (int i = 0; i < 3; i++) {
+        pthread_join(threads[i], NULL);
+        printf("執行緒 %d 已結束\n", i + 1);
+    }
+    
+    printf("所有執行緒已完成，主執行緒結束\n");
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>編譯與執行</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o thread_basic thread_basic.c -pthread
+<span class="prompt">$</span> ./thread_basic
+<span class="output">主執行緒開始，TID: 140234567890
+已建立執行緒 1
+已建立執行緒 2
+已建立執行緒 3
+[執行緒 1] 開始執行，TID: 140234567891
+[執行緒 2] 開始執行，TID: 140234567892
+[執行緒 3] 開始執行，TID: 140234567893
+[執行緒 1] 工作進度: 1/3
+[執行緒 2] 工作進度: 1/3
+[執行緒 3] 工作進度: 1/3
+[執行緒 1] 工作進度: 2/3
+[執行緒 2] 工作進度: 2/3
+[執行緒 3] 工作進度: 2/3
+[執行緒 1] 工作進度: 3/3
+[執行緒 2] 工作進度: 3/3
+[執行緒 3] 工作進度: 3/3
+[執行緒 1] 完成工作
+[執行緒 2] 完成工作
+[執行緒 3] 完成工作
+執行緒 1 已結束
+執行緒 2 已結束
+執行緒 3 已結束
+所有執行緒已完成，主執行緒結束</span>
+                </div>
+
+                <div class="note-box">
+                    <strong>編譯注意事項：</strong>
+                    <p>編譯 pthread 程式時必須加上 <code>-pthread</code> 選項，這會連結 pthread 函式庫並設定必要的編譯標誌。</p>
+                </div>
+
+                <h3>3.2 執行緒返回值</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>thread_return.c</span>
+                        <span>執行緒返回值處理</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+
+typedef struct {
+    int start;
+    int end;
+    int sum;
+} ThreadData;
+
+void* calculate_sum(void* arg) {
+    ThreadData* data = (ThreadData*)arg;
+    
+    printf("計算 %d 到 %d 的總和\n", data->start, data->end);
+    
+    data->sum = 0;
+    for (int i = data->start; i <= data->end; i++) {
+        data->sum += i;
+    }
+    
+    printf("範圍 %d-%d 的總和: %d\n", data->start, data->end, data->sum);
+    
+    // 返回計算結果
+    return (void*)data;
+}
+
+int main() {
+    pthread_t threads[4];
+    ThreadData thread_data[4];
+    
+    // 將 1-100 分成 4 個範圍計算
+    int range = 25;
+    for (int i = 0; i < 4; i++) {
+        thread_data[i].start = i * range + 1;
+        thread_data[i].end = (i + 1) * range;
+        thread_data[i].sum = 0;
+        
+        pthread_create(&threads[i], NULL, calculate_sum, &thread_data[i]);
+    }
+    
+    // 收集結果
+    int total_sum = 0;
+    for (int i = 0; i < 4; i++) {
+        ThreadData* result;
+        pthread_join(threads[i], (void**)&result);
+        total_sum += result->sum;
+    }
+    
+    printf("\n總和: %d\n", total_sum);
+    printf("驗證: 1 到 100 的總和 = %d\n", (100 * 101) / 2);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.3 共享資料與競爭條件</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>race_condition.c</span>
+                        <span>展示競爭條件問題</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+
+#define NUM_THREADS 5
+#define ITERATIONS 100000
+
+int shared_counter = 0;  // 共享變數
+
+void* increment_counter(void* arg) {
+    int thread_id = *(int*)arg;
+    
+    for (int i = 0; i < ITERATIONS; i++) {
+        // 臨界區域：多個執行緒可能同時執行
+        shared_counter++;
+    }
+    
+    printf("執行緒 %d 完成\n", thread_id);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int thread_ids[NUM_THREADS];
+    
+    printf("初始計數: %d\n", shared_counter);
+    printf("每個執行緒遞增 %d 次\n", ITERATIONS);
+    printf("預期最終值: %d\n\n", NUM_THREADS * ITERATIONS);
+    
+    // 建立執行緒
+    for (int i = 0; i < NUM_THREADS; i++) {
+        thread_ids[i] = i + 1;
+        pthread_create(&threads[i], NULL, increment_counter, &thread_ids[i]);
+    }
+    
+    // 等待所有執行緒
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
+    printf("\n實際最終值: %d\n", shared_counter);
+    
+    if (shared_counter != NUM_THREADS * ITERATIONS) {
+        printf("發生競爭條件！結果不正確。\n");
+        printf("遺失的遞增次數: %d\n", 
+               NUM_THREADS * ITERATIONS - shared_counter);
+    } else {
+        printf("結果正確（運氣好或執行緒數太少）\n");
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>競爭條件（Race Condition）</strong>
+                    <p>當多個執行緒同時存取和修改共享資料時，最終結果取決於執行的時序，這就是競爭條件。上面的程式展示了典型的競爭條件：多個執行緒同時對 shared_counter 進行遞增操作，導致某些遞增操作被覆蓋。</p>
+                    <p>執行這個程式多次，你會發現每次的結果都不同，而且通常小於預期值。這就是為什麼我們需要同步機制（下週課程內容）。</p>
+                </div>
+
+                <h3>3.4 執行緒池（Thread Pool）</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>thread_pool.c</span>
+                        <span>簡單的執行緒池實作</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+#define POOL_SIZE 4
+#define TASK_QUEUE_SIZE 10
+
+typedef struct {
+    void (*function)(void* arg);
+    void* argument;
+} Task;
+
+typedef struct {
+    Task task_queue[TASK_QUEUE_SIZE];
+    int queue_size;
+    int front;
+    int rear;
+    pthread_t threads[POOL_SIZE];
+    pthread_mutex_t queue_mutex;
+    pthread_cond_t queue_cond;
+    int shutdown;
+} ThreadPool;
+
+ThreadPool pool;
+
+void* worker_thread(void* arg) {
+    while (1) {
+        pthread_mutex_lock(&pool.queue_mutex);
+        
+        // 等待任務或關閉信號
+        while (pool.queue_size == 0 && !pool.shutdown) {
+            pthread_cond_wait(&pool.queue_cond, &pool.queue_mutex);
+        }
+        
+        if (pool.shutdown) {
+            pthread_mutex_unlock(&pool.queue_mutex);
+            pthread_exit(NULL);
+        }
+        
+        // 取得任務
+        Task task = pool.task_queue[pool.front];
+        pool.front = (pool.front + 1) % TASK_QUEUE_SIZE;
+        pool.queue_size--;
+        
+        pthread_mutex_unlock(&pool.queue_mutex);
+        
+        // 執行任務
+        (task.function)(task.argument);
+    }
+    
+    return NULL;
+}
+
+void init_thread_pool() {
+    pool.queue_size = 0;
+    pool.front = 0;
+    pool.rear = 0;
+    pool.shutdown = 0;
+    
+    pthread_mutex_init(&pool.queue_mutex, NULL);
+    pthread_cond_init(&pool.queue_cond, NULL);
+    
+    // 建立工作執行緒
+    for (int i = 0; i < POOL_SIZE; i++) {
+        pthread_create(&pool.threads[i], NULL, worker_thread, NULL);
+    }
+    
+    printf("執行緒池已初始化 (%d 個工作執行緒)\n", POOL_SIZE);
+}
+
+void add_task(void (*function)(void*), void* arg) {
+    pthread_mutex_lock(&pool.queue_mutex);
+    
+    if (pool.queue_size < TASK_QUEUE_SIZE) {
+        pool.task_queue[pool.rear].function = function;
+        pool.task_queue[pool.rear].argument = arg;
+        pool.rear = (pool.rear + 1) % TASK_QUEUE_SIZE;
+        pool.queue_size++;
+        
+        pthread_cond_signal(&pool.queue_cond);
+    } else {
+        printf("任務佇列已滿！\n");
+    }
+    
+    pthread_mutex_unlock(&pool.queue_mutex);
+}
+
+void destroy_thread_pool() {
+    pthread_mutex_lock(&pool.queue_mutex);
+    pool.shutdown = 1;
+    pthread_cond_broadcast(&pool.queue_cond);
+    pthread_mutex_unlock(&pool.queue_mutex);
+    
+    // 等待所有工作執行緒結束
+    for (int i = 0; i < POOL_SIZE; i++) {
+        pthread_join(pool.threads[i], NULL);
+    }
+    
+    pthread_mutex_destroy(&pool.queue_mutex);
+    pthread_cond_destroy(&pool.queue_cond);
+    
+    printf("執行緒池已關閉\n");
+}
+
+// 示範任務
+void sample_task(void* arg) {
+    int task_id = *(int*)arg;
+    printf("[任務 %d] 開始執行 (執行緒 %lu)\n", task_id, pthread_self());
+    sleep(1);  // 模擬工作
+    printf("[任務 %d] 完成\n", task_id);
+}
+
+int main() {
+    init_thread_pool();
+    
+    // 提交任務
+    int task_ids[8];
+    for (int i = 0; i < 8; i++) {
+        task_ids[i] = i + 1;
+        add_task(sample_task, &task_ids[i]);
+        printf("已提交任務 %d\n", i + 1);
+    }
+    
+    // 等待所有任務完成
+    sleep(5);
+    
+    destroy_thread_pool();
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.5 多執行緒矩陣運算</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>matrix_multiplication.c</span>
+                        <span>並行矩陣乘法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;time.h&gt;
+
+#define SIZE 500
+#define NUM_THREADS 4
+
+int A[SIZE][SIZE];
+int B[SIZE][SIZE];
+int C[SIZE][SIZE];
+
+typedef struct {
+    int start_row;
+    int end_row;
+} ThreadArg;
+
+void* multiply_rows(void* arg) {
+    ThreadArg* range = (ThreadArg*)arg;
+    
+    for (int i = range->start_row; i < range->end_row; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < SIZE; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    
+    return NULL;
+}
+
+void initialize_matrices() {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            A[i][j] = rand() % 10;
+            B[i][j] = rand() % 10;
+        }
+    }
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    ThreadArg thread_args[NUM_THREADS];
+    clock_t start, end;
+    
+    printf("初始化 %dx%d 矩陣...\n", SIZE, SIZE);
+    initialize_matrices();
+    
+    printf("使用 %d 個執行緒進行矩陣乘法...\n", NUM_THREADS);
+    
+    start = clock();
+    
+    // 將工作分配給執行緒
+    int rows_per_thread = SIZE / NUM_THREADS;
+    for (int i = 0; i < NUM_THREADS; i++) {
+        thread_args[i].start_row = i * rows_per_thread;
+        thread_args[i].end_row = (i == NUM_THREADS - 1) ? 
+                                  SIZE : (i + 1) * rows_per_thread;
+        
+        pthread_create(&threads[i], NULL, multiply_rows, &thread_args[i]);
+    }
+    
+    // 等待所有執行緒完成
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    
+    end = clock();
+    
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    
+    printf("完成！\n");
+    printf("執行時間: %.3f 秒\n", time_taken);
+    printf("結果矩陣 C[0][0] = %d (驗證用)\n", C[0][0]);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.6 執行緒屬性設定</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>thread_attributes.c</span>
+                        <span>設定執行緒屬性</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+
+void* detached_thread(void* arg) {
+    printf("分離執行緒執行中...\n");
+    sleep(2);
+    printf("分離執行緒完成\n");
+    return NULL;
+}
+
+void* joinable_thread(void* arg) {
+    printf("可結合執行緒執行中...\n");
+    sleep(1);
+    printf("可結合執行緒完成\n");
+    return (void*)42;
+}
+
+int main() {
+    pthread_t t1, t2;
+    pthread_attr_t attr;
+    void* result;
+    
+    // 初始化屬性物件
+    pthread_attr_init(&attr);
+    
+    // 設定為分離狀態
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    
+    // 建立分離執行緒
+    pthread_create(&t1, &attr, detached_thread, NULL);
+    printf("已建立分離執行緒\n");
+    
+    // 重新設定為可結合狀態
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    
+    // 取得和設定堆疊大小
+    size_t stack_size;
+    pthread_attr_getstacksize(&attr, &stack_size);
+    printf("預設堆疊大小: %zu bytes\n", stack_size);
+    
+    // 設定新的堆疊大小
+    pthread_attr_setstacksize(&attr, 2 * 1024 * 1024);  // 2 MB
+    
+    // 建立可結合執行緒
+    pthread_create(&t2, &attr, joinable_thread, NULL);
+    printf("已建立可結合執行緒\n");
+    
+    // 等待可結合執行緒
+    pthread_join(t2, &result);
+    printf("執行緒返回值: %ld\n", (long)result);
+    
+    // 清理屬性物件
+    pthread_attr_destroy(&attr);
+    
+    // 等待分離執行緒完成（實際上無法 join）
+    sleep(3);
+    
+    printf("主執行緒結束\n");
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：平行排序</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>實作多執行緒快速排序或合併排序。</p>
+                        <ul>
+                            <li>將陣列分成 N 個部分，每個執行緒排序一部分</li>
+                            <li>主執行緒合併所有已排序的部分</li>
+                            <li>比較單執行緒和多執行緒版本的執行時間</li>
+                            <li>測試不同陣列大小和執行緒數量的效能</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：檔案處理器</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立多執行緒檔案處理程式。</p>
+                        <ul>
+                            <li>讀取目錄中的所有文字檔案</li>
+                            <li>使用執行緒池並行處理檔案（如計算單字數、搜尋特定字串）</li>
+                            <li>安全地彙總所有執行緒的結果</li>
+                            <li>顯示處理進度</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：Web 伺服器模擬</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立簡單的多執行緒 Web 伺服器。</p>
+                        <ul>
+                            <li>主執行緒監聽連線請求</li>
+                            <li>為每個客戶端建立新執行緒處理請求</li>
+                            <li>實作執行緒池以限制同時執行的執行緒數</li>
+                            <li>記錄請求日誌（注意執行緒安全）</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：效能分析工具</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>開發執行緒效能分析工具。</p>
+                        <ul>
+                            <li>監控每個執行緒的 CPU 使用時間</li>
+                            <li>追蹤執行緒的狀態變化（執行、等待、阻塞）</li>
+                            <li>偵測執行緒間的競爭條件</li>
+                            <li>生成效能報告和視覺化圖表</li>
+                            <li>找出效能瓶頸</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：並行搜尋引擎</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作簡單的並行文件搜尋引擎。</p>
+                        <ul>
+                            <li>建立倒排索引（Inverted Index）</li>
+                            <li>多執行緒建立索引（並行處理多個文件）</li>
+                            <li>多執行緒搜尋查詢</li>
+                            <li>實作查詢結果排序（按相關性）</li>
+                            <li>測試不同文件集大小和執行緒配置的效能</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 執行緒與行程的主要差異是？</strong></p>
+                        <p>A. 執行緒比行程更難建立</p>
+                        <p>B. 執行緒共享行程的位址空間</p>
+                        <p>C. 執行緒不能並行執行</p>
+                        <p>D. 執行緒需要更多記憶體</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. pthread_join() 的作用是？</strong></p>
+                        <p>A. 建立新執行緒</p>
+                        <p>B. 等待執行緒結束並獲取返回值</p>
+                        <p>C. 終止執行緒</p>
+                        <p>D. 分離執行緒</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 什麼是競爭條件（Race Condition）？</strong></p>
+                        <p>A. 執行緒執行速度的競賽</p>
+                        <p>B. 多個執行緒同時存取共享資料，結果取決於執行順序</p>
+                        <p>C. 執行緒之間的優先權競爭</p>
+                        <p>D. CPU 資源的競爭</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. 使用執行緒的主要優勢不包括？</strong></p>
+                        <p>A. 提高程式回應性</p>
+                        <p>B. 資源共享更容易</p>
+                        <p>C. 完全避免同步問題</p>
+                        <p>D. 建立成本低於行程</p>
+                        <p><em>答案：C（執行緒反而更容易產生同步問題）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 編譯 pthread 程式需要使用什麼選項？</strong></p>
+                        <p>A. -lpthread</p>
+                        <p>B. -pthread</p>
+                        <p>C. -thread</p>
+                        <p>D. -mt</p>
+                        <p><em>答案：B（雖然 -lpthread 也可以，但 -pthread 是推薦的方式）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 實作題：寫出建立執行緒的基本程式碼框架</strong></p>
+                        <p><em>參考答案：</em></p>
+                        <pre><code class="language-c">pthread_t thread;
+void* thread_func(void* arg) {
+    // 執行緒工作
+    return NULL;
+}
+
+// 主程式中
+pthread_create(&thread, NULL, thread_func, NULL);
+pthread_join(thread, NULL);</code></pre>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：解釋為什麼執行緒比行程更適合實作伺服器程式？</strong></p>
+                        <p><em>參考答案：伺服器程式需要同時處理多個客戶端請求。使用執行緒的優勢包括：(1) 建立執行緒的成本遠低於建立行程，可以快速回應新連線；(2) 執行緒間共享記憶體，方便共享連線資訊、快取等資料；(3) 執行緒切換開銷小，提高並行效能；(4) 可以使用執行緒池重用執行緒，進一步降低開銷。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：說明執行緒池的優勢</strong></p>
+                        <p><em>參考答案：執行緒池預先建立固定數量的執行緒，任務來臨時直接分配給空閒執行緒執行。優勢包括：(1) 避免頻繁建立和銷毀執行緒的開銷；(2) 限制同時執行的執行緒數量，防止系統過載；(3) 提高資源利用率；(4) 更容易管理和監控執行緒。缺點是需要額外的管理開銷和記憶體來維護執行緒池。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week3.html" class="nav-button">上一週：行程排程</a>
+                <a href="week5.html" class="nav-button">下一週：行程同步</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 4 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1: 作業系統概論 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .nav-button.disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 1: 作業系統概論</h1>
+            <p class="week-info">Operating System Fundamentals</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到作業系統課程的第一週！本週我們將探索作業系統的基本概念，了解它在計算機系統中扮演的核心角色。作業系統是連接硬體與應用程式的橋樑，管理所有系統資源，讓我們能夠有效率地使用電腦。</p>
+                <p>透過本週的學習，你將建立對作業系統的整體認知，為接下來深入探討各個子系統打下堅實的基礎。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解作業系統的定義與目的</li>
+                    <li>認識作業系統的主要功能與組成</li>
+                    <li>了解作業系統的演進歷史</li>
+                    <li>學習作業系統的基本架構</li>
+                    <li>掌握使用系統呼叫獲取系統資訊的方法</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、什麼是作業系統？</h2>
+                
+                <h3>1.1 作業系統的定義</h3>
+                <p>作業系統（Operating System, OS）是一種系統軟體，它管理計算機的硬體資源，並為應用程式提供服務。作業系統是使用者與計算機硬體之間的介面，讓使用者能夠方便地使用計算機而不需要了解底層硬體的複雜細節。</p>
+
+                <div class="concept-box">
+                    <h4>核心概念：作業系統的雙重角色</h4>
+                    <p><strong>1. 資源管理者（Resource Manager）：</strong>作業系統負責管理和分配系統資源，包括 CPU、記憶體、硬碟空間、I/O 裝置等，確保資源被有效利用。</p>
+                    <p><strong>2. 擴展機器（Extended Machine）：</strong>作業系統提供比硬體更高階的抽象介面，隱藏硬體的複雜性，讓程式設計師和使用者更容易使用計算機。</p>
+                </div>
+
+                <h3>1.2 作業系統的主要功能</h3>
+                
+                <h4>行程管理（Process Management）</h4>
+                <ul>
+                    <li>建立和刪除行程</li>
+                    <li>暫停和恢復行程</li>
+                    <li>提供行程同步機制</li>
+                    <li>提供行程通訊機制</li>
+                    <li>處理死結（Deadlock）問題</li>
+                </ul>
+
+                <h4>記憶體管理（Memory Management）</h4>
+                <ul>
+                    <li>追蹤記憶體使用狀況</li>
+                    <li>決定哪些行程和資料載入記憶體</li>
+                    <li>配置和回收記憶體空間</li>
+                    <li>提供虛擬記憶體機制</li>
+                </ul>
+
+                <h4>檔案系統管理（File System Management）</h4>
+                <ul>
+                    <li>建立和刪除檔案與目錄</li>
+                    <li>提供檔案存取的原語（primitives）</li>
+                    <li>將檔案映射到次級儲存裝置</li>
+                    <li>備份檔案到穩定的儲存媒體</li>
+                </ul>
+
+                <h4>I/O 系統管理（I/O System Management）</h4>
+                <ul>
+                    <li>提供緩衝、快取機制</li>
+                    <li>提供通用的裝置驅動程式介面</li>
+                    <li>提供特定硬體裝置的驅動程式</li>
+                </ul>
+
+                <h3>1.3 作業系統的演進歷史</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>世代</th>
+                            <th>時期</th>
+                            <th>特色</th>
+                            <th>代表技術</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>第一代</td>
+                            <td>1945-1955</td>
+                            <td>真空管時代，無作業系統</td>
+                            <td>機器語言、插線板</td>
+                        </tr>
+                        <tr>
+                            <td>第二代</td>
+                            <td>1955-1965</td>
+                            <td>電晶體與批次系統</td>
+                            <td>批次處理、作業控制語言</td>
+                        </tr>
+                        <tr>
+                            <td>第三代</td>
+                            <td>1965-1980</td>
+                            <td>積體電路與多工</td>
+                            <td>分時系統、多工處理</td>
+                        </tr>
+                        <tr>
+                            <td>第四代</td>
+                            <td>1980-現在</td>
+                            <td>個人電腦時代</td>
+                            <td>圖形介面、網路、分散式系統</td>
+                        </tr>
+                        <tr>
+                            <td>現代</td>
+                            <td>2000-現在</td>
+                            <td>行動裝置與雲端</td>
+                            <td>虛擬化、容器、微服務</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>1.4 作業系統的架構</h3>
+
+                <h4>單體式核心（Monolithic Kernel）</h4>
+                <p>所有作業系統功能都在核心空間執行，效能較高但較不安全。代表：Linux、Unix。</p>
+
+                <h4>微核心（Microkernel）</h4>
+                <p>只保留最基本的功能在核心，其他服務在使用者空間執行。代表：Minix、QNX。</p>
+
+                <h4>混合式核心（Hybrid Kernel）</h4>
+                <p>結合單體式和微核心的優點。代表：Windows NT、macOS。</p>
+
+                <h4>外核心（Exokernel）</h4>
+                <p>提供最小的硬體抽象，讓應用程式直接管理資源。</p>
+
+                <h3>1.5 作業系統的組成</h3>
+
+                <div class="concept-box">
+                    <h4>核心（Kernel）</h4>
+                    <p>作業系統的核心部分，直接與硬體互動，管理系統資源。核心提供：</p>
+                    <ul>
+                        <li>行程排程器</li>
+                        <li>記憶體管理器</li>
+                        <li>檔案系統</li>
+                        <li>裝置驅動程式</li>
+                        <li>網路協定堆疊</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>系統呼叫（System Calls）</h4>
+                    <p>應用程式與作業系統核心之間的介面。系統呼叫提供：</p>
+                    <ul>
+                        <li>行程控制：fork(), exec(), wait(), exit()</li>
+                        <li>檔案操作：open(), read(), write(), close()</li>
+                        <li>裝置管理：ioctl(), read(), write()</li>
+                        <li>資訊維護：getpid(), alarm(), sleep()</li>
+                        <li>通訊：pipe(), socket(), send(), receive()</li>
+                    </ul>
+                </div>
+
+                <h2>二、作業系統的實際運作</h2>
+
+                <h3>2.1 啟動程序（Boot Process）</h3>
+                <ol>
+                    <li><strong>BIOS/UEFI 初始化：</strong>執行開機自我測試（POST），初始化硬體</li>
+                    <li><strong>載入啟動載入器（Bootloader）：</strong>如 GRUB、Lilo</li>
+                    <li><strong>載入核心：</strong>將作業系統核心載入記憶體</li>
+                    <li><strong>核心初始化：</strong>設定系統環境，啟動核心服務</li>
+                    <li><strong>啟動系統行程：</strong>如 init、systemd</li>
+                    <li><strong>使用者登入：</strong>顯示登入畫面</li>
+                </ol>
+
+                <h3>2.2 系統模式</h3>
+
+                <div class="note-box">
+                    <strong>核心模式 vs 使用者模式</strong>
+                    <p><strong>核心模式（Kernel Mode）：</strong>具有完整的硬體存取權限，可以執行任何指令。作業系統核心在此模式運行。</p>
+                    <p><strong>使用者模式（User Mode）：</strong>受限的硬體存取權限，應用程式在此模式運行。需要透過系統呼叫來請求核心服務。</p>
+                    <p>這種分離提供了安全性和穩定性，防止應用程式直接存取硬體造成系統崩潰。</p>
+                </div>
+
+                <h3>2.3 中斷機制（Interrupt Mechanism）</h3>
+                <p>中斷是作業系統與硬體互動的重要機制：</p>
+
+                <h4>硬體中斷（Hardware Interrupt）</h4>
+                <ul>
+                    <li>由硬體裝置觸發，如鍵盤輸入、滑鼠點擊、網路封包到達</li>
+                    <li>非同步發生，可以在任何時間點打斷 CPU</li>
+                </ul>
+
+                <h4>軟體中斷（Software Interrupt / Trap）</h4>
+                <ul>
+                    <li>由軟體觸發，如系統呼叫、異常（除以零、記憶體存取錯誤）</li>
+                    <li>同步發生，由程式執行特定指令產生</li>
+                </ul>
+
+            </section>
+
+            <section id="practice">
+                <h2>三、實作練習</h2>
+
+                <h3>3.1 取得系統資訊</h3>
+                <p>讓我們開始第一個程式，學習如何使用系統呼叫來獲取作業系統資訊。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>system_info.c</span>
+                        <span>取得系統基本資訊</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;sys/utsname.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    struct utsname system_info;
+    
+    // 使用 uname 系統呼叫獲取系統資訊
+    if (uname(&system_info) == -1) {
+        perror("uname 失敗");
+        return 1;
+    }
+    
+    printf("=== 系統資訊 ===\n");
+    printf("作業系統名稱: %s\n", system_info.sysname);
+    printf("網路節點名稱: %s\n", system_info.nodename);
+    printf("作業系統版本: %s\n", system_info.release);
+    printf("作業系統版號: %s\n", system_info.version);
+    printf("硬體架構: %s\n", system_info.machine);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="note-box">
+                    <strong>程式說明：</strong>
+                    <p><code>struct utsname</code> 結構包含系統資訊的五個欄位。<code>uname()</code> 系統呼叫會填入這些欄位。</p>
+                </div>
+
+                <h4>編譯與執行</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o system_info system_info.c
+<span class="prompt">$</span> ./system_info
+<span class="output">=== 系統資訊 ===
+作業系統名稱: Linux
+網路節點名稱: ubuntu-server
+作業系統版本: 5.15.0-56-generic
+作業系統版號: #62-Ubuntu SMP Tue Nov 22 19:54:14 UTC 2022
+硬體架構: x86_64</span>
+                </div>
+
+                <h3>3.2 獲取行程資訊</h3>
+                <p>每個執行中的程式都是一個行程，作業系統會為每個行程分配唯一的識別碼（PID）。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>process_info.c</span>
+                        <span>顯示行程 ID 資訊</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+int main() {
+    pid_t pid, ppid;
+    uid_t uid;
+    gid_t gid;
+    
+    // 獲取當前行程的 PID
+    pid = getpid();
+    
+    // 獲取父行程的 PID
+    ppid = getppid();
+    
+    // 獲取使用者 ID
+    uid = getuid();
+    
+    // 獲取群組 ID
+    gid = getgid();
+    
+    printf("=== 行程資訊 ===\n");
+    printf("行程 ID (PID): %d\n", pid);
+    printf("父行程 ID (PPID): %d\n", ppid);
+    printf("使用者 ID (UID): %d\n", uid);
+    printf("群組 ID (GID): %d\n", gid);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o process_info process_info.c
+<span class="prompt">$</span> ./process_info
+<span class="output">=== 行程資訊 ===
+行程 ID (PID): 12345
+父行程 ID (PPID): 12344
+使用者 ID (UID): 1000
+群組 ID (GID): 1000</span>
+                </div>
+
+                <h3>3.3 系統資源監控</h3>
+                <p>作業系統需要管理各種資源，我們可以查詢系統的資源使用狀況。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>system_resources.c</span>
+                        <span>顯示系統資源資訊</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/sysinfo.h&gt;
+
+int main() {
+    struct sysinfo info;
+    
+    // 獲取系統資訊
+    if (sysinfo(&info) != 0) {
+        perror("sysinfo 失敗");
+        return 1;
+    }
+    
+    printf("=== 系統資源資訊 ===\n");
+    
+    // 系統運行時間
+    long uptime_hours = info.uptime / 3600;
+    long uptime_minutes = (info.uptime % 3600) / 60;
+    printf("系統運行時間: %ld 小時 %ld 分鐘\n", 
+           uptime_hours, uptime_minutes);
+    
+    // 記憶體資訊（轉換為 MB）
+    printf("\n記憶體資訊:\n");
+    printf("  總記憶體: %lu MB\n", info.totalram / (1024 * 1024));
+    printf("  可用記憶體: %lu MB\n", info.freeram / (1024 * 1024));
+    printf("  已使用記憶體: %lu MB\n", 
+           (info.totalram - info.freeram) / (1024 * 1024));
+    
+    // 交換空間資訊
+    printf("\n交換空間:\n");
+    printf("  總交換空間: %lu MB\n", info.totalswap / (1024 * 1024));
+    printf("  可用交換空間: %lu MB\n", info.freeswap / (1024 * 1024));
+    
+    // 行程資訊
+    printf("\n行程數量: %d\n", info.procs);
+    
+    // CPU 資訊
+    long num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    printf("CPU 核心數: %ld\n", num_cpus);
+    
+    // 頁面大小
+    long page_size = sysconf(_SC_PAGESIZE);
+    printf("記憶體頁面大小: %ld bytes\n", page_size);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o system_resources system_resources.c
+<span class="prompt">$</span> ./system_resources
+<span class="output">=== 系統資源資訊 ===
+系統運行時間: 5 小時 23 分鐘
+
+記憶體資訊:
+  總記憶體: 16384 MB
+  可用記憶體: 8192 MB
+  已使用記憶體: 8192 MB
+
+交換空間:
+  總交換空間: 4096 MB
+  可用交換空間: 4096 MB
+
+行程數量: 245
+CPU 核心數: 8
+記憶體頁面大小: 4096 bytes</span>
+                </div>
+
+                <h3>3.4 環境變數存取</h3>
+                <p>作業系統使用環境變數來儲存系統設定和使用者偏好。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>env_vars.c</span>
+                        <span>讀取環境變數</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main() {
+    char* home = getenv("HOME");
+    char* user = getenv("USER");
+    char* path = getenv("PATH");
+    char* shell = getenv("SHELL");
+    
+    printf("=== 環境變數 ===\n");
+    
+    if (home != NULL) {
+        printf("家目錄 (HOME): %s\n", home);
+    }
+    
+    if (user != NULL) {
+        printf("使用者名稱 (USER): %s\n", user);
+    }
+    
+    if (shell != NULL) {
+        printf("預設 Shell (SHELL): %s\n", shell);
+    }
+    
+    if (path != NULL) {
+        printf("\n執行路徑 (PATH):\n");
+        // PATH 通常很長，只顯示前 100 個字元
+        printf("%.100s...\n", path);
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.5 綜合練習：系統監控工具</h3>
+                <p>將前面學到的知識整合，建立一個簡單的系統監控工具。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>system_monitor.c</span>
+                        <span>簡易系統監控工具</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/utsname.h&gt;
+#include &lt;sys/sysinfo.h&gt;
+#include &lt;time.h&gt;
+
+void print_separator() {
+    printf("\n");
+    for (int i = 0; i &lt; 60; i++) printf("=");
+    printf("\n");
+}
+
+void print_system_info() {
+    struct utsname uname_info;
+    time_t current_time;
+    char* time_string;
+    
+    uname(&uname_info);
+    time(&current_time);
+    time_string = ctime(&current_time);
+    
+    printf("系統監控工具 v1.0\n");
+    print_separator();
+    
+    printf("當前時間: %s", time_string);
+    printf("作業系統: %s %s\n", uname_info.sysname, uname_info.release);
+    printf("主機名稱: %s\n", uname_info.nodename);
+    printf("架構: %s\n", uname_info.machine);
+}
+
+void print_cpu_info() {
+    print_separator();
+    printf("CPU 資訊\n");
+    print_separator();
+    
+    long num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    long num_cpus_conf = sysconf(_SC_NPROCESSORS_CONF);
+    
+    printf("線上 CPU 數量: %ld\n", num_cpus);
+    printf("已配置 CPU 數量: %ld\n", num_cpus_conf);
+    
+    // 讀取 CPU 使用率（簡化版本）
+    FILE* fp = fopen("/proc/loadavg", "r");
+    if (fp != NULL) {
+        float load1, load5, load15;
+        fscanf(fp, "%f %f %f", &load1, &load5, &load15);
+        printf("系統負載: %.2f (1分鐘), %.2f (5分鐘), %.2f (15分鐘)\n",
+               load1, load5, load15);
+        fclose(fp);
+    }
+}
+
+void print_memory_info() {
+    struct sysinfo info;
+    sysinfo(&info);
+    
+    print_separator();
+    printf("記憶體資訊\n");
+    print_separator();
+    
+    unsigned long total_ram = info.totalram / (1024 * 1024);
+    unsigned long free_ram = info.freeram / (1024 * 1024);
+    unsigned long used_ram = total_ram - free_ram;
+    unsigned long total_swap = info.totalswap / (1024 * 1024);
+    unsigned long free_swap = info.freeswap / (1024 * 1024);
+    
+    printf("實體記憶體:\n");
+    printf("  總量: %lu MB\n", total_ram);
+    printf("  已使用: %lu MB (%.1f%%)\n", 
+           used_ram, (float)used_ram / total_ram * 100);
+    printf("  可用: %lu MB (%.1f%%)\n", 
+           free_ram, (float)free_ram / total_ram * 100);
+    
+    printf("\n交換空間:\n");
+    printf("  總量: %lu MB\n", total_swap);
+    printf("  可用: %lu MB\n", free_swap);
+}
+
+void print_process_info() {
+    struct sysinfo info;
+    sysinfo(&info);
+    
+    print_separator();
+    printf("行程資訊\n");
+    print_separator();
+    
+    printf("執行中行程數量: %d\n", info.procs);
+    printf("當前行程 PID: %d\n", getpid());
+    printf("父行程 PID: %d\n", getppid());
+}
+
+void print_uptime() {
+    struct sysinfo info;
+    sysinfo(&info);
+    
+    long days = info.uptime / 86400;
+    long hours = (info.uptime % 86400) / 3600;
+    long minutes = (info.uptime % 3600) / 60;
+    long seconds = info.uptime % 60;
+    
+    print_separator();
+    printf("系統運行時間\n");
+    print_separator();
+    printf("%ld 天 %ld 小時 %ld 分鐘 %ld 秒\n", 
+           days, hours, minutes, seconds);
+}
+
+int main() {
+    print_system_info();
+    print_cpu_info();
+    print_memory_info();
+    print_process_info();
+    print_uptime();
+    print_separator();
+    
+    printf("\n監控完成！\n");
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果範例</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o system_monitor system_monitor.c
+<span class="prompt">$</span> ./system_monitor
+<span class="output">系統監控工具 v1.0
+============================================================
+當前時間: Sun Feb  8 14:30:45 2026
+作業系統: Linux 5.15.0-56-generic
+主機名稱: ubuntu-server
+架構: x86_64
+
+============================================================
+CPU 資訊
+============================================================
+線上 CPU 數量: 8
+已配置 CPU 數量: 8
+系統負載: 0.52 (1分鐘), 0.48 (5分鐘), 0.45 (15分鐘)
+
+============================================================
+記憶體資訊
+============================================================
+實體記憶體:
+  總量: 16384 MB
+  已使用: 8192 MB (50.0%)
+  可用: 8192 MB (50.0%)
+
+交換空間:
+  總量: 4096 MB
+  可用: 4096 MB
+
+============================================================
+行程資訊
+============================================================
+執行中行程數量: 245
+當前行程 PID: 15678
+父行程 PID: 15677
+
+============================================================
+系統運行時間
+============================================================
+0 天 5 小時 23 分鐘 45 秒
+============================================================
+
+監控完成！</span>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+                    <p>完成以下練習以鞏固本週所學：</p>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：系統資訊查詢工具</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>撰寫一個程式，顯示以下資訊：</p>
+                        <ul>
+                            <li>作業系統名稱和版本</li>
+                            <li>CPU 核心數</li>
+                            <li>總記憶體和可用記憶體</li>
+                            <li>當前使用者名稱</li>
+                            <li>系統運行時間</li>
+                        </ul>
+                        <p><strong>提示：</strong>使用 <code>uname()</code>, <code>sysinfo()</code>, <code>getenv()</code> 等系統呼叫。</p>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：記憶體使用率計算</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>寫一個程式計算並顯示：</p>
+                        <ul>
+                            <li>總記憶體、已使用記憶體、可用記憶體（以 MB 為單位）</li>
+                            <li>記憶體使用率（百分比）</li>
+                            <li>用視覺化的方式顯示使用率（如進度條：[====      ] 40%）</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：環境變數管理工具</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立一個程式，可以：</p>
+                        <ul>
+                            <li>列出所有環境變數</li>
+                            <li>搜尋特定的環境變數</li>
+                            <li>以格式化的方式顯示結果</li>
+                        </ul>
+                        <p><strong>提示：</strong>使用 <code>extern char **environ</code> 來存取所有環境變數。</p>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：系統比較工具</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>研究並比較至少兩種不同的作業系統（例如：Linux vs Windows，或 Linux vs macOS），撰寫一份報告包含：</p>
+                        <ul>
+                            <li>核心架構的差異</li>
+                            <li>記憶體管理方式</li>
+                            <li>檔案系統的特色</li>
+                            <li>適用場景</li>
+                        </ul>
+                        <p><strong>加分項：</strong>在報告中包含實際的系統呼叫對照表。</p>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：進階系統監控器</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>擴展課程中的系統監控工具，加入以下功能：</p>
+                        <ul>
+                            <li>每 N 秒自動更新一次系統資訊</li>
+                            <li>記錄系統資源使用的歷史資料</li>
+                            <li>當資源使用超過閾值時發出警告</li>
+                            <li>以圖形化或顏色化的方式顯示資訊</li>
+                            <li>支援輸出到檔案</li>
+                        </ul>
+                        <p><strong>提示：</strong>使用 <code>sleep()</code> 或 <code>usleep()</code> 來控制更新頻率，使用 ANSI 控制碼來清除螢幕和顯示顏色。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+                    <p>測試你對本週課程的理解程度：</p>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 作業系統的主要功能不包括下列哪一項？</strong></p>
+                        <p>A. 行程管理</p>
+                        <p>B. 記憶體管理</p>
+                        <p>C. 編譯程式碼</p>
+                        <p>D. I/O 管理</p>
+                        <p><em>答案：C（編譯程式碼是編譯器的工作，不是作業系統的核心功能）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 下列何者不是作業系統的架構類型？</strong></p>
+                        <p>A. 單體式核心</p>
+                        <p>B. 微核心</p>
+                        <p>C. 分散式核心</p>
+                        <p>D. 混合式核心</p>
+                        <p><em>答案：C（分散式核心不是標準的作業系統架構分類）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 系統呼叫 getpid() 的作用是什麼？</strong></p>
+                        <p>A. 取得父行程的 ID</p>
+                        <p>B. 取得當前行程的 ID</p>
+                        <p>C. 取得使用者 ID</p>
+                        <p>D. 取得群組 ID</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. 核心模式（Kernel Mode）和使用者模式（User Mode）的主要差異是？</strong></p>
+                        <p>A. 執行速度不同</p>
+                        <p>B. 記憶體大小不同</p>
+                        <p>C. 硬體存取權限不同</p>
+                        <p>D. 程式語言不同</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 下列哪個不是中斷的類型？</strong></p>
+                        <p>A. 硬體中斷</p>
+                        <p>B. 軟體中斷</p>
+                        <p>C. 網路中斷</p>
+                        <p>D. 陷阱（Trap）</p>
+                        <p><em>答案：C（網路中斷是硬體中斷的一種，不是獨立的中斷類型）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 問答題：請簡述作業系統在計算機系統中扮演的角色。</strong></p>
+                        <p><em>參考答案：作業系統扮演兩個主要角色：(1) 資源管理者：管理和分配 CPU、記憶體、硬碟等系統資源；(2) 擴展機器：提供比硬體更高階的抽象介面，讓使用者和應用程式能更方便地使用計算機。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：為什麼作業系統需要區分核心模式和使用者模式？</strong></p>
+                        <p><em>參考答案：區分核心模式和使用者模式主要是為了系統的安全性和穩定性。限制應用程式的硬體存取權限可以防止惡意或有錯誤的程式直接操作硬體，造成系統崩潰或資料損壞。只有作業系統核心在核心模式下才能執行特權指令和直接存取硬體。</em></p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="index.html" class="nav-button">回到課程首頁</a>
+                <a href="week2.html" class="nav-button">下一週：行程管理</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 1 © 2026</p>
+        <p>建議學習時間：8-10 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        // 平滑滾動
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

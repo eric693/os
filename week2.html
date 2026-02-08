@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2: 行程管理與系統呼叫 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .diagram {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .nav-button.disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 2: 行程管理與系統呼叫</h1>
+            <p class="week-info">Process Management and System Calls</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第二週的課程！本週我們將深入探討作業系統中最核心的概念之一：行程（Process）。行程是作業系統管理和執行程式的基本單位，理解行程的運作方式對於掌握作業系統至關重要。</p>
+                <p>我們將學習行程的生命週期、如何建立和管理行程，以及如何透過系統呼叫與作業系統核心互動。透過豐富的程式範例，你將親手實作行程的建立、執行和控制。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解行程的概念與組成</li>
+                    <li>掌握行程的狀態轉換</li>
+                    <li>學習使用 fork() 建立子行程</li>
+                    <li>了解 exec() 系列函數的用途</li>
+                    <li>掌握行程等待與同步機制</li>
+                    <li>理解行程結束與回收</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、行程的基本概念</h2>
+                
+                <h3>1.1 什麼是行程？</h3>
+                <p>行程（Process）是執行中的程式實例。當你執行一個程式時，作業系統會建立一個行程來執行該程式。每個行程都有自己獨立的記憶體空間、系統資源和執行狀態。</p>
+
+                <div class="concept-box">
+                    <h4>程式 vs 行程</h4>
+                    <p><strong>程式（Program）：</strong>是儲存在磁碟上的可執行檔案，是被動的實體，包含指令和資料。</p>
+                    <p><strong>行程（Process）：</strong>是執行中的程式，是主動的實體，包含程式計數器、暫存器、記憶體內容等。</p>
+                    <p><strong>比喻：</strong>程式就像食譜，行程就像按照食譜實際烹飪的過程。</p>
+                </div>
+
+                <h3>1.2 行程的組成</h3>
+                <p>一個行程在記憶體中主要包含以下部分：</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>區段</th>
+                            <th>說明</th>
+                            <th>內容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>文字區段（Text）</td>
+                            <td>程式碼區</td>
+                            <td>可執行的機器指令</td>
+                        </tr>
+                        <tr>
+                            <td>資料區段（Data）</td>
+                            <td>已初始化資料</td>
+                            <td>全域變數、靜態變數</td>
+                        </tr>
+                        <tr>
+                            <td>BSS 區段</td>
+                            <td>未初始化資料</td>
+                            <td>未初始化的全域變數</td>
+                        </tr>
+                        <tr>
+                            <td>堆積（Heap）</td>
+                            <td>動態記憶體</td>
+                            <td>malloc/new 配置的記憶體</td>
+                        </tr>
+                        <tr>
+                            <td>堆疊（Stack）</td>
+                            <td>函數呼叫資訊</td>
+                            <td>區域變數、函數參數、返回位址</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>1.3 行程控制區塊（PCB）</h3>
+                <p>作業系統為每個行程維護一個行程控制區塊（Process Control Block, PCB），儲存行程的所有資訊：</p>
+
+                <ul>
+                    <li><strong>行程識別碼（PID）：</strong>唯一識別行程的編號</li>
+                    <li><strong>行程狀態：</strong>新建、就緒、執行、等待、終止</li>
+                    <li><strong>程式計數器：</strong>下一個要執行的指令位址</li>
+                    <li><strong>CPU 暫存器：</strong>各種暫存器的值</li>
+                    <li><strong>CPU 排程資訊：</strong>優先權、排程佇列指標</li>
+                    <li><strong>記憶體管理資訊：</strong>頁表、記憶體限制</li>
+                    <li><strong>帳務資訊：</strong>CPU 使用時間、時間限制</li>
+                    <li><strong>I/O 狀態資訊：</strong>開啟的檔案、I/O 裝置</li>
+                </ul>
+
+                <h3>1.4 行程狀態</h3>
+                <p>行程在執行期間會經歷不同的狀態：</p>
+
+                <div class="diagram">
+                    <p><strong>行程狀態轉換圖</strong></p>
+                    <pre style="text-align: left; display: inline-block;">
+    新建 (New)
+        ↓
+    就緒 (Ready) ←──────────┐
+        ↓                    │
+    執行 (Running)           │
+        ↓         ↓          │
+    終止 (Terminated)   等待 (Waiting)
+                        ↓
+                    (I/O 完成或事件發生)
+                    </pre>
+                </div>
+
+                <ul>
+                    <li><strong>新建（New）：</strong>行程正在被建立</li>
+                    <li><strong>就緒（Ready）：</strong>行程已準備好執行，等待 CPU 分配</li>
+                    <li><strong>執行（Running）：</strong>行程正在 CPU 上執行</li>
+                    <li><strong>等待（Waiting/Blocked）：</strong>行程等待某個事件發生（如 I/O 完成）</li>
+                    <li><strong>終止（Terminated）：</strong>行程執行完畢</li>
+                </ul>
+
+                <h2>二、行程建立與管理</h2>
+
+                <h3>2.1 fork() 系統呼叫</h3>
+                <p><code>fork()</code> 是 Unix/Linux 系統中建立新行程的主要方式。它會建立一個與父行程幾乎完全相同的子行程。</p>
+
+                <div class="concept-box">
+                    <h4>fork() 的特性</h4>
+                    <ul>
+                        <li>子行程是父行程的副本，擁有相同的程式碼、資料</li>
+                        <li>子行程獲得父行程資料空間、堆積和堆疊的副本（Copy-on-Write）</li>
+                        <li>父子行程共享文字區段（程式碼）</li>
+                        <li>fork() 在父行程返回子行程的 PID，在子行程返回 0</li>
+                        <li>如果 fork() 失敗，返回 -1</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 exec() 系列函數</h3>
+                <p>exec() 系列函數用於在當前行程中執行新的程式，替換當前行程的映像。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>函數</th>
+                            <th>說明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>execl()</td>
+                            <td>使用參數列表，需指定完整路徑</td>
+                        </tr>
+                        <tr>
+                            <td>execv()</td>
+                            <td>使用參數陣列，需指定完整路徑</td>
+                        </tr>
+                        <tr>
+                            <td>execle()</td>
+                            <td>使用參數列表和環境變數</td>
+                        </tr>
+                        <tr>
+                            <td>execve()</td>
+                            <td>使用參數陣列和環境變數</td>
+                        </tr>
+                        <tr>
+                            <td>execlp()</td>
+                            <td>在 PATH 中搜尋程式</td>
+                        </tr>
+                        <tr>
+                            <td>execvp()</td>
+                            <td>在 PATH 中搜尋程式，使用參數陣列</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.3 行程等待與終止</h3>
+
+                <h4>wait() 和 waitpid()</h4>
+                <p>父行程可以使用 wait() 或 waitpid() 等待子行程結束：</p>
+                <ul>
+                    <li><strong>wait()：</strong>等待任何一個子行程結束</li>
+                    <li><strong>waitpid()：</strong>等待特定的子行程結束</li>
+                    <li>如果不等待子行程，子行程變成殭屍行程（Zombie Process）</li>
+                </ul>
+
+                <h4>exit() 和 _exit()</h4>
+                <ul>
+                    <li><strong>exit()：</strong>正常結束行程，執行清理工作（關閉檔案、清空緩衝區）</li>
+                    <li><strong>_exit()：</strong>立即結束行程，不執行清理</li>
+                </ul>
+
+            </section>
+
+            <section id="practice">
+                <h2>三、實作練習</h2>
+
+                <h3>3.1 基本的 fork() 使用</h3>
+                <p>讓我們從最簡單的 fork() 範例開始，了解父子行程的關係。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>fork_basic.c</span>
+                        <span>基本的 fork() 範例</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+int main() {
+    pid_t pid;
+    
+    printf("開始執行，當前 PID: %d\n", getpid());
+    
+    // 建立子行程
+    pid = fork();
+    
+    if (pid &lt; 0) {
+        // fork 失敗
+        fprintf(stderr, "Fork 失敗\n");
+        return 1;
+    }
+    else if (pid == 0) {
+        // 子行程
+        printf("[子行程] PID: %d, 父 PID: %d\n", 
+               getpid(), getppid());
+        printf("[子行程] fork() 返回值: %d\n", pid);
+    }
+    else {
+        // 父行程
+        printf("[父行程] PID: %d, 子 PID: %d\n", 
+               getpid(), pid);
+        printf("[父行程] fork() 返回值: %d\n", pid);
+    }
+    
+    printf("行程 %d 執行完畢\n", getpid());
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o fork_basic fork_basic.c
+<span class="prompt">$</span> ./fork_basic
+<span class="output">開始執行，當前 PID: 12345
+[父行程] PID: 12345, 子 PID: 12346
+[父行程] fork() 返回值: 12346
+行程 12345 執行完畢
+[子行程] PID: 12346, 父 PID: 12345
+[子行程] fork() 返回值: 0
+行程 12346 執行完畢</span>
+                </div>
+
+                <div class="note-box">
+                    <strong>重要觀察：</strong>
+                    <p>1. fork() 之後的程式碼會被父子行程都執行一次</p>
+                    <p>2. 父行程的 fork() 返回子行程的 PID</p>
+                    <p>3. 子行程的 fork() 返回 0</p>
+                    <p>4. 輸出順序可能因排程而不同</p>
+                </div>
+
+                <h3>3.2 父行程等待子行程</h3>
+                <p>使用 wait() 讓父行程等待子行程結束。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>fork_wait.c</span>
+                        <span>使用 wait() 等待子行程</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;sys/types.h&gt;
+
+int main() {
+    pid_t pid;
+    int status;
+    
+    pid = fork();
+    
+    if (pid &lt; 0) {
+        perror("Fork 失敗");
+        return 1;
+    }
+    else if (pid == 0) {
+        // 子行程
+        printf("[子行程] PID: %d 開始執行\n", getpid());
+        
+        // 模擬工作
+        printf("[子行程] 工作中...\n");
+        sleep(2);
+        
+        printf("[子行程] 工作完成，準備結束\n");
+        exit(42);  // 以狀態碼 42 結束
+    }
+    else {
+        // 父行程
+        printf("[父行程] 等待子行程 %d 結束...\n", pid);
+        
+        // 等待子行程結束
+        pid_t child_pid = wait(&status);
+        
+        printf("[父行程] 子行程 %d 已結束\n", child_pid);
+        
+        // 檢查子行程如何結束
+        if (WIFEXITED(status)) {
+            printf("[父行程] 子行程正常結束，返回值: %d\n", 
+                   WEXITSTATUS(status));
+        }
+        else if (WIFSIGNALED(status)) {
+            printf("[父行程] 子行程被信號終止，信號: %d\n", 
+                   WTERMSIG(status));
+        }
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o fork_wait fork_wait.c
+<span class="prompt">$</span> ./fork_wait
+<span class="output">[父行程] 等待子行程 12347 結束...
+[子行程] PID: 12347 開始執行
+[子行程] 工作中...
+[子行程] 工作完成，準備結束
+[父行程] 子行程 12347 已結束
+[父行程] 子行程正常結束，返回值: 42</span>
+                </div>
+
+                <h3>3.3 建立多個子行程</h3>
+                <p>示範如何建立和管理多個子行程。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>fork_multiple.c</span>
+                        <span>建立多個子行程</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define NUM_CHILDREN 3
+
+int main() {
+    pid_t pid;
+    int i;
+    
+    printf("父行程 (PID: %d) 開始建立子行程\n\n", getpid());
+    
+    // 建立多個子行程
+    for (i = 0; i &lt; NUM_CHILDREN; i++) {
+        pid = fork();
+        
+        if (pid &lt; 0) {
+            perror("Fork 失敗");
+            return 1;
+        }
+        else if (pid == 0) {
+            // 子行程
+            printf("[子行程 %d] PID: %d, 父 PID: %d\n", 
+                   i + 1, getpid(), getppid());
+            
+            // 每個子行程工作不同的時間
+            sleep(i + 1);
+            
+            printf("[子行程 %d] 完成工作\n", i + 1);
+            exit(i);
+        }
+        
+        // 父行程繼續迴圈建立下一個子行程
+    }
+    
+    // 父行程等待所有子行程
+    printf("\n[父行程] 等待所有子行程結束...\n\n");
+    
+    for (i = 0; i &lt; NUM_CHILDREN; i++) {
+        int status;
+        pid_t child_pid = wait(&status);
+        
+        if (WIFEXITED(status)) {
+            printf("[父行程] 子行程 %d 結束，返回值: %d\n",
+                   child_pid, WEXITSTATUS(status));
+        }
+    }
+    
+    printf("\n[父行程] 所有子行程已完成\n");
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o fork_multiple fork_multiple.c
+<span class="prompt">$</span> ./fork_multiple
+<span class="output">父行程 (PID: 12350) 開始建立子行程
+
+[子行程 1] PID: 12351, 父 PID: 12350
+[子行程 2] PID: 12352, 父 PID: 12350
+[子行程 3] PID: 12353, 父 PID: 12350
+
+[父行程] 等待所有子行程結束...
+
+[子行程 1] 完成工作
+[父行程] 子行程 12351 結束，返回值: 0
+[子行程 2] 完成工作
+[父行程] 子行程 12352 結束，返回值: 1
+[子行程 3] 完成工作
+[父行程] 子行程 12353 結束，返回值: 2
+
+[父行程] 所有子行程已完成</span>
+                </div>
+
+                <h3>3.4 使用 exec() 執行新程式</h3>
+                <p>展示如何使用 exec() 系列函數執行其他程式。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>exec_example.c</span>
+                        <span>使用 exec() 執行新程式</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main() {
+    pid_t pid;
+    
+    printf("=== exec() 範例 ===\n\n");
+    
+    pid = fork();
+    
+    if (pid &lt; 0) {
+        perror("Fork 失敗");
+        return 1;
+    }
+    else if (pid == 0) {
+        // 子行程：執行 ls 命令
+        printf("[子行程] 執行 ls -l 命令\n");
+        printf("------------------------\n");
+        
+        // 使用 execlp 在 PATH 中搜尋 ls
+        execlp("ls", "ls", "-l", NULL);
+        
+        // 如果 exec 成功，下面的程式碼不會執行
+        perror("exec 失敗");
+        exit(1);
+    }
+    else {
+        // 父行程：等待子行程
+        int status;
+        wait(&status);
+        
+        printf("------------------------\n");
+        printf("[父行程] 子行程執行完畢\n");
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>3.5 fork() 和 exec() 的組合使用</h3>
+                <p>實作一個簡單的命令執行器，結合 fork() 和 exec()。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>simple_shell.c</span>
+                        <span>簡易 Shell 程式</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define MAX_COMMAND 1024
+#define MAX_ARGS 64
+
+void parse_command(char *command, char **args) {
+    int i = 0;
+    char *token = strtok(command, " \t\n");
+    
+    while (token != NULL && i &lt; MAX_ARGS - 1) {
+        args[i++] = token;
+        token = strtok(NULL, " \t\n");
+    }
+    args[i] = NULL;
+}
+
+int main() {
+    char command[MAX_COMMAND];
+    char *args[MAX_ARGS];
+    pid_t pid;
+    int status;
+    
+    printf("簡易 Shell (輸入 'exit' 結束)\n");
+    
+    while (1) {
+        printf("\nshell> ");
+        fflush(stdout);
+        
+        // 讀取命令
+        if (fgets(command, MAX_COMMAND, stdin) == NULL) {
+            break;
+        }
+        
+        // 移除換行符號
+        command[strcspn(command, "\n")] = 0;
+        
+        // 檢查是否為空命令
+        if (strlen(command) == 0) {
+            continue;
+        }
+        
+        // 檢查是否要退出
+        if (strcmp(command, "exit") == 0) {
+            printf("再見！\n");
+            break;
+        }
+        
+        // 解析命令
+        parse_command(command, args);
+        
+        // 建立子行程執行命令
+        pid = fork();
+        
+        if (pid &lt; 0) {
+            perror("Fork 失敗");
+            continue;
+        }
+        else if (pid == 0) {
+            // 子行程：執行命令
+            if (execvp(args[0], args) &lt; 0) {
+                printf("錯誤: 無法執行 '%s'\n", args[0]);
+                exit(1);
+            }
+        }
+        else {
+            // 父行程：等待子行程
+            waitpid(pid, &status, 0);
+        }
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o simple_shell simple_shell.c
+<span class="prompt">$</span> ./simple_shell
+<span class="output">簡易 Shell (輸入 'exit' 結束)
+
+shell> ls
+fork_basic  fork_basic.c  fork_wait  fork_wait.c  simple_shell  simple_shell.c
+
+shell> pwd
+/home/user/os-course
+
+shell> echo Hello World
+Hello World
+
+shell> date
+Sun Feb  8 14:30:45 CST 2026
+
+shell> exit
+再見！</span>
+                </div>
+
+                <h3>3.6 殭屍行程與孤兒行程</h3>
+                <p>理解特殊的行程狀態。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>zombie_process.c</span>
+                        <span>殭屍行程示範</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    pid_t pid;
+    
+    pid = fork();
+    
+    if (pid &lt; 0) {
+        perror("Fork 失敗");
+        return 1;
+    }
+    else if (pid == 0) {
+        // 子行程：快速結束
+        printf("[子行程] PID: %d, 準備結束\n", getpid());
+        exit(0);
+    }
+    else {
+        // 父行程：不呼叫 wait()，子行程變成殭屍
+        printf("[父行程] 子行程 PID: %d\n", pid);
+        printf("[父行程] 睡眠 30 秒（不呼叫 wait）\n");
+        printf("[父行程] 可用 'ps aux | grep %d' 查看殭屍行程\n", pid);
+        
+        sleep(30);
+        
+        printf("[父行程] 結束\n");
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>警告：殭屍行程</strong>
+                    <p>當子行程結束後，如果父行程沒有呼叫 wait() 或 waitpid() 來回收子行程，子行程會變成殭屍行程（Zombie Process）。殭屍行程會佔用系統資源（PCB），雖然不佔用 CPU 和記憶體，但過多的殭屍行程會耗盡系統的行程表空間。</p>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>orphan_process.c</span>
+                        <span>孤兒行程示範</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    pid_t pid;
+    
+    pid = fork();
+    
+    if (pid &lt; 0) {
+        perror("Fork 失敗");
+        return 1;
+    }
+    else if (pid == 0) {
+        // 子行程：父行程結束後繼續執行
+        sleep(2);  // 等待父行程結束
+        
+        printf("[子行程] PID: %d, 父 PID: %d\n", 
+               getpid(), getppid());
+        printf("[子行程] 注意父 PID 已變成 1 (init/systemd)\n");
+        
+        sleep(3);
+        printf("[子行程] 結束\n");
+    }
+    else {
+        // 父行程：快速結束
+        printf("[父行程] PID: %d, 子 PID: %d\n", getpid(), pid);
+        printf("[父行程] 快速結束，子行程變成孤兒\n");
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="note-box">
+                    <strong>孤兒行程</strong>
+                    <p>當父行程在子行程之前結束時，子行程會變成孤兒行程（Orphan Process）。作業系統會將孤兒行程的父行程設定為 init 行程（PID 1），init 會負責回收這些孤兒行程。</p>
+                </div>
+
+                <h3>3.7 行程資源使用監控</h3>
+                <p>使用 getrusage() 監控行程的資源使用情況。</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>process_resource.c</span>
+                        <span>行程資源監控</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/resource.h&gt;
+#include &lt;sys/time.h&gt;
+#include &lt;unistd.h&gt;
+
+void print_resource_usage() {
+    struct rusage usage;
+    
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        printf("\n=== 行程資源使用狀況 ===\n");
+        
+        // CPU 時間
+        printf("使用者 CPU 時間: %ld.%06ld 秒\n",
+               usage.ru_utime.tv_sec,
+               usage.ru_utime.tv_usec);
+        printf("系統 CPU 時間: %ld.%06ld 秒\n",
+               usage.ru_stime.tv_sec,
+               usage.ru_stime.tv_usec);
+        
+        // 記憶體使用
+        printf("最大記憶體使用: %ld KB\n", usage.ru_maxrss);
+        
+        // 頁面錯誤
+        printf("次要頁面錯誤: %ld\n", usage.ru_minflt);
+        printf("主要頁面錯誤: %ld\n", usage.ru_majflt);
+        
+        // I/O 操作
+        printf("檔案系統輸入: %ld\n", usage.ru_inblock);
+        printf("檔案系統輸出: %ld\n", usage.ru_oublock);
+        
+        // 上下文切換
+        printf("自願上下文切換: %ld\n", usage.ru_nvcsw);
+        printf("非自願上下文切換: %ld\n", usage.ru_nivcsw);
+    }
+}
+
+void do_some_work() {
+    // 模擬一些工作
+    int sum = 0;
+    for (int i = 0; i &lt; 10000000; i++) {
+        sum += i;
+    }
+}
+
+int main() {
+    printf("行程 PID: %d\n", getpid());
+    
+    printf("\n開始工作...\n");
+    do_some_work();
+    
+    print_resource_usage();
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：行程樹狀結構</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>撰寫一個程式，建立如下的行程樹狀結構：</p>
+                        <pre>
+        父行程
+        ├── 子行程 1
+        │   ├── 孫行程 1
+        │   └── 孫行程 2
+        └── 子行程 2
+                        </pre>
+                        <p>每個行程應該顯示自己的 PID 和父 PID，並適當使用 wait() 等待子行程。</p>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：行程執行時間測量</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立一個程式，使用 fork() 建立子行程執行某個運算任務，測量並比較：</p>
+                        <ul>
+                            <li>實際執行時間（Wall-clock time）</li>
+                            <li>使用者 CPU 時間</li>
+                            <li>系統 CPU 時間</li>
+                        </ul>
+                        <p><strong>提示：</strong>使用 gettimeofday() 或 clock_gettime() 測量實際時間，使用 getrusage() 獲取 CPU 時間。</p>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：改良版 Shell</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>擴展課程中的簡易 Shell，加入以下功能：</p>
+                        <ul>
+                            <li>支援背景執行（命令後加 &）</li>
+                            <li>支援管線（pipe）：command1 | command2</li>
+                            <li>支援輸入輸出重導向（<, >, >>）</li>
+                            <li>顯示命令執行的時間</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：行程管理工具</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立一個行程管理工具，可以：</p>
+                        <ul>
+                            <li>列出當前使用者的所有行程</li>
+                            <li>顯示每個行程的 PID、PPID、狀態、CPU 使用率、記憶體使用量</li>
+                            <li>可以終止指定的行程</li>
+                            <li>可以改變行程的優先權</li>
+                            <li>即時更新顯示（類似 top 命令）</li>
+                        </ul>
+                        <p><strong>提示：</strong>讀取 /proc 檔案系統獲取行程資訊。</p>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：行程池（Process Pool）</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作一個行程池系統：</p>
+                        <ul>
+                            <li>預先建立固定數量的工作行程（worker processes）</li>
+                            <li>主行程接收任務並分配給空閒的工作行程</li>
+                            <li>使用行程間通訊（pipe 或共享記憶體）傳遞任務和結果</li>
+                            <li>工作行程完成任務後回到行程池等待新任務</li>
+                            <li>支援優雅關閉（graceful shutdown）</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. fork() 系統呼叫在父行程中的返回值是？</strong></p>
+                        <p>A. 0</p>
+                        <p>B. 子行程的 PID</p>
+                        <p>C. 父行程的 PID</p>
+                        <p>D. -1</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 下列哪個不是行程的狀態？</strong></p>
+                        <p>A. 新建（New）</p>
+                        <p>B. 就緒（Ready）</p>
+                        <p>C. 睡眠（Sleeping）</p>
+                        <p>D. 執行（Running）</p>
+                        <p><em>答案：C（睡眠是等待狀態的一種，但不是標準的五種狀態之一）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. exec() 系列函數的作用是？</strong></p>
+                        <p>A. 建立新的行程</p>
+                        <p>B. 替換當前行程的映像</p>
+                        <p>C. 終止行程</p>
+                        <p>D. 等待子行程</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. 什麼是殭屍行程（Zombie Process）？</strong></p>
+                        <p>A. 正在執行但沒有回應的行程</p>
+                        <p>B. 已結束但父行程尚未回收的行程</p>
+                        <p>C. 父行程已結束的子行程</p>
+                        <p>D. 被暫停執行的行程</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 孤兒行程的父行程會被設定為？</strong></p>
+                        <p>A. PID 0</p>
+                        <p>B. PID 1 (init/systemd)</p>
+                        <p>C. PID -1</p>
+                        <p>D. 原父行程的父行程</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 問答題：說明 fork() 和 exec() 通常如何配合使用？</strong></p>
+                        <p><em>參考答案：fork() 建立一個新的子行程，該子行程是父行程的副本。然後在子行程中呼叫 exec() 來執行新的程式，替換子行程的映像。這樣可以在不影響父行程的情況下執行新程式。父行程通常會呼叫 wait() 等待子行程完成。這是 Unix/Linux 系統中執行新程式的標準模式。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：為什麼需要呼叫 wait() 或 waitpid()？</strong></p>
+                        <p><em>參考答案：呼叫 wait() 或 waitpid() 有兩個主要目的：(1) 讓父行程等待子行程完成，實現同步；(2) 回收子行程的資源（PCB），防止產生殭屍行程。如果父行程不回收子行程，即使子行程已經結束，其 PCB 仍會佔用系統資源，大量的殭屍行程可能耗盡系統的行程表空間。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 實作題：寫出程式碼，建立一個子行程執行 "ps -ef" 命令</strong></p>
+                        <p><em>參考答案：</em></p>
+                        <pre><code class="language-c">pid_t pid = fork();
+if (pid == 0) {
+    execl("/bin/ps", "ps", "-ef", NULL);
+    exit(1);
+}
+wait(NULL);</code></pre>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week1.html" class="nav-button">上一週：作業系統概論</a>
+                <a href="week3.html" class="nav-button">下一週：行程排程</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 2 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
