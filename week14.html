@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 14: 效能監控與除錯 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .tool-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 14: 效能監控與除錯</h1>
+            <p class="week-info">Performance Monitoring and Debugging</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第十四週的課程！系統效能監控與除錯是系統管理員和開發人員必備的技能。了解系統如何運作、發現效能瓶頸、診斷程式錯誤，這些能力對於維護穩定高效的系統至關重要。</p>
+                <p>本週我們將學習各種效能監控工具、效能指標的意義、如何分析系統瓶頸、除錯工具的使用、記憶體洩漏偵測、以及效能優化的策略。這些實用技能將幫助你成為更優秀的系統工程師。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>掌握系統效能監控工具（top、htop、vmstat 等）</li>
+                    <li>理解各種效能指標的意義</li>
+                    <li>學習除錯工具的使用（gdb、strace、ltrace）</li>
+                    <li>掌握記憶體洩漏偵測技術</li>
+                    <li>了解效能剖析（Profiling）方法</li>
+                    <li>學習系統調校與優化策略</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、系統效能指標</h2>
+                
+                <h3>1.1 效能指標類型</h3>
+
+                <div class="concept-box">
+                    <h4>主要效能指標</h4>
+                    <ul>
+                        <li><strong>CPU 指標：</strong>
+                            <ul>
+                                <li>使用率（User、System、Idle、I/O Wait）</li>
+                                <li>負載平均（Load Average）</li>
+                                <li>Context Switch 次數</li>
+                            </ul>
+                        </li>
+                        <li><strong>記憶體指標：</strong>
+                            <ul>
+                                <li>總量、已使用、可用</li>
+                                <li>Swap 使用情況</li>
+                                <li>快取和緩衝</li>
+                                <li>分頁錯誤次數</li>
+                            </ul>
+                        </li>
+                        <li><strong>磁碟 I/O 指標：</strong>
+                            <ul>
+                                <li>讀寫速度（MB/s、IOPS）</li>
+                                <li>I/O Wait 時間</li>
+                                <li>佇列長度</li>
+                            </ul>
+                        </li>
+                        <li><strong>網路指標：</strong>
+                            <ul>
+                                <li>頻寬使用率</li>
+                                <li>封包遺失率</li>
+                                <li>連線數</li>
+                                <li>延遲</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>1.2 負載平均（Load Average）</h3>
+                <p>負載平均表示系統在一段時間內平均有多少行程在等待執行。</p>
+
+                <div class="note-box">
+                    <strong>Load Average 解讀</strong>
+                    <p>通常顯示三個數字：1 分鐘、5 分鐘、15 分鐘的平均值</p>
+                    <ul>
+                        <li>單核心系統：1.0 表示 100% 使用率</li>
+                        <li>四核心系統：4.0 表示 100% 使用率</li>
+                        <li>負載 > 核心數：系統過載</li>
+                        <li>負載遞增：問題正在惡化</li>
+                        <li>負載遞減：問題正在改善</li>
+                    </ul>
+                </div>
+
+                <h2>二、效能監控工具</h2>
+
+                <h3>2.1 top / htop</h3>
+                <p>即時顯示系統資源使用情況和行程資訊。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>欄位</th>
+                            <th>說明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PID</td>
+                            <td>行程 ID</td>
+                        </tr>
+                        <tr>
+                            <td>USER</td>
+                            <td>執行使用者</td>
+                        </tr>
+                        <tr>
+                            <td>PR/NI</td>
+                            <td>優先權/Nice 值</td>
+                        </tr>
+                        <tr>
+                            <td>VIRT</td>
+                            <td>虛擬記憶體大小</td>
+                        </tr>
+                        <tr>
+                            <td>RES</td>
+                            <td>實際使用的記憶體</td>
+                        </tr>
+                        <tr>
+                            <td>SHR</td>
+                            <td>共享記憶體</td>
+                        </tr>
+                        <tr>
+                            <td>%CPU</td>
+                            <td>CPU 使用率</td>
+                        </tr>
+                        <tr>
+                            <td>%MEM</td>
+                            <td>記憶體使用率</td>
+                        </tr>
+                        <tr>
+                            <td>TIME+</td>
+                            <td>累計 CPU 時間</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.2 vmstat</h3>
+                <p>報告虛擬記憶體統計資訊。</p>
+
+                <div class="tool-diagram">
+<strong>vmstat 輸出範例：</strong>
+
+$ vmstat 1 5
+
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 2  0      0 512340  85640 892756    0    0    12    45  156  312  5  2 92  1  0
+ 1  0      0 510120  85640 894580    0    0     0   128  168  325  6  2 91  1  0
+
+欄位說明：
+r: 等待執行的行程數
+b: 不可中斷睡眠的行程數
+swpd: 已使用的 swap
+free: 可用記憶體
+buff: 緩衝記憶體
+cache: 快取記憶體
+si: 從磁碟 swap in 的記憶體
+so: 從記憶體 swap out 的量
+bi: 從區塊裝置讀取的量
+bo: 寫入區塊裝置的量
+in: 每秒中斷次數
+cs: 每秒 context switch 次數
+us: 使用者時間百分比
+sy: 系統時間百分比
+id: 閒置時間百分比
+wa: I/O 等待時間百分比
+                </div>
+
+                <h3>2.3 iostat</h3>
+                <p>報告 CPU 和磁碟 I/O 統計資訊。</p>
+
+                <h3>2.4 netstat / ss</h3>
+                <p>顯示網路連線、路由表、網路介面統計。</p>
+
+                <h3>2.5 sar</h3>
+                <p>收集、報告和儲存系統活動資訊。</p>
+
+                <div class="concept-box">
+                    <h4>監控工具總覽</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>工具</th>
+                                <th>主要用途</th>
+                                <th>特點</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>top/htop</td>
+                                <td>即時系統監控</td>
+                                <td>互動式、即時更新</td>
+                            </tr>
+                            <tr>
+                                <td>vmstat</td>
+                                <td>虛擬記憶體統計</td>
+                                <td>輕量、快速</td>
+                            </tr>
+                            <tr>
+                                <td>iostat</td>
+                                <td>I/O 統計</td>
+                                <td>磁碟效能分析</td>
+                            </tr>
+                            <tr>
+                                <td>netstat/ss</td>
+                                <td>網路連線</td>
+                                <td>網路診斷</td>
+                            </tr>
+                            <tr>
+                                <td>sar</td>
+                                <td>歷史資料收集</td>
+                                <td>長期趨勢分析</td>
+                            </tr>
+                            <tr>
+                                <td>perf</td>
+                                <td>效能剖析</td>
+                                <td>深入分析</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>三、除錯工具</h2>
+
+                <h3>3.1 GDB（GNU Debugger）</h3>
+                <p>最強大的 C/C++ 程式除錯工具。</p>
+
+                <div class="concept-box">
+                    <h4>GDB 常用指令</h4>
+                    <ul>
+                        <li><strong>啟動除錯：</strong>gdb ./program</li>
+                        <li><strong>設定中斷點：</strong>break main, break file.c:10</li>
+                        <li><strong>執行程式：</strong>run [args]</li>
+                        <li><strong>單步執行：</strong>step（進入函數）, next（跳過函數）</li>
+                        <li><strong>繼續執行：</strong>continue</li>
+                        <li><strong>查看變數：</strong>print variable</li>
+                        <li><strong>查看堆疊：</strong>backtrace</li>
+                        <li><strong>查看記憶體：</strong>x/10x address</li>
+                        <li><strong>設定觀察點：</strong>watch variable</li>
+                    </ul>
+                </div>
+
+                <h3>3.2 strace</h3>
+                <p>追蹤系統呼叫和信號。</p>
+
+                <div class="note-box">
+                    <strong>strace 用途</strong>
+                    <ul>
+                        <li>查看程式呼叫了哪些系統呼叫</li>
+                        <li>診斷程式掛起或效能問題</li>
+                        <li>了解程式如何與系統互動</li>
+                        <li>追蹤檔案開啟、網路連線等</li>
+                    </ul>
+                </div>
+
+                <h3>3.3 ltrace</h3>
+                <p>追蹤函式庫呼叫。</p>
+
+                <h3>3.4 Valgrind</h3>
+                <p>記憶體除錯和效能剖析工具。</p>
+
+                <div class="concept-box">
+                    <h4>Valgrind 工具集</h4>
+                    <ul>
+                        <li><strong>Memcheck：</strong>記憶體錯誤偵測
+                            <ul>
+                                <li>記憶體洩漏</li>
+                                <li>使用未初始化的記憶體</li>
+                                <li>非法記憶體存取</li>
+                                <li>重複釋放記憶體</li>
+                            </ul>
+                        </li>
+                        <li><strong>Cachegrind：</strong>快取效能分析</li>
+                        <li><strong>Callgrind：</strong>呼叫圖剖析</li>
+                        <li><strong>Helgrind：</strong>執行緒錯誤偵測</li>
+                        <li><strong>Massif：</strong>堆疊剖析</li>
+                    </ul>
+                </div>
+
+                <h2>四、效能剖析</h2>
+
+                <h3>4.1 什麼是 Profiling？</h3>
+                <p>效能剖析是分析程式執行時的行為，找出效能瓶頸的過程。</p>
+
+                <h3>4.2 gprof</h3>
+                <p>GNU 效能剖析工具。</p>
+
+                <div class="note-box">
+                    <strong>使用 gprof 的步驟</strong>
+                    <ol>
+                        <li>編譯時加上 -pg 選項：gcc -pg program.c -o program</li>
+                        <li>執行程式：./program</li>
+                        <li>生成分析報告：gprof program gmon.out > analysis.txt</li>
+                    </ol>
+                </div>
+
+                <h3>4.3 perf</h3>
+                <p>Linux 效能分析工具，可以進行 CPU 剖析、追蹤事件等。</p>
+
+                <h3>4.4 火焰圖（Flame Graph）</h3>
+                <p>視覺化的效能剖析結果，可以快速找出熱點函數。</p>
+
+                <h2>五、效能優化策略</h2>
+
+                <h3>5.1 優化原則</h3>
+
+                <div class="warning-box">
+                    <strong>優化的黃金法則</strong>
+                    <ul>
+                        <li>不要過早優化（Premature optimization is the root of all evil）</li>
+                        <li>先測量，再優化</li>
+                        <li>專注於瓶頸</li>
+                        <li>優化後要驗證</li>
+                        <li>注意可讀性與維護性</li>
+                    </ul>
+                </div>
+
+                <h3>5.2 常見優化方向</h3>
+
+                <div class="concept-box">
+                    <h4>CPU 優化</h4>
+                    <ul>
+                        <li>減少不必要的計算</li>
+                        <li>使用更高效的演算法</li>
+                        <li>利用快取局部性</li>
+                        <li>並行化處理</li>
+                        <li>減少 context switch</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>記憶體優化</h4>
+                    <ul>
+                        <li>減少記憶體配置次數</li>
+                        <li>使用記憶體池</li>
+                        <li>避免記憶體洩漏</li>
+                        <li>減少記憶體碎片</li>
+                        <li>使用適當的資料結構</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>I/O 優化</h4>
+                    <ul>
+                        <li>使用緩衝</li>
+                        <li>批次處理</li>
+                        <li>非同步 I/O</li>
+                        <li>減少磁碟存取</li>
+                        <li>使用快取</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>六、實作練習</h2>
+
+                <h3>6.1 系統監控腳本</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>system_monitor.sh</span>
+                        <span>系統資源監控腳本</span>
+                    </div>
+                    <pre><code class="language-bash">#!/bin/bash
+
+# 系統監控腳本
+
+LOG_FILE="system_monitor.log"
+INTERVAL=5
+
+echo "系統監控開始 - $(date)" | tee -a $LOG_FILE
+echo "========================================" | tee -a $LOG_FILE
+
+while true; do
+    echo "" | tee -a $LOG_FILE
+    echo "=== 時間: $(date) ===" | tee -a $LOG_FILE
+    
+    # CPU 資訊
+    echo "--- CPU 使用率 ---" | tee -a $LOG_FILE
+    top -bn1 | grep "Cpu(s)" | tee -a $LOG_FILE
+    
+    # 記憶體資訊
+    echo "--- 記憶體使用 ---" | tee -a $LOG_FILE
+    free -h | tee -a $LOG_FILE
+    
+    # 磁碟使用
+    echo "--- 磁碟使用 ---" | tee -a $LOG_FILE
+    df -h | grep -v tmpfs | tee -a $LOG_FILE
+    
+    # 負載平均
+    echo "--- 負載平均 ---" | tee -a $LOG_FILE
+    uptime | tee -a $LOG_FILE
+    
+    # Top 5 CPU 使用行程
+    echo "--- Top 5 CPU 使用行程 ---" | tee -a $LOG_FILE
+    ps aux --sort=-%cpu | head -6 | tee -a $LOG_FILE
+    
+    # Top 5 記憶體使用行程
+    echo "--- Top 5 記憶體使用行程 ---" | tee -a $LOG_FILE
+    ps aux --sort=-%mem | head -6 | tee -a $LOG_FILE
+    
+    # 網路連線統計
+    echo "--- 網路連線統計 ---" | tee -a $LOG_FILE
+    ss -s | tee -a $LOG_FILE
+    
+    sleep $INTERVAL
+done</code></pre>
+                </div>
+
+                <h3>6.2 GDB 除錯練習</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>buggy_program.c</span>
+                        <span>包含錯誤的程式（用於除錯練習）</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int divide(int a, int b) {
+    return a / b;  // 可能除以零
+}
+
+void array_access(int* arr, int size, int index) {
+    printf("Value: %d\n", arr[index]);  // 可能越界
+}
+
+int* create_array() {
+    int arr[5] = {1, 2, 3, 4, 5};
+    return arr;  // 返回局部變數位址（錯誤！）
+}
+
+int main() {
+    int result;
+    int arr[5] = {1, 2, 3, 4, 5};
+    
+    // Bug 1: 除以零
+    result = divide(10, 0);
+    printf("Result: %d\n", result);
+    
+    // Bug 2: 陣列越界
+    array_access(arr, 5, 10);
+    
+    // Bug 3: 使用已釋放的記憶體
+    int* ptr = malloc(sizeof(int) * 5);
+    free(ptr);
+    ptr[0] = 10;  // 使用已釋放的記憶體
+    
+    // Bug 4: 記憶體洩漏
+    int* leak = malloc(sizeof(int) * 100);
+    // 忘記 free(leak);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>gdb_commands.txt</span>
+                        <span>GDB 除錯指令範例</span>
+                    </div>
+                    <pre><code class="language-bash"># 編譯程式（加上除錯資訊）
+gcc -g buggy_program.c -o buggy_program
+
+# 啟動 GDB
+gdb ./buggy_program
+
+# GDB 指令序列
+(gdb) break main          # 在 main 設中斷點
+(gdb) run                 # 執行程式
+(gdb) next                # 單步執行（不進入函數）
+(gdb) step                # 單步執行（進入函數）
+(gdb) print result        # 印出變數值
+(gdb) backtrace           # 顯示呼叫堆疊
+(gdb) info locals         # 顯示局部變數
+(gdb) watch result        # 監視變數變化
+(gdb) continue            # 繼續執行
+(gdb) quit                # 離開 GDB</code></pre>
+                </div>
+
+                <h3>6.3 strace 系統呼叫追蹤</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>strace_examples.sh</span>
+                        <span>strace 使用範例</span>
+                    </div>
+                    <pre><code class="language-bash">#!/bin/bash
+
+# 追蹤程式的所有系統呼叫
+strace ./my_program
+
+# 只追蹤特定的系統呼叫（open, read, write）
+strace -e trace=open,read,write ./my_program
+
+# 追蹤並統計系統呼叫
+strace -c ./my_program
+
+# 追蹤檔案相關的系統呼叫
+strace -e trace=file ./my_program
+
+# 追蹤網路相關的系統呼叫
+strace -e trace=network ./my_program
+
+# 追蹤執行中的行程
+strace -p 1234  # 1234 是 PID
+
+# 輸出到檔案
+strace -o output.txt ./my_program
+
+# 顯示時間戳記
+strace -t ./my_program
+
+# 顯示相對時間
+strace -r ./my_program</code></pre>
+                </div>
+
+                <h3>6.4 Valgrind 記憶體檢查</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>memory_leak.c</span>
+                        <span>記憶體洩漏範例</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+void memory_leak_example() {
+    // 記憶體洩漏：配置但未釋放
+    char* leak = malloc(100);
+    strcpy(leak, "This memory will leak");
+    // 忘記 free(leak);
+}
+
+void use_after_free_example() {
+    int* ptr = malloc(sizeof(int) * 10);
+    free(ptr);
+    ptr[0] = 42;  // 錯誤：使用已釋放的記憶體
+}
+
+void invalid_access_example() {
+    int* arr = malloc(sizeof(int) * 5);
+    arr[10] = 100;  // 錯誤：越界存取
+    free(arr);
+}
+
+void uninitialized_value_example() {
+    int* ptr = malloc(sizeof(int));
+    printf("Value: %d\n", *ptr);  // 錯誤：使用未初始化的值
+    free(ptr);
+}
+
+int main() {
+    memory_leak_example();
+    
+    // 註解掉這些以避免崩潰
+    // use_after_free_example();
+    // invalid_access_example();
+    // uninitialized_value_example();
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="output-block">
+<span class="prompt">$</span> gcc -g memory_leak.c -o memory_leak
+<span class="prompt">$</span> valgrind --leak-check=full ./memory_leak
+<span class="output">==12345== Memcheck, a memory error detector
+==12345== HEAP SUMMARY:
+==12345==     in use at exit: 100 bytes in 1 blocks
+==12345==   total heap usage: 1 allocs, 0 frees, 100 bytes allocated
+==12345== 
+==12345== 100 bytes in 1 blocks are definitely lost
+==12345==    at malloc
+==12345==    by memory_leak_example
+==12345==    by main
+==12345== 
+==12345== LEAK SUMMARY:
+==12345==    definitely lost: 100 bytes in 1 blocks</span>
+                </div>
+
+                <h3>6.5 效能剖析工具</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>performance_test.c</span>
+                        <span>效能測試程式</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+#define SIZE 1000000
+
+// 效能較差的版本（頻繁的記憶體配置）
+void slow_version() {
+    for (int i = 0; i < SIZE; i++) {
+        int* temp = malloc(sizeof(int));
+        *temp = i;
+        free(temp);
+    }
+}
+
+// 效能較好的版本（一次配置）
+void fast_version() {
+    int* arr = malloc(sizeof(int) * SIZE);
+    for (int i = 0; i < SIZE; i++) {
+        arr[i] = i;
+    }
+    free(arr);
+}
+
+void measure_time(void (*func)(), const char* name) {
+    clock_t start = clock();
+    func();
+    clock_t end = clock();
+    
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("%s: %.4f 秒\n", name, time_spent);
+}
+
+int main() {
+    printf("效能比較測試\n");
+    printf("================\n");
+    
+    measure_time(slow_version, "慢速版本");
+    measure_time(fast_version, "快速版本");
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>perf_commands.sh</span>
+                        <span>perf 工具使用範例</span>
+                    </div>
+                    <pre><code class="language-bash">#!/bin/bash
+
+# 編譯程式
+gcc -O2 -g performance_test.c -o performance_test
+
+# 使用 perf 記錄效能資料
+perf record ./performance_test
+
+# 查看報告
+perf report
+
+# 統計事件
+perf stat ./performance_test
+
+# 追蹤特定事件
+perf stat -e cycles,instructions,cache-misses ./performance_test
+
+# CPU 剖析
+perf record -g ./performance_test
+perf report -g
+
+# 即時 top
+perf top</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：系統監控儀表板</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>建立即時系統監控程式。</p>
+                        <ul>
+                            <li>顯示 CPU、記憶體、磁碟使用情況</li>
+                            <li>列出 Top 10 資源使用行程</li>
+                            <li>支援自動更新（每 N 秒）</li>
+                            <li>將資料記錄到檔案</li>
+                            <li>產生簡單的文字圖表</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：除錯練習</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>使用 GDB 和 Valgrind 除錯程式。</p>
+                        <ul>
+                            <li>找出並修復記憶體洩漏</li>
+                            <li>修復緩衝區溢位問題</li>
+                            <li>修復 segmentation fault</li>
+                            <li>使用 GDB 追蹤變數變化</li>
+                            <li>撰寫除錯報告</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：效能分析工具</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立程式效能分析工具。</p>
+                        <ul>
+                            <li>測量函數執行時間</li>
+                            <li>統計函數呼叫次數</li>
+                            <li>記憶體使用追蹤</li>
+                            <li>產生效能報告</li>
+                            <li>視覺化結果（圖表）</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：效能優化實戰</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>優化給定的低效程式。</p>
+                        <ul>
+                            <li>使用 profiling 工具找出瓶頸</li>
+                            <li>優化演算法複雜度</li>
+                            <li>減少記憶體配置次數</li>
+                            <li>優化快取使用</li>
+                            <li>比較優化前後的效能</li>
+                            <li>撰寫優化報告</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：完整監控系統</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立完整的系統監控與預警系統。</p>
+                        <ul>
+                            <li>收集系統各項指標</li>
+                            <li>歷史資料儲存</li>
+                            <li>異常偵測與預警</li>
+                            <li>產生趨勢分析報告</li>
+                            <li>Web 介面展示（選擇性）</li>
+                            <li>支援多台主機監控</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. Load Average 為 2.5 在四核心系統上表示？</strong></p>
+                        <p>A. 系統嚴重過載</p>
+                        <p>B. 系統使用率約 62.5%</p>
+                        <p>C. 系統閒置</p>
+                        <p>D. 有 2.5 個行程在執行</p>
+                        <p><em>答案：B（2.5/4 = 62.5%）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. vmstat 中的 'si' 和 'so' 欄位表示？</strong></p>
+                        <p>A. CPU 使用率</p>
+                        <p>B. Swap in 和 Swap out</p>
+                        <p>C. 系統中斷</p>
+                        <p>D. 磁碟 I/O</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. GDB 中用於設定中斷點的指令是？</strong></p>
+                        <p>A. stop</p>
+                        <p>B. pause</p>
+                        <p>C. break</p>
+                        <p>D. halt</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. Valgrind 的 Memcheck 主要用於？</strong></p>
+                        <p>A. CPU 效能分析</p>
+                        <p>B. 記憶體錯誤偵測</p>
+                        <p>C. 網路監控</p>
+                        <p>D. 磁碟 I/O 分析</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. strace 工具主要追蹤？</strong></p>
+                        <p>A. 函式庫呼叫</p>
+                        <p>B. 系統呼叫</p>
+                        <p>C. 網路封包</p>
+                        <p>D. 記憶體配置</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 效能優化的首要原則是？</strong></p>
+                        <p>A. 立即優化所有程式碼</p>
+                        <p>B. 先測量，再優化</p>
+                        <p>C. 只優化 CPU 使用</p>
+                        <p>D. 使用最複雜的演算法</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明如何使用監控工具診斷系統效能問題</strong></p>
+                        <p><em>參考答案：診斷系統效能問題的步驟：(1) 使用 top/htop 查看整體資源使用情況，識別異常行程；(2) 使用 vmstat 檢查記憶體和 swap 使用，判斷是否有記憶體壓力；(3) 使用 iostat 分析磁碟 I/O，檢查是否有 I/O 瓶頸；(4) 使用 netstat/ss 檢查網路連線狀態；(5) 查看 Load Average 判斷系統負載趨勢；(6) 使用 sar 分析歷史資料找出規律。根據監控結果，針對性地優化：CPU 過高則優化演算法或增加並行；記憶體不足則優化記憶體使用或增加實體記憶體；I/O Wait 高則優化磁碟存取或使用 SSD。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：解釋記憶體洩漏的成因及如何使用工具偵測</strong></p>
+                        <p><em>參考答案：記憶體洩漏是指程式配置記憶體後未正確釋放，導致記憶體逐漸耗盡。常見原因：(1) malloc/new 後忘記 free/delete；(2) 迴圈中重複配置；(3) 異常處理路徑中未釋放；(4) 資料結構未完整清理。偵測方法：使用 Valgrind 的 Memcheck 工具，編譯時加上 -g 選項，執行 'valgrind --leak-check=full ./program'，報告會顯示洩漏的位置、大小和呼叫堆疊。也可使用 AddressSanitizer（編譯時加 -fsanitize=address）進行即時偵測。預防方法：使用 RAII 模式、智慧指標、記憶體池，養成配置後立即規劃釋放的習慣。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week13.html" class="nav-button">上一週：虛擬化技術</a>
+                <a href="week15.html" class="nav-button">下一週：雲端運算</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 14 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

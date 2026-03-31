@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 15: 雲端運算與現代作業系統 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .cloud-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 15: 雲端運算與現代作業系統</h1>
+            <p class="week-info">Cloud Computing and Modern Operating Systems</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第十五週的課程！我們已經學習了作業系統的核心概念，現在讓我們將視野擴展到雲端運算時代。雲端運算徹底改變了我們使用和管理資訊系統的方式，而現代作業系統也在不斷演進以適應新的需求。</p>
+                <p>本週我們將學習雲端運算的基本概念、服務模型、容器編排技術（Kubernetes）、微服務架構、Serverless 運算，以及現代作業系統的發展趨勢。這些知識將幫助你理解當今 IT 產業的核心技術。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解雲端運算的概念與服務模型</li>
+                    <li>學習容器編排與 Kubernetes 基礎</li>
+                    <li>了解微服務架構的設計原則</li>
+                    <li>認識 Serverless 運算模式</li>
+                    <li>探索現代作業系統的發展趨勢</li>
+                    <li>了解物聯網與邊緣運算</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、雲端運算基礎</h2>
+                
+                <h3>1.1 什麼是雲端運算？</h3>
+                <p>雲端運算是一種透過網際網路提供運算資源（伺服器、儲存、資料庫、網路、軟體等）的模式，使用者可以按需使用，按使用量付費。</p>
+
+                <div class="concept-box">
+                    <h4>雲端運算的五大特性（NIST 定義）</h4>
+                    <ul>
+                        <li><strong>按需自助服務（On-demand Self-service）：</strong>使用者可以自行配置資源，無需人工介入</li>
+                        <li><strong>廣泛的網路存取（Broad Network Access）：</strong>透過標準機制從各種裝置存取</li>
+                        <li><strong>資源池（Resource Pooling）：</strong>供應商的資源集中管理，動態分配給多個使用者</li>
+                        <li><strong>快速彈性（Rapid Elasticity）：</strong>可以快速擴展或縮減資源</li>
+                        <li><strong>可測量的服務（Measured Service）：</strong>資源使用可以監控、控制和報告</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 雲端服務模型</h3>
+
+                <div class="cloud-diagram">
+<strong>雲端服務模型堆疊：</strong>
+
+┌─────────────────────────────────┐
+│         SaaS (軟體即服務)         │  使用者只需使用應用程式
+│    應用程式 (Gmail, Office365)   │  (如 Gmail, Salesforce)
+├─────────────────────────────────┤
+│         PaaS (平台即服務)         │  開發者部署應用程式
+│  執行環境、資料庫、開發工具        │  (如 Heroku, Google App)
+├─────────────────────────────────┤
+│     IaaS (基礎設施即服務)         │  系統管理員管理虛擬機
+│   虛擬機、儲存、網路              │  (如 AWS EC2, Azure VM)
+├─────────────────────────────────┤
+│         實體基礎設施              │  雲端供應商管理
+│   伺服器、儲存、網路              │
+└─────────────────────────────────┘
+
+責任劃分：
+                 IaaS         PaaS         SaaS
+應用程式         使用者       使用者       供應商
+資料             使用者       使用者       供應商
+執行環境         使用者       供應商       供應商
+作業系統         使用者       供應商       供應商
+虛擬化           供應商       供應商       供應商
+硬體             供應商       供應商       供應商
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>說明</th>
+                            <th>使用者控制</th>
+                            <th>範例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>IaaS</td>
+                            <td>提供虛擬化的運算資源</td>
+                            <td>OS、應用程式</td>
+                            <td>AWS EC2, Azure VM, GCP Compute</td>
+                        </tr>
+                        <tr>
+                            <td>PaaS</td>
+                            <td>提供應用程式開發平台</td>
+                            <td>應用程式、資料</td>
+                            <td>Heroku, Google App Engine, Azure App Service</td>
+                        </tr>
+                        <tr>
+                            <td>SaaS</td>
+                            <td>提供完整的應用程式</td>
+                            <td>僅使用應用程式</td>
+                            <td>Gmail, Office 365, Salesforce, Dropbox</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>1.3 雲端部署模型</h3>
+
+                <div class="concept-box">
+                    <h4>四種部署模型</h4>
+                    <ul>
+                        <li><strong>公有雲（Public Cloud）：</strong>
+                            <ul>
+                                <li>向公眾開放</li>
+                                <li>共享基礎設施</li>
+                                <li>成本較低</li>
+                                <li>範例：AWS、Azure、GCP</li>
+                            </ul>
+                        </li>
+                        <li><strong>私有雲（Private Cloud）：</strong>
+                            <ul>
+                                <li>專屬於單一組織</li>
+                                <li>更好的控制與安全性</li>
+                                <li>成本較高</li>
+                                <li>範例：OpenStack、VMware vCloud</li>
+                            </ul>
+                        </li>
+                        <li><strong>混合雲（Hybrid Cloud）：</strong>
+                            <ul>
+                                <li>結合公有雲與私有雲</li>
+                                <li>資料與應用可在兩者間移動</li>
+                                <li>靈活性高</li>
+                            </ul>
+                        </li>
+                        <li><strong>社群雲（Community Cloud）：</strong>
+                            <ul>
+                                <li>由具有共同需求的組織共享</li>
+                                <li>介於公有雲與私有雲之間</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h2>二、容器編排與 Kubernetes</h2>
+
+                <h3>2.1 為什麼需要容器編排？</h3>
+                <p>當容器數量增加到數十、數百甚至數千個時，手動管理變得不切實際。容器編排工具自動化容器的部署、擴展、網路和管理。</p>
+
+                <div class="note-box">
+                    <strong>容器編排解決的問題</strong>
+                    <ul>
+                        <li>自動化部署與更新</li>
+                        <li>服務發現與負載平衡</li>
+                        <li>自動擴展（Scaling）</li>
+                        <li>自我修復（Self-healing）</li>
+                        <li>配置管理</li>
+                        <li>儲存編排</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 Kubernetes 基礎</h3>
+                <p>Kubernetes（K8s）是目前最流行的容器編排平台，由 Google 開發並開源。</p>
+
+                <div class="concept-box">
+                    <h4>Kubernetes 核心概念</h4>
+                    <ul>
+                        <li><strong>Pod：</strong>最小部署單位，包含一個或多個容器</li>
+                        <li><strong>Node：</strong>工作節點，執行 Pod 的機器</li>
+                        <li><strong>Cluster：</strong>由多個 Node 組成的集群</li>
+                        <li><strong>Deployment：</strong>管理 Pod 的宣告式更新</li>
+                        <li><strong>Service：</strong>提供網路存取 Pod 的抽象層</li>
+                        <li><strong>Namespace：</strong>虛擬集群，用於資源隔離</li>
+                        <li><strong>ConfigMap & Secret：</strong>配置與敏感資料管理</li>
+                    </ul>
+                </div>
+
+                <div class="cloud-diagram">
+<strong>Kubernetes 架構：</strong>
+
+Master Node (Control Plane):
+┌────────────────────────────────────┐
+│  API Server  │  Scheduler          │
+│  Controller  │  etcd (資料庫)       │
+└────────────────────────────────────┘
+              │
+      ┌───────┴───────┐
+      │               │
+Worker Node 1    Worker Node 2
+┌──────────┐    ┌──────────┐
+│ kubelet  │    │ kubelet  │
+│ kube-proxy│   │ kube-proxy│
+│          │    │          │
+│ ┌──Pod──┐│    │ ┌──Pod──┐│
+│ │ App  ││    │ │ App  ││
+│ └──────┘│    │ └──────┘│
+└──────────┘    └──────────┘
+                </div>
+
+                <h3>2.3 Kubernetes 核心功能</h3>
+
+                <h4>自動擴展（Auto-scaling）</h4>
+                <ul>
+                    <li>Horizontal Pod Autoscaler（HPA）：根據 CPU/記憶體使用率自動調整 Pod 數量</li>
+                    <li>Vertical Pod Autoscaler（VPA）：調整 Pod 的資源請求</li>
+                    <li>Cluster Autoscaler：調整集群節點數量</li>
+                </ul>
+
+                <h4>滾動更新（Rolling Update）</h4>
+                <p>逐步更新 Pod，確保服務不中斷。</p>
+
+                <h4>自我修復（Self-healing）</h4>
+                <ul>
+                    <li>重啟失敗的容器</li>
+                    <li>替換無回應的 Pod</li>
+                    <li>健康檢查（Liveness & Readiness Probes）</li>
+                </ul>
+
+                <h2>三、微服務架構</h2>
+
+                <h3>3.1 微服務 vs 單體架構</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>單體架構（Monolithic）</th>
+                            <th>微服務架構（Microservices）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>結構</td>
+                            <td>所有功能在單一應用</td>
+                            <td>多個獨立的小服務</td>
+                        </tr>
+                        <tr>
+                            <td>部署</td>
+                            <td>整體部署</td>
+                            <td>獨立部署</td>
+                        </tr>
+                        <tr>
+                            <td>擴展</td>
+                            <td>垂直擴展</td>
+                            <td>水平擴展</td>
+                        </tr>
+                        <tr>
+                            <td>技術棧</td>
+                            <td>統一技術棧</td>
+                            <td>可使用不同技術</td>
+                        </tr>
+                        <tr>
+                            <td>開發速度</td>
+                            <td>初期快，後期慢</td>
+                            <td>持續快速迭代</td>
+                        </tr>
+                        <tr>
+                            <td>複雜度</td>
+                            <td>較低</td>
+                            <td>較高</td>
+                        </tr>
+                        <tr>
+                            <td>適用場景</td>
+                            <td>小型應用、MVP</td>
+                            <td>大型、複雜系統</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>3.2 微服務設計原則</h3>
+
+                <div class="concept-box">
+                    <h4>核心原則</h4>
+                    <ul>
+                        <li><strong>單一職責：</strong>每個服務專注於一個業務功能</li>
+                        <li><strong>自治性：</strong>服務可獨立開發、部署、擴展</li>
+                        <li><strong>去中心化：</strong>避免單點故障</li>
+                        <li><strong>彈性設計：</strong>容錯與降級機制</li>
+                        <li><strong>可觀測性：</strong>日誌、監控、追蹤</li>
+                        <li><strong>API 優先：</strong>明確的服務介面</li>
+                    </ul>
+                </div>
+
+                <h3>3.3 微服務挑戰</h3>
+
+                <div class="warning-box">
+                    <strong>常見挑戰</strong>
+                    <ul>
+                        <li><strong>分散式系統複雜性：</strong>網路延遲、部分失效</li>
+                        <li><strong>資料一致性：</strong>分散式交易處理困難</li>
+                        <li><strong>服務間通訊：</strong>增加網路開銷</li>
+                        <li><strong>測試複雜度：</strong>整合測試困難</li>
+                        <li><strong>部署協調：</strong>需要自動化工具</li>
+                        <li><strong>監控與除錯：</strong>跨服務追蹤困難</li>
+                    </ul>
+                </div>
+
+                <h2>四、Serverless 運算</h2>
+
+                <h3>4.1 什麼是 Serverless？</h3>
+                <p>Serverless 不是沒有伺服器，而是開發者不需要管理伺服器。雲端供應商負責基礎設施管理，開發者只需關注程式碼。</p>
+
+                <div class="concept-box">
+                    <h4>Serverless 的特點</h4>
+                    <ul>
+                        <li><strong>事件驅動：</strong>由事件觸發執行</li>
+                        <li><strong>自動擴展：</strong>根據需求自動調整資源</li>
+                        <li><strong>按使用付費：</strong>只為實際執行時間付費</li>
+                        <li><strong>無狀態：</strong>函數不保存狀態</li>
+                        <li><strong>快速部署：</strong>專注於業務邏輯</li>
+                    </ul>
+                </div>
+
+                <h3>4.2 Function as a Service (FaaS)</h3>
+                <p>FaaS 是 Serverless 的核心，允許開發者上傳函數程式碼，由事件觸發執行。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>平台</th>
+                            <th>服務名稱</th>
+                            <th>支援語言</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>AWS</td>
+                            <td>Lambda</td>
+                            <td>Node.js, Python, Java, Go, C#, Ruby</td>
+                        </tr>
+                        <tr>
+                            <td>Azure</td>
+                            <td>Functions</td>
+                            <td>C#, JavaScript, Python, Java, PowerShell</td>
+                        </tr>
+                        <tr>
+                            <td>Google Cloud</td>
+                            <td>Cloud Functions</td>
+                            <td>Node.js, Python, Go, Java</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>4.3 Serverless 應用場景</h3>
+                <ul>
+                    <li>Web API 與後端服務</li>
+                    <li>資料處理與 ETL</li>
+                    <li>即時檔案處理（圖片縮放、影片轉碼）</li>
+                    <li>定時任務（Cron jobs）</li>
+                    <li>聊天機器人</li>
+                    <li>IoT 資料處理</li>
+                </ul>
+
+                <h2>五、現代作業系統趨勢</h2>
+
+                <h3>5.1 作業系統的演進</h3>
+
+                <div class="concept-box">
+                    <h4>發展趨勢</h4>
+                    <ul>
+                        <li><strong>雲端原生（Cloud-Native）：</strong>
+                            <ul>
+                                <li>為雲端環境優化</li>
+                                <li>支援容器和微服務</li>
+                                <li>動態資源管理</li>
+                            </ul>
+                        </li>
+                        <li><strong>即時性（Real-time）：</strong>
+                            <ul>
+                                <li>低延遲保證</li>
+                                <li>確定性排程</li>
+                                <li>適用於 IoT、自動駕駛</li>
+                            </ul>
+                        </li>
+                        <li><strong>安全性強化：</strong>
+                            <ul>
+                                <li>硬體安全模組整合</li>
+                                <li>零信任架構</li>
+                                <li>機密運算（Confidential Computing）</li>
+                            </ul>
+                        </li>
+                        <li><strong>能源效率：</strong>
+                            <ul>
+                                <li>綠色運算</li>
+                                <li>動態電源管理</li>
+                                <li>異構運算支援</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>5.2 物聯網作業系統</h3>
+                <p>專為資源受限的 IoT 裝置設計的輕量級作業系統。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>作業系統</th>
+                            <th>特性</th>
+                            <th>適用場景</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>FreeRTOS</td>
+                            <td>即時、輕量</td>
+                            <td>嵌入式系統、IoT 裝置</td>
+                        </tr>
+                        <tr>
+                            <td>Zephyr</td>
+                            <td>模組化、可擴展</td>
+                            <td>IoT、穿戴裝置</td>
+                        </tr>
+                        <tr>
+                            <td>Contiki</td>
+                            <td>低功耗</td>
+                            <td>感測器網路</td>
+                        </tr>
+                        <tr>
+                            <td>RIOT</td>
+                            <td>支援多種硬體</td>
+                            <td>IoT 應用</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>5.3 邊緣運算（Edge Computing）</h3>
+                <p>將運算能力從雲端推向網路邊緣，靠近資料來源。</p>
+
+                <div class="note-box">
+                    <strong>邊緣運算的優勢</strong>
+                    <ul>
+                        <li>降低延遲</li>
+                        <li>減少頻寬使用</li>
+                        <li>提高隱私與安全</li>
+                        <li>離線運作能力</li>
+                        <li>即時決策</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>六、實作練習</h2>
+
+                <h3>6.1 Kubernetes 基本操作</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>k8s_basics.sh</span>
+                        <span>Kubernetes 基本指令</span>
+                    </div>
+                    <pre><code class="language-bash"># 查看集群資訊
+kubectl cluster-info
+
+# 查看節點
+kubectl get nodes
+
+# 查看所有 namespace
+kubectl get namespaces
+
+# 查看 pods
+kubectl get pods
+kubectl get pods -n kube-system  # 指定 namespace
+
+# 查看 deployments
+kubectl get deployments
+
+# 查看 services
+kubectl get services
+
+# 查看所有資源
+kubectl get all
+
+# 查看詳細資訊
+kubectl describe pod <pod-name>
+kubectl describe node <node-name>
+
+# 查看日誌
+kubectl logs <pod-name>
+kubectl logs -f <pod-name>  # 持續顯示
+
+# 進入 pod
+kubectl exec -it <pod-name> -- /bin/bash
+
+# 刪除資源
+kubectl delete pod <pod-name>
+kubectl delete deployment <deployment-name></code></pre>
+                </div>
+
+                <h3>6.2 部署應用到 Kubernetes</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>deployment.yaml</span>
+                        <span>Kubernetes Deployment 配置</span>
+                    </div>
+                    <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: web
+spec:
+  replicas: 3  # 執行 3 個 Pod
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80</code></pre>
+                </div>
+
+                <div class="output-block">
+<span class="prompt">$</span> kubectl apply -f deployment.yaml
+<span class="output">deployment.apps/web-app created
+service/web-service created</span>
+
+<span class="prompt">$</span> kubectl get pods
+<span class="output">NAME                       READY   STATUS    RESTARTS   AGE
+web-app-7d4b8c8d9f-abc12   1/1     Running   0          30s
+web-app-7d4b8c8d9f-def34   1/1     Running   0          30s
+web-app-7d4b8c8d9f-ghi56   1/1     Running   0          30s</span>
+
+<span class="prompt">$</span> kubectl get services
+<span class="output">NAME          TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+web-service   LoadBalancer   10.0.123.45    <pending>     80:30123/TCP   1m</span>
+                </div>
+
+                <h3>6.3 ConfigMap 與 Secret</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>config.yaml</span>
+                        <span>配置管理</span>
+                    </div>
+                    <pre><code class="language-yaml"># ConfigMap - 一般配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  database_host: "mysql.default.svc.cluster.local"
+  database_port: "3306"
+  log_level: "info"
+---
+# Secret - 敏感資料
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+type: Opaque
+data:
+  # Base64 編碼
+  database_user: dXNlcm5hbWU=  # username
+  database_password: cGFzc3dvcmQ=  # password
+---
+# 使用 ConfigMap 和 Secret 的 Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-pod
+spec:
+  containers:
+  - name: app
+    image: myapp:latest
+    env:
+    # 從 ConfigMap 取得
+    - name: DB_HOST
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: database_host
+    # 從 Secret 取得
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: app-secret
+          key: database_password</code></pre>
+                </div>
+
+                <h3>6.4 水平自動擴展（HPA）</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>hpa.yaml</span>
+                        <span>Horizontal Pod Autoscaler</span>
+                    </div>
+                    <pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70  # CPU 使用率超過 70% 就擴展
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80</code></pre>
+                </div>
+
+                <h3>6.5 微服務範例（Python Flask）</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>microservice.py</span>
+                        <span>簡易微服務</span>
+                    </div>
+                    <pre><code class="language-python">from flask import Flask, jsonify
+import requests
+import os
+
+app = Flask(__name__)
+
+SERVICE_NAME = os.getenv('SERVICE_NAME', 'unknown')
+PORT = int(os.getenv('PORT', 5000))
+
+@app.route('/health')
+def health():
+    return jsonify({
+        'status': 'healthy',
+        'service': SERVICE_NAME
+    })
+
+@app.route('/api/info')
+def info():
+    return jsonify({
+        'service': SERVICE_NAME,
+        'version': '1.0.0',
+        'port': PORT
+    })
+
+@app.route('/api/call-other')
+def call_other():
+    # 呼叫另一個微服務
+    try:
+        other_service = os.getenv('OTHER_SERVICE_URL')
+        response = requests.get(f'{other_service}/api/info', timeout=5)
+        return jsonify({
+            'this_service': SERVICE_NAME,
+            'other_service_response': response.json()
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=PORT)</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Dockerfile</span>
+                        <span>微服務容器化</span>
+                    </div>
+                    <pre><code class="language-dockerfile">FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY microservice.py .
+
+ENV SERVICE_NAME=my-service
+ENV PORT=5000
+
+EXPOSE 5000
+
+CMD ["python", "microservice.py"]</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：Kubernetes 部署練習</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>在 Kubernetes 上部署應用。</p>
+                        <ul>
+                            <li>建立 Deployment 配置</li>
+                            <li>配置 Service 暴露服務</li>
+                            <li>使用 ConfigMap 管理配置</li>
+                            <li>實作健康檢查</li>
+                            <li>測試滾動更新</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：微服務系統設計</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>設計並實作簡易微服務系統。</p>
+                        <ul>
+                            <li>至少 3 個微服務（如：用戶、訂單、商品）</li>
+                            <li>服務間通訊（REST API）</li>
+                            <li>容器化所有服務</li>
+                            <li>使用 Docker Compose 或 Kubernetes 部署</li>
+                            <li>實作服務發現與負載平衡</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：Serverless 函數開發</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>開發 Serverless 應用。</p>
+                        <ul>
+                            <li>選擇平台（AWS Lambda / Azure Functions）</li>
+                            <li>實作至少 3 個函數</li>
+                            <li>配置觸發器（HTTP、定時、事件）</li>
+                            <li>整合資料庫或儲存服務</li>
+                            <li>撰寫部署文件</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：雲端原生應用</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立完整的雲端原生應用。</p>
+                        <ul>
+                            <li>微服務架構設計</li>
+                            <li>容器化與編排（Kubernetes）</li>
+                            <li>CI/CD pipeline</li>
+                            <li>監控與日誌收集</li>
+                            <li>自動擴展配置</li>
+                            <li>災難復原計畫</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：作業系統趨勢研究</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>研究現代作業系統技術。</p>
+                        <ul>
+                            <li>選擇一個趨勢主題（如：機密運算、實時 OS）</li>
+                            <li>深入研究技術原理</li>
+                            <li>分析應用場景</li>
+                            <li>比較不同解決方案</li>
+                            <li>撰寫研究報告（含實驗或演示）</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 雲端服務模型中，使用者控制最少的是？</strong></p>
+                        <p>A. IaaS</p>
+                        <p>B. PaaS</p>
+                        <p>C. SaaS</p>
+                        <p>D. FaaS</p>
+                        <p><em>答案：C（SaaS 使用者只能使用應用程式）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. Kubernetes 中最小的部署單位是？</strong></p>
+                        <p>A. Container</p>
+                        <p>B. Pod</p>
+                        <p>C. Deployment</p>
+                        <p>D. Service</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. 微服務架構的優勢不包括？</strong></p>
+                        <p>A. 獨立部署</p>
+                        <p>B. 技術多樣性</p>
+                        <p>C. 簡單性</p>
+                        <p>D. 可擴展性</p>
+                        <p><em>答案：C（微服務架構複雜度較高）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. Serverless 的計費方式是？</strong></p>
+                        <p>A. 按月付費</p>
+                        <p>B. 按實例數付費</p>
+                        <p>C. 按執行時間付費</p>
+                        <p>D. 免費</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 邊緣運算的主要優勢是？</strong></p>
+                        <p>A. 成本更低</p>
+                        <p>B. 降低延遲</p>
+                        <p>C. 更強大的運算能力</p>
+                        <p>D. 更簡單的架構</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. Kubernetes HPA 的功能是？</strong></p>
+                        <p>A. 備份資料</p>
+                        <p>B. 自動擴展 Pod</p>
+                        <p>C. 負載平衡</p>
+                        <p>D. 監控日誌</p>
+                        <p><em>答案：B（Horizontal Pod Autoscaler）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：比較 IaaS、PaaS 和 SaaS，並說明各自適用的場景</strong></p>
+                        <p><em>參考答案：IaaS（基礎設施即服務）提供虛擬化資源，使用者控制 OS 和應用程式，適合需要完全控制環境的情況，如自建系統、特殊配置需求。PaaS（平台即服務）提供開發平台，使用者只需部署應用程式，適合快速開發、不想管理基礎設施的團隊。SaaS（軟體即服務）提供完整應用程式，使用者直接使用，適合標準化需求，如郵件、協作工具。選擇考量：控制需求、技術能力、開發速度、成本。IaaS 靈活但複雜，SaaS 簡單但客製化受限，PaaS 介於兩者之間。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：解釋為什麼微服務架構適合大型應用，並說明實施時需要注意的關鍵點</strong></p>
+                        <p><em>參考答案：微服務適合大型應用的原因：(1) 團隊可獨立開發不同服務，提高開發效率；(2) 服務可獨立部署和擴展，不影響整體系統；(3) 故障隔離，一個服務出錯不會拖垮整個系統；(4) 技術多樣性，可為不同服務選擇最適合的技術。關鍵注意點：(1) 服務劃分要合理，避免過度拆分；(2) 需要完善的監控和追蹤系統；(3) API 設計要穩定；(4) 資料一致性處理（分散式交易）；(5) 服務間通訊的效能和可靠性；(6) 需要強大的 DevOps 能力和自動化工具；(7) 初期投入較大，不適合小型項目。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week14.html" class="nav-button">上一週：效能監控與除錯</a>
+                <a href="week16.html" class="nav-button">下一週：Side Project 實戰</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 15 © 2026</p>
+        <p>建議學習時間：12-14 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

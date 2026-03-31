@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 10: 磁碟排程與 I/O 系統 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block .prompt {
+            color: #48bb78;
+        }
+
+        .output-block .output {
+            color: #90cdf4;
+        }
+
+        .disk-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 10: 磁碟排程與 I/O 系統</h1>
+            <p class="week-info">Disk Scheduling and I/O Systems</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第十週的課程！在學習了檔案系統的基本概念後，本週我們將深入探討儲存裝置的底層運作，學習磁碟的物理結構、存取機制，以及如何透過有效的排程演算法來優化磁碟效能。</p>
+                <p>我們也會學習 I/O 系統的分層架構、緩衝機制、RAID 技術，以及現代儲存裝置（SSD）的特性。這些知識對於理解系統效能優化和儲存管理至關重要。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解磁碟的物理結構與存取時間組成</li>
+                    <li>掌握各種磁碟排程演算法（FCFS、SSTF、SCAN、C-SCAN、LOOK、C-LOOK）</li>
+                    <li>了解 RAID 技術的原理與應用</li>
+                    <li>認識 SSD 與傳統硬碟的差異</li>
+                    <li>學習 I/O 系統的架構與優化技術</li>
+                    <li>掌握緩衝與快取的運作機制</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、磁碟結構與存取</h2>
+                
+                <h3>1.1 磁碟物理結構</h3>
+                <p>傳統硬碟（HDD）由多個磁碟盤片組成，資料儲存在磁性表面上。</p>
+
+                <div class="concept-box">
+                    <h4>磁碟組成要素</h4>
+                    <ul>
+                        <li><strong>磁碟盤片（Platter）：</strong>實際儲存資料的磁性圓盤</li>
+                        <li><strong>磁軌（Track）：</strong>盤片上的同心圓環</li>
+                        <li><strong>磁區（Sector）：</strong>磁軌上的扇形區域，通常為 512 bytes 或 4096 bytes</li>
+                        <li><strong>磁柱（Cylinder）：</strong>所有盤片上相同位置的磁軌集合</li>
+                        <li><strong>讀寫頭（Read/Write Head）：</strong>負責讀取和寫入資料</li>
+                        <li><strong>磁臂（Arm）：</strong>控制讀寫頭移動的機械臂</li>
+                    </ul>
+                </div>
+
+                <div class="disk-diagram">
+<strong>磁碟結構示意圖：</strong>
+
+               讀寫頭
+                 ↓
+            ┌────┴────┐
+            │         │
+        ────┼─────────┼──── 磁軌 (Track)
+            │    ·    │
+            │   · ·   │      磁區 (Sector)
+            │  ·   ·  │
+            │ ·     · │
+            │·───────·│
+            └─────────┘
+             磁碟盤片
+
+<strong>磁柱 (Cylinder)：</strong>
+  多個盤片上相同位置的磁軌
+  
+  盤片 0: ═══════
+  盤片 1: ═══════  ← 同一磁柱
+  盤片 2: ═══════
+                </div>
+
+                <h3>1.2 磁碟存取時間</h3>
+                <p>讀取或寫入資料的總時間由三個部分組成：</p>
+
+                <div class="concept-box">
+                    <h4>存取時間組成</h4>
+                    <p><strong>1. 尋道時間（Seek Time）：</strong>移動讀寫頭到目標磁軌所需的時間</p>
+                    <ul>
+                        <li>通常是最耗時的部分（3-12 ms）</li>
+                        <li>取決於移動的磁軌數</li>
+                    </ul>
+
+                    <p><strong>2. 旋轉延遲（Rotational Latency）：</strong>等待目標磁區旋轉到讀寫頭下方的時間</p>
+                    <ul>
+                        <li>平均為半圈的旋轉時間</li>
+                        <li>7200 RPM 硬碟：平均約 4.17 ms</li>
+                        <li>公式：60 / (RPM × 2) 秒</li>
+                    </ul>
+
+                    <p><strong>3. 傳輸時間（Transfer Time）：</strong>實際讀取或寫入資料的時間</p>
+                    <ul>
+                        <li>通常最短（< 1 ms）</li>
+                        <li>取決於資料大小和傳輸速率</li>
+                    </ul>
+
+                    <p><strong>總存取時間 = 尋道時間 + 旋轉延遲 + 傳輸時間</strong></p>
+                </div>
+
+                <h2>二、磁碟排程演算法</h2>
+
+                <h3>2.1 為什麼需要磁碟排程？</h3>
+                <p>當多個 I/O 請求同時到達時，需要決定服務這些請求的順序。好的排程可以：</p>
+                <ul>
+                    <li>減少尋道時間</li>
+                    <li>提高磁碟使用率</li>
+                    <li>降低平均等待時間</li>
+                    <li>確保公平性</li>
+                </ul>
+
+                <h3>2.2 FCFS（First-Come, First-Served）</h3>
+                <p>按照請求到達的順序處理，最簡單但效能可能不佳。</p>
+
+                <div class="concept-box">
+                    <h4>FCFS 特性</h4>
+                    <p><strong>優點：</strong></p>
+                    <ul>
+                        <li>公平，不會造成飢餓</li>
+                        <li>實作簡單</li>
+                    </ul>
+                    
+                    <p><strong>缺點：</strong></p>
+                    <ul>
+                        <li>可能導致大量的磁頭移動</li>
+                        <li>平均尋道時間可能很長</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 SSTF（Shortest Seek Time First）</h3>
+                <p>選擇距離當前磁頭位置最近的請求。</p>
+
+                <div class="concept-box">
+                    <h4>SSTF 特性</h4>
+                    <p><strong>優點：</strong></p>
+                    <ul>
+                        <li>減少總尋道時間</li>
+                        <li>吞吐量較 FCFS 好</li>
+                    </ul>
+                    
+                    <p><strong>缺點：</strong></p>
+                    <ul>
+                        <li>可能造成飢餓（邊緣磁軌的請求可能長時間得不到服務）</li>
+                        <li>不是最優解</li>
+                    </ul>
+                </div>
+
+                <h3>2.4 SCAN（電梯演算法）</h3>
+                <p>磁頭在磁碟上來回掃描，服務路徑上的所有請求。</p>
+
+                <div class="concept-box">
+                    <h4>SCAN 運作方式</h4>
+                    <ul>
+                        <li>磁頭向一個方向移動，服務路徑上的所有請求</li>
+                        <li>到達磁碟末端後反向移動</li>
+                        <li>類似電梯的運作方式</li>
+                    </ul>
+                    
+                    <p><strong>優點：</strong></p>
+                    <ul>
+                        <li>避免飢餓問題</li>
+                        <li>平均等待時間較穩定</li>
+                    </ul>
+                    
+                    <p><strong>缺點：</strong></p>
+                    <ul>
+                        <li>剛服務過的磁軌附近的新請求需要等待較久</li>
+                    </ul>
+                </div>
+
+                <h3>2.5 C-SCAN（Circular SCAN）</h3>
+                <p>改良的 SCAN，磁頭只在一個方向服務請求。</p>
+
+                <div class="concept-box">
+                    <h4>C-SCAN 運作方式</h4>
+                    <ul>
+                        <li>磁頭向一個方向移動並服務請求</li>
+                        <li>到達末端後，快速返回起點（不服務請求）</li>
+                        <li>再次從起點開始向同一方向移動</li>
+                    </ul>
+                    
+                    <p><strong>優點：</strong></p>
+                    <ul>
+                        <li>等待時間更加均勻</li>
+                        <li>避免 SCAN 的不公平性</li>
+                    </ul>
+                </div>
+
+                <h3>2.6 LOOK 和 C-LOOK</h3>
+                <p>SCAN 和 C-SCAN 的改良版，磁頭不需要移動到磁碟末端。</p>
+
+                <div class="concept-box">
+                    <h4>LOOK / C-LOOK 特性</h4>
+                    <ul>
+                        <li><strong>LOOK：</strong>到達該方向最遠的請求後立即反向</li>
+                        <li><strong>C-LOOK：</strong>到達該方向最遠的請求後返回該方向最近的請求</li>
+                        <li>比 SCAN/C-SCAN 更有效率</li>
+                    </ul>
+                </div>
+
+                <h3>2.7 演算法比較</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>演算法</th>
+                            <th>平均尋道時間</th>
+                            <th>公平性</th>
+                            <th>實作複雜度</th>
+                            <th>適用情境</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>FCFS</td>
+                            <td>差</td>
+                            <td>最公平</td>
+                            <td>簡單</td>
+                            <td>負載輕時</td>
+                        </tr>
+                        <tr>
+                            <td>SSTF</td>
+                            <td>較好</td>
+                            <td>可能飢餓</td>
+                            <td>中等</td>
+                            <td>一般負載</td>
+                        </tr>
+                        <tr>
+                            <td>SCAN</td>
+                            <td>好</td>
+                            <td>好</td>
+                            <td>中等</td>
+                            <td>重負載</td>
+                        </tr>
+                        <tr>
+                            <td>C-SCAN</td>
+                            <td>好</td>
+                            <td>更好</td>
+                            <td>中等</td>
+                            <td>重負載</td>
+                        </tr>
+                        <tr>
+                            <td>LOOK</td>
+                            <td>很好</td>
+                            <td>好</td>
+                            <td>稍複雜</td>
+                            <td>現代系統</td>
+                        </tr>
+                        <tr>
+                            <td>C-LOOK</td>
+                            <td>很好</td>
+                            <td>最好</td>
+                            <td>稍複雜</td>
+                            <td>現代系統</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>三、RAID 技術</h2>
+
+                <h3>3.1 RAID 概念</h3>
+                <p>RAID（Redundant Array of Independent Disks）是一種將多個磁碟組合使用的技術，可以提高效能或可靠性。</p>
+
+                <h3>3.2 常見 RAID 等級</h3>
+
+                <div class="concept-box">
+                    <h4>RAID 0（Striping）</h4>
+                    <ul>
+                        <li>資料分散儲存在多個磁碟上</li>
+                        <li>優點：讀寫效能最佳</li>
+                        <li>缺點：無容錯，一個磁碟故障就全部遺失</li>
+                        <li>最少磁碟數：2</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>RAID 1（Mirroring）</h4>
+                    <ul>
+                        <li>資料完全複製到另一個磁碟</li>
+                        <li>優點：容錯能力強，讀取效能好</li>
+                        <li>缺點：可用容量只有 50%，寫入效能一般</li>
+                        <li>最少磁碟數：2</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>RAID 5（Striping with Parity）</h4>
+                    <ul>
+                        <li>資料和同位檢查碼分散儲存</li>
+                        <li>優點：平衡效能和容錯</li>
+                        <li>缺點：寫入時需計算同位檢查碼</li>
+                        <li>可容忍一個磁碟故障</li>
+                        <li>最少磁碟數：3</li>
+                    </ul>
+                </div>
+
+                <div class="concept-box">
+                    <h4>RAID 10（1+0）</h4>
+                    <ul>
+                        <li>先做 Mirror 再做 Stripe</li>
+                        <li>優點：兼具效能和可靠性</li>
+                        <li>缺點：成本高，可用容量 50%</li>
+                        <li>最少磁碟數：4</li>
+                    </ul>
+                </div>
+
+                <h2>四、SSD 與傳統硬碟</h2>
+
+                <h3>4.1 SSD 特性</h3>
+                <p>固態硬碟（SSD）使用快閃記憶體儲存資料，與傳統硬碟有顯著差異。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>HDD（傳統硬碟）</th>
+                            <th>SSD（固態硬碟）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>存取時間</td>
+                            <td>5-10 ms</td>
+                            <td>0.1 ms</td>
+                        </tr>
+                        <tr>
+                            <td>隨機 I/O</td>
+                            <td>慢</td>
+                            <td>快</td>
+                        </tr>
+                        <tr>
+                            <td>循序 I/O</td>
+                            <td>中等</td>
+                            <td>很快</td>
+                        </tr>
+                        <tr>
+                            <td>噪音</td>
+                            <td>有</td>
+                            <td>無</td>
+                        </tr>
+                        <tr>
+                            <td>抗震動</td>
+                            <td>差</td>
+                            <td>好</td>
+                        </tr>
+                        <tr>
+                            <td>功耗</td>
+                            <td>較高</td>
+                            <td>較低</td>
+                        </tr>
+                        <tr>
+                            <td>壽命</td>
+                            <td>機械磨損</td>
+                            <td>寫入次數限制</td>
+                        </tr>
+                        <tr>
+                            <td>成本</td>
+                            <td>低</td>
+                            <td>較高</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="note-box">
+                    <strong>SSD 的磁碟排程：</strong>
+                    <p>由於 SSD 沒有機械移動部件，傳統的磁碟排程演算法對 SSD 效果不大。SSD 更注重於：</p>
+                    <ul>
+                        <li>磨損平衡（Wear Leveling）</li>
+                        <li>垃圾回收（Garbage Collection）</li>
+                        <li>TRIM 指令支援</li>
+                    </ul>
+                </div>
+
+                <h2>五、I/O 系統架構</h2>
+
+                <h3>5.1 I/O 系統分層</h3>
+
+                <div class="disk-diagram">
+<strong>I/O 系統分層架構：</strong>
+
+┌──────────────────────────┐
+│    使用者行程層            │ ← 應用程式 I/O 呼叫
+├──────────────────────────┤
+│    核心 I/O 子系統         │ ← 緩衝、快取、排程
+├──────────────────────────┤
+│    裝置驅動程式            │ ← 裝置特定操作
+├──────────────────────────┤
+│    中斷處理程式            │ ← 處理 I/O 完成中斷
+├──────────────────────────┤
+│    硬體裝置控制器          │ ← DMA、裝置暫存器
+└──────────────────────────┘
+                </div>
+
+                <h3>5.2 緩衝（Buffering）</h3>
+                <p>在記憶體中暫存資料，協調裝置與行程間的速度差異。</p>
+
+                <div class="concept-box">
+                    <h4>緩衝的類型</h4>
+                    <ul>
+                        <li><strong>單一緩衝：</strong>一個緩衝區</li>
+                        <li><strong>雙重緩衝：</strong>兩個緩衝區，一個讀一個寫</li>
+                        <li><strong>循環緩衝：</strong>多個緩衝區形成環狀</li>
+                    </ul>
+                </div>
+
+                <h3>5.3 快取（Caching）</h3>
+                <p>將經常存取的資料保存在高速記憶體中。</p>
+
+                <ul>
+                    <li>減少磁碟存取次數</li>
+                    <li>提高系統效能</li>
+                    <li>需要考慮一致性問題</li>
+                </ul>
+
+                <h3>5.4 DMA（Direct Memory Access）</h3>
+                <p>允許 I/O 裝置直接存取記憶體，不需要 CPU 介入。</p>
+
+                <div class="concept-box">
+                    <h4>DMA 優勢</h4>
+                    <ul>
+                        <li>減輕 CPU 負擔</li>
+                        <li>提高資料傳輸效率</li>
+                        <li>允許 CPU 並行執行其他任務</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>六、實作練習</h2>
+
+                <h3>6.1 FCFS 磁碟排程</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>fcfs_disk_scheduling.c</span>
+                        <span>FCFS 磁碟排程模擬</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int calculate_total_head_movement(int requests[], int n, int initial_head) {
+    int total_movement = 0;
+    int current_position = initial_head;
+    
+    printf("\n=== FCFS 磁碟排程 ===\n");
+    printf("初始磁頭位置: %d\n\n", initial_head);
+    printf("請求序列: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", requests[i]);
+    }
+    printf("\n\n");
+    
+    printf("磁頭移動過程：\n");
+    printf("位置\t移動距離\t累計距離\n");
+    printf("------------------------------------\n");
+    printf("%d\t-\t\t0\n", current_position);
+    
+    for (int i = 0; i < n; i++) {
+        int movement = abs(requests[i] - current_position);
+        total_movement += movement;
+        current_position = requests[i];
+        
+        printf("%d\t%d\t\t%d\n", current_position, movement, total_movement);
+    }
+    
+    return total_movement;
+}
+
+int main() {
+    int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
+    int n = sizeof(requests) / sizeof(requests[0]);
+    int initial_head = 53;
+    
+    int total_movement = calculate_total_head_movement(requests, n, initial_head);
+    
+    printf("\n總磁頭移動距離: %d 個磁軌\n", total_movement);
+    printf("平均尋道長度: %.2f 個磁軌\n", (float)total_movement / n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h4>執行結果</h4>
+                <div class="output-block">
+<span class="prompt">$</span> gcc -o fcfs_disk fcfs_disk_scheduling.c
+<span class="prompt">$</span> ./fcfs_disk
+<span class="output">=== FCFS 磁碟排程 ===
+初始磁頭位置: 53
+
+請求序列: 98 183 37 122 14 124 65 67 
+
+磁頭移動過程：
+位置    移動距離        累計距離
+------------------------------------
+53      -               0
+98      45              45
+183     85              130
+37      146             276
+122     85              361
+14      108             469
+124     110             579
+65      59              638
+67      2               640
+
+總磁頭移動距離: 640 個磁軌
+平均尋道長度: 80.00 個磁軌</span>
+                </div>
+
+                <h3>6.2 SSTF 磁碟排程</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>sstf_disk_scheduling.c</span>
+                        <span>SSTF 最短尋道時間優先</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_REQUESTS 100
+
+int find_closest(int requests[], bool serviced[], int n, int current) {
+    int min_distance = 999999;
+    int closest_index = -1;
+    
+    for (int i = 0; i < n; i++) {
+        if (!serviced[i]) {
+            int distance = abs(requests[i] - current);
+            if (distance < min_distance) {
+                min_distance = distance;
+                closest_index = i;
+            }
+        }
+    }
+    
+    return closest_index;
+}
+
+int sstf_scheduling(int requests[], int n, int initial_head) {
+    bool serviced[MAX_REQUESTS] = {false};
+    int total_movement = 0;
+    int current_position = initial_head;
+    
+    printf("\n=== SSTF 磁碟排程 ===\n");
+    printf("初始磁頭位置: %d\n\n", initial_head);
+    
+    printf("磁頭移動過程：\n");
+    printf("步驟\t目標位置\t移動距離\t累計距離\n");
+    printf("------------------------------------------------\n");
+    printf("0\t%d\t\t-\t\t0\n", current_position);
+    
+    for (int step = 0; step < n; step++) {
+        int next_index = find_closest(requests, serviced, n, current_position);
+        
+        if (next_index == -1) break;
+        
+        serviced[next_index] = true;
+        int movement = abs(requests[next_index] - current_position);
+        total_movement += movement;
+        current_position = requests[next_index];
+        
+        printf("%d\t%d\t\t%d\t\t%d\n", 
+               step + 1, current_position, movement, total_movement);
+    }
+    
+    return total_movement;
+}
+
+int main() {
+    int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
+    int n = sizeof(requests) / sizeof(requests[0]);
+    int initial_head = 53;
+    
+    int total_movement = sstf_scheduling(requests, n, initial_head);
+    
+    printf("\n總磁頭移動距離: %d 個磁軌\n", total_movement);
+    printf("平均尋道長度: %.2f 個磁軌\n", (float)total_movement / n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>6.3 SCAN 磁碟排程</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>scan_disk_scheduling.c</span>
+                        <span>SCAN 電梯演算法</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define DISK_SIZE 200
+
+int compare(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int scan_scheduling(int requests[], int n, int initial_head, int direction) {
+    int total_movement = 0;
+    int current_position = initial_head;
+    
+    // 排序請求
+    qsort(requests, n, sizeof(int), compare);
+    
+    printf("\n=== SCAN 磁碟排程 ===\n");
+    printf("初始磁頭位置: %d\n", initial_head);
+    printf("初始方向: %s\n\n", direction == 1 ? "往高磁軌" : "往低磁軌");
+    
+    // 找出當前位置的分界點
+    int split = 0;
+    for (int i = 0; i < n; i++) {
+        if (requests[i] >= initial_head) {
+            split = i;
+            break;
+        }
+    }
+    
+    printf("磁頭移動順序: %d", current_position);
+    
+    if (direction == 1) {
+        // 向上掃描
+        for (int i = split; i < n; i++) {
+            total_movement += abs(requests[i] - current_position);
+            current_position = requests[i];
+            printf(" -> %d", current_position);
+        }
+        
+        // 到達最高點
+        if (current_position != DISK_SIZE - 1) {
+            total_movement += abs((DISK_SIZE - 1) - current_position);
+            current_position = DISK_SIZE - 1;
+            printf(" -> %d", current_position);
+        }
+        
+        // 向下掃描
+        for (int i = split - 1; i >= 0; i--) {
+            total_movement += abs(requests[i] - current_position);
+            current_position = requests[i];
+            printf(" -> %d", current_position);
+        }
+    } else {
+        // 向下掃描
+        for (int i = split - 1; i >= 0; i--) {
+            total_movement += abs(requests[i] - current_position);
+            current_position = requests[i];
+            printf(" -> %d", current_position);
+        }
+        
+        // 到達最低點
+        if (current_position != 0) {
+            total_movement += abs(0 - current_position);
+            current_position = 0;
+            printf(" -> %d", current_position);
+        }
+        
+        // 向上掃描
+        for (int i = split; i < n; i++) {
+            total_movement += abs(requests[i] - current_position);
+            current_position = requests[i];
+            printf(" -> %d", current_position);
+        }
+    }
+    
+    printf("\n");
+    
+    return total_movement;
+}
+
+int main() {
+    int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
+    int n = sizeof(requests) / sizeof(requests[0]);
+    int initial_head = 53;
+    int direction = 1; // 1 = 向上, 0 = 向下
+    
+    int total_movement = scan_scheduling(requests, n, initial_head, direction);
+    
+    printf("\n總磁頭移動距離: %d 個磁軌\n", total_movement);
+    printf("平均尋道長度: %.2f 個磁軌\n", (float)total_movement / n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>6.4 C-SCAN 磁碟排程</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>cscan_disk_scheduling.c</span>
+                        <span>C-SCAN 循環掃描</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define DISK_SIZE 200
+
+int compare(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int cscan_scheduling(int requests[], int n, int initial_head) {
+    int total_movement = 0;
+    int current_position = initial_head;
+    
+    qsort(requests, n, sizeof(int), compare);
+    
+    printf("\n=== C-SCAN 磁碟排程 ===\n");
+    printf("初始磁頭位置: %d\n\n", initial_head);
+    
+    int split = 0;
+    for (int i = 0; i < n; i++) {
+        if (requests[i] >= initial_head) {
+            split = i;
+            break;
+        }
+    }
+    
+    printf("磁頭移動順序: %d", current_position);
+    
+    // 向上掃描到末端
+    for (int i = split; i < n; i++) {
+        total_movement += abs(requests[i] - current_position);
+        current_position = requests[i];
+        printf(" -> %d", current_position);
+    }
+    
+    // 到達最高點
+    if (current_position != DISK_SIZE - 1) {
+        total_movement += abs((DISK_SIZE - 1) - current_position);
+        current_position = DISK_SIZE - 1;
+        printf(" -> %d", current_position);
+    }
+    
+    // 返回起點（不服務請求）
+    total_movement += current_position; // 返回到 0
+    current_position = 0;
+    printf(" -> %d (返回)", current_position);
+    
+    // 從起點開始向上掃描
+    for (int i = 0; i < split; i++) {
+        total_movement += abs(requests[i] - current_position);
+        current_position = requests[i];
+        printf(" -> %d", current_position);
+    }
+    
+    printf("\n");
+    
+    return total_movement;
+}
+
+int main() {
+    int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
+    int n = sizeof(requests) / sizeof(requests[0]);
+    int initial_head = 53;
+    
+    int total_movement = cscan_scheduling(requests, n, initial_head);
+    
+    printf("\n總磁頭移動距離: %d 個磁軌\n", total_movement);
+    printf("平均尋道長度: %.2f 個磁軌\n", (float)total_movement / n);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>6.5 演算法比較工具</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>disk_scheduling_comparison.c</span>
+                        <span>磁碟排程演算法比較</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+
+// 前面實作的函數宣告
+int calculate_total_head_movement(int requests[], int n, int initial_head);
+int sstf_scheduling(int requests[], int n, int initial_head);
+int scan_scheduling(int requests[], int n, int initial_head, int direction);
+int cscan_scheduling(int requests[], int n, int initial_head);
+
+void compare_algorithms(int requests[], int n, int initial_head) {
+    printf("\n");
+    printf("==================================================\n");
+    printf("磁碟排程演算法效能比較\n");
+    printf("==================================================\n\n");
+    
+    printf("請求序列: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", requests[i]);
+    }
+    printf("\n初始磁頭位置: %d\n\n", initial_head);
+    
+    // 為每個演算法建立請求陣列的副本
+    int req_copy1[100], req_copy2[100], req_copy3[100], req_copy4[100];
+    for (int i = 0; i < n; i++) {
+        req_copy1[i] = req_copy2[i] = req_copy3[i] = req_copy4[i] = requests[i];
+    }
+    
+    printf("演算法\t\t總移動距離\t平均尋道長度\n");
+    printf("--------------------------------------------------\n");
+    
+    // FCFS
+    int fcfs = calculate_total_head_movement(req_copy1, n, initial_head);
+    printf("FCFS\t\t%d\t\t%.2f\n", fcfs, (float)fcfs / n);
+    
+    // SSTF
+    int sstf = sstf_scheduling(req_copy2, n, initial_head);
+    printf("SSTF\t\t%d\t\t%.2f\n", sstf, (float)sstf / n);
+    
+    // SCAN
+    int scan = scan_scheduling(req_copy3, n, initial_head, 1);
+    printf("SCAN\t\t%d\t\t%.2f\n", scan, (float)scan / n);
+    
+    // C-SCAN
+    int cscan = cscan_scheduling(req_copy4, n, initial_head);
+    printf("C-SCAN\t\t%d\t\t%.2f\n", cscan, (float)cscan / n);
+    
+    printf("\n註：數字越小表示效能越好\n");
+}
+
+int main() {
+    int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
+    int n = sizeof(requests) / sizeof(requests[0]);
+    int initial_head = 53;
+    
+    compare_algorithms(requests, n, initial_head);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：LOOK 演算法實作</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>實作 LOOK 磁碟排程演算法。</p>
+                        <ul>
+                            <li>實作 LOOK 演算法（只移動到最遠的請求）</li>
+                            <li>支援雙向掃描</li>
+                            <li>計算總磁頭移動距離</li>
+                            <li>與 SCAN 比較效能差異</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：磁碟排程模擬器</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立互動式磁碟排程模擬器。</p>
+                        <ul>
+                            <li>支援所有主要排程演算法（FCFS、SSTF、SCAN、C-SCAN、LOOK、C-LOOK）</li>
+                            <li>可從檔案讀取請求序列</li>
+                            <li>視覺化顯示磁頭移動路徑</li>
+                            <li>生成詳細的效能報告</li>
+                            <li>支援批次比較測試</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：RAID 模擬</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>模擬 RAID 0、RAID 1、RAID 5 的運作。</p>
+                        <ul>
+                            <li>實作資料分散（Striping）</li>
+                            <li>實作資料鏡像（Mirroring）</li>
+                            <li>實作同位檢查（Parity）</li>
+                            <li>模擬磁碟故障和資料恢復</li>
+                            <li>比較不同 RAID 等級的效能</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：I/O 緩衝管理</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作 I/O 緩衝管理系統。</p>
+                        <ul>
+                            <li>實作單一緩衝、雙重緩衝、循環緩衝</li>
+                            <li>模擬生產者-消費者模式</li>
+                            <li>實作緩衝區管理策略（LRU、FIFO）</li>
+                            <li>處理緩衝區溢位</li>
+                            <li>效能分析與優化</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：完整儲存系統模擬</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立完整的儲存系統模擬。</p>
+                        <ul>
+                            <li>整合磁碟排程演算法</li>
+                            <li>實作檔案配置表（FAT）</li>
+                            <li>支援緩衝和快取機制</li>
+                            <li>模擬 DMA 傳輸</li>
+                            <li>實作 RAID 支援</li>
+                            <li>效能監控和優化建議</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 磁碟存取時間不包括下列哪一項？</strong></p>
+                        <p>A. 尋道時間</p>
+                        <p>B. 旋轉延遲</p>
+                        <p>C. 傳輸時間</p>
+                        <p>D. 處理時間</p>
+                        <p><em>答案：D</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 哪個磁碟排程演算法可能造成飢餓？</strong></p>
+                        <p>A. FCFS</p>
+                        <p>B. SSTF</p>
+                        <p>C. SCAN</p>
+                        <p>D. C-SCAN</p>
+                        <p><em>答案：B（SSTF 可能讓邊緣磁軌的請求長時間得不到服務）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. SCAN 演算法又稱為？</strong></p>
+                        <p>A. 最短尋道演算法</p>
+                        <p>B. 電梯演算法</p>
+                        <p>C. 循環演算法</p>
+                        <p>D. 優先權演算法</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. RAID 1 的主要特性是？</strong></p>
+                        <p>A. 資料分散</p>
+                        <p>B. 資料鏡像</p>
+                        <p>C. 同位檢查</p>
+                        <p>D. 資料壓縮</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. SSD 相比 HDD 的優勢不包括？</strong></p>
+                        <p>A. 存取速度快</p>
+                        <p>B. 無噪音</p>
+                        <p>C. 成本低</p>
+                        <p>D. 抗震動</p>
+                        <p><em>答案：C（SSD 成本較高）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 計算題：假設磁碟轉速為 7200 RPM，計算平均旋轉延遲</strong></p>
+                        <p><em>答案：60 / (7200 × 2) = 0.00417 秒 = 4.17 毫秒</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明 C-SCAN 相比 SCAN 的改進之處</strong></p>
+                        <p><em>參考答案：C-SCAN 改進了 SCAN 的不公平性問題。在 SCAN 中，剛被服務過的磁軌附近如果有新請求到達，需要等待磁頭反向回來才能被服務。C-SCAN 則讓磁頭只在一個方向服務請求，到達末端後快速返回起點（不服務請求），再從同一方向開始服務。這樣所有請求的等待時間更加均勻，提供了更一致的服務品質。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：解釋 DMA 如何提高 I/O 效能</strong></p>
+                        <p><em>參考答案：DMA（Direct Memory Access）允許 I/O 裝置直接存取記憶體，不需要 CPU 介入每一筆資料的傳輸。傳統方式中，CPU 需要負責將資料從 I/O 裝置搬移到記憶體，這會佔用大量 CPU 時間。使用 DMA 後，CPU 只需設定傳輸參數（起始位址、資料量等），由 DMA 控制器完成實際的資料傳輸，完成後以中斷通知 CPU。這樣 CPU 可以並行執行其他任務，大幅提高系統整體效能。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week9.html" class="nav-button">上一週：檔案系統</a>
+                <a href="week11.html" class="nav-button">下一週：安全性與保護</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 10 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

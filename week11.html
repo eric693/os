@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 11: 安全性與保護機制 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .security-box {
+            background: #fef2f2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #ef4444;
+        }
+
+        .security-box h4 {
+            color: #991b1b;
+            margin-top: 0;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .permission-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 11: 安全性與保護機制</h1>
+            <p class="week-info">Security and Protection Mechanisms</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第十一週的課程！資訊安全是現代作業系統最重要的議題之一。隨著網路攻擊手段日益複雜，作業系統必須提供強大的安全機制來保護使用者資料和系統資源。</p>
+                <p>本週我們將學習作業系統的安全目標、威脅類型、認證與授權機制、存取控制模型、檔案權限管理，以及加密技術的基礎應用。這些知識對於建立安全的系統至關重要。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解作業系統安全的基本概念與目標</li>
+                    <li>認識常見的安全威脅與攻擊手法</li>
+                    <li>掌握認證（Authentication）與授權（Authorization）機制</li>
+                    <li>學習存取控制模型（ACL、RBAC）</li>
+                    <li>了解 Linux/Unix 檔案權限系統</li>
+                    <li>認識加密技術的基本原理</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、作業系統安全基礎</h2>
+                
+                <h3>1.1 安全的目標（CIA Triad）</h3>
+                <p>資訊安全的三大核心目標：</p>
+
+                <div class="concept-box">
+                    <h4>CIA 三要素</h4>
+                    <ul>
+                        <li><strong>機密性（Confidentiality）：</strong>確保資訊只能被授權的使用者存取
+                            <ul>
+                                <li>防止未授權的資訊洩漏</li>
+                                <li>使用加密技術保護資料</li>
+                            </ul>
+                        </li>
+                        <li><strong>完整性（Integrity）：</strong>確保資訊不被未授權修改
+                            <ul>
+                                <li>防止資料被竄改</li>
+                                <li>使用雜湊函數驗證資料</li>
+                            </ul>
+                        </li>
+                        <li><strong>可用性（Availability）：</strong>確保授權使用者可以存取資源
+                            <ul>
+                                <li>防止服務中斷</li>
+                                <li>抵禦阻斷服務攻擊（DoS）</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>1.2 安全威脅類型</h3>
+
+                <div class="security-box">
+                    <h4>常見安全威脅</h4>
+                    <ul>
+                        <li><strong>惡意軟體（Malware）：</strong>
+                            <ul>
+                                <li>病毒（Virus）：附著在其他程式上</li>
+                                <li>蠕蟲（Worm）：自我複製並傳播</li>
+                                <li>木馬（Trojan）：偽裝成合法程式</li>
+                                <li>勒索軟體（Ransomware）：加密檔案並勒索</li>
+                            </ul>
+                        </li>
+                        <li><strong>未授權存取：</strong>
+                            <ul>
+                                <li>密碼破解</li>
+                                <li>社交工程</li>
+                                <li>權限提升攻擊</li>
+                            </ul>
+                        </li>
+                        <li><strong>阻斷服務攻擊（DoS/DDoS）：</strong>
+                            <ul>
+                                <li>消耗系統資源</li>
+                                <li>使服務無法正常運作</li>
+                            </ul>
+                        </li>
+                        <li><strong>資料洩露：</strong>
+                            <ul>
+                                <li>緩衝區溢位攻擊</li>
+                                <li>SQL 注入</li>
+                                <li>跨站腳本攻擊（XSS）</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h2>二、認證與授權</h2>
+
+                <h3>2.1 認證（Authentication）</h3>
+                <p>驗證使用者身份的過程，確認「你是誰」。</p>
+
+                <div class="concept-box">
+                    <h4>認證方法</h4>
+                    <ul>
+                        <li><strong>知識因素（Something You Know）：</strong>
+                            <ul>
+                                <li>密碼（Password）</li>
+                                <li>PIN 碼</li>
+                                <li>安全問題</li>
+                            </ul>
+                        </li>
+                        <li><strong>擁有因素（Something You Have）：</strong>
+                            <ul>
+                                <li>智慧卡</li>
+                                <li>手機（OTP）</li>
+                                <li>硬體金鑰</li>
+                            </ul>
+                        </li>
+                        <li><strong>生物特徵（Something You Are）：</strong>
+                            <ul>
+                                <li>指紋</li>
+                                <li>虹膜掃描</li>
+                                <li>臉部辨識</li>
+                            </ul>
+                        </li>
+                        <li><strong>多因素認證（MFA）：</strong>結合兩個或以上的認證方法</li>
+                    </ul>
+                </div>
+
+                <h3>2.2 密碼安全</h3>
+
+                <div class="warning-box">
+                    <strong>密碼儲存的安全實務</strong>
+                    <ul>
+                        <li>絕對不要以明文儲存密碼</li>
+                        <li>使用強雜湊函數（如 bcrypt、Argon2）</li>
+                        <li>加入鹽值（Salt）防止彩虹表攻擊</li>
+                        <li>使用多輪雜湊增加破解難度</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 授權（Authorization）</h3>
+                <p>決定已認證的使用者可以做什麼，確認「你能做什麼」。</p>
+
+                <h2>三、存取控制</h2>
+
+                <h3>3.1 存取控制模型</h3>
+
+                <h4>自主存取控制（DAC - Discretionary Access Control）</h4>
+                <div class="concept-box">
+                    <h4>DAC 特性</h4>
+                    <ul>
+                        <li>資源的擁有者決定誰可以存取</li>
+                        <li>使用者可以將權限授予其他使用者</li>
+                        <li>靈活但可能不安全</li>
+                        <li>範例：Unix/Linux 檔案權限</li>
+                    </ul>
+                </div>
+
+                <h4>強制存取控制（MAC - Mandatory Access Control）</h4>
+                <div class="concept-box">
+                    <h4>MAC 特性</h4>
+                    <ul>
+                        <li>系統強制執行的存取控制策略</li>
+                        <li>使用者無法更改安全標籤</li>
+                        <li>更安全但較不靈活</li>
+                        <li>範例：SELinux、AppArmor</li>
+                    </ul>
+                </div>
+
+                <h4>角色基礎存取控制（RBAC - Role-Based Access Control）</h4>
+                <div class="concept-box">
+                    <h4>RBAC 特性</h4>
+                    <ul>
+                        <li>根據使用者的角色授予權限</li>
+                        <li>簡化權限管理</li>
+                        <li>適合大型組織</li>
+                        <li>範例：管理員、一般使用者、訪客</li>
+                    </ul>
+                </div>
+
+                <h3>3.2 存取控制列表（ACL）</h3>
+                <p>為每個資源維護一份允許存取的使用者清單。</p>
+
+                <div class="permission-diagram">
+<strong>ACL 範例：</strong>
+
+檔案: project.txt
+ACL:
+  使用者 Alice: 讀、寫、執行
+  使用者 Bob: 讀、寫
+  群組 developers: 讀
+  其他: 無權限
+                </div>
+
+                <h3>3.3 Linux/Unix 檔案權限</h3>
+
+                <div class="concept-box">
+                    <h4>權限系統</h4>
+                    <p>Linux 使用 9 位元的權限系統：</p>
+                    <ul>
+                        <li><strong>擁有者（Owner）權限：</strong>rwx（讀、寫、執行）</li>
+                        <li><strong>群組（Group）權限：</strong>rwx</li>
+                        <li><strong>其他人（Others）權限：</strong>rwx</li>
+                    </ul>
+                </div>
+
+                <div class="permission-diagram">
+<strong>權限表示法：</strong>
+
+-rwxr-xr--
+│││││││││
+│││││││└└─ 其他人權限: r-- (讀)
+││││││└──── 群組權限: r-x (讀、執行)
+│││└└└────── 擁有者權限: rwx (讀、寫、執行)
+│└────────── 檔案類型: - (普通檔案)
+            d (目錄)
+            l (符號連結)
+
+<strong>數字表示法：</strong>
+r = 4, w = 2, x = 1
+rwxr-xr-- = 754
+  7 = rwx (4+2+1)
+  5 = r-x (4+0+1)
+  4 = r-- (4+0+0)
+                </div>
+
+                <h3>3.4 特殊權限</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>權限</th>
+                            <th>符號</th>
+                            <th>數字</th>
+                            <th>說明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SUID</td>
+                            <td>s (在擁有者 x 位置)</td>
+                            <td>4000</td>
+                            <td>以檔案擁有者權限執行</td>
+                        </tr>
+                        <tr>
+                            <td>SGID</td>
+                            <td>s (在群組 x 位置)</td>
+                            <td>2000</td>
+                            <td>以群組權限執行或繼承群組</td>
+                        </tr>
+                        <tr>
+                            <td>Sticky Bit</td>
+                            <td>t (在其他人 x 位置)</td>
+                            <td>1000</td>
+                            <td>只有擁有者可刪除檔案</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>四、加密技術基礎</h2>
+
+                <h3>4.1 對稱式加密</h3>
+                <p>使用相同的金鑰進行加密和解密。</p>
+
+                <div class="concept-box">
+                    <h4>對稱式加密特性</h4>
+                    <ul>
+                        <li><strong>優點：</strong>
+                            <ul>
+                                <li>速度快</li>
+                                <li>適合大量資料</li>
+                            </ul>
+                        </li>
+                        <li><strong>缺點：</strong>
+                            <ul>
+                                <li>金鑰分發問題</li>
+                                <li>需要安全的通道交換金鑰</li>
+                            </ul>
+                        </li>
+                        <li><strong>常見演算法：</strong>AES、DES、3DES、Blowfish</li>
+                    </ul>
+                </div>
+
+                <h3>4.2 非對稱式加密</h3>
+                <p>使用一對金鑰：公鑰（Public Key）和私鑰（Private Key）。</p>
+
+                <div class="concept-box">
+                    <h4>非對稱式加密特性</h4>
+                    <ul>
+                        <li><strong>運作方式：</strong>
+                            <ul>
+                                <li>公鑰加密，私鑰解密（保密）</li>
+                                <li>私鑰加密，公鑰解密（數位簽章）</li>
+                            </ul>
+                        </li>
+                        <li><strong>優點：</strong>
+                            <ul>
+                                <li>解決金鑰分發問題</li>
+                                <li>支援數位簽章</li>
+                            </ul>
+                        </li>
+                        <li><strong>缺點：</strong>
+                            <ul>
+                                <li>速度較慢</li>
+                                <li>計算量大</li>
+                            </ul>
+                        </li>
+                        <li><strong>常見演算法：</strong>RSA、ECC、DSA</li>
+                    </ul>
+                </div>
+
+                <h3>4.3 雜湊函數</h3>
+                <p>將任意長度的資料轉換成固定長度的輸出。</p>
+
+                <div class="concept-box">
+                    <h4>雜湊函數特性</h4>
+                    <ul>
+                        <li><strong>單向性：</strong>無法從雜湊值反推原始資料</li>
+                        <li><strong>確定性：</strong>相同輸入產生相同輸出</li>
+                        <li><strong>抗碰撞：</strong>很難找到兩個不同輸入產生相同雜湊值</li>
+                        <li><strong>雪崩效應：</strong>輸入小改變，輸出大幅改變</li>
+                        <li><strong>常見演算法：</strong>SHA-256、SHA-3、bcrypt</li>
+                    </ul>
+                </div>
+
+                <h3>4.4 數位簽章</h3>
+                <p>用於驗證資料完整性和來源真實性。</p>
+
+                <div class="permission-diagram">
+<strong>數位簽章流程：</strong>
+
+簽署方（Alice）:
+1. 計算訊息雜湊值
+2. 用私鑰加密雜湊值 → 數位簽章
+3. 傳送訊息 + 簽章
+
+驗證方（Bob）:
+1. 計算收到訊息的雜湊值
+2. 用 Alice 的公鑰解密簽章
+3. 比對兩個雜湊值
+4. 相同 → 驗證成功
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>五、實作練習</h2>
+
+                <h3>5.1 簡易使用者認證系統</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>user_authentication.c</span>
+                        <span>使用者登入系統（含密碼雜湊）</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX_USERS 100
+#define MAX_NAME_LEN 50
+#define MAX_PASS_LEN 100
+
+typedef struct {
+    char username[MAX_NAME_LEN];
+    char password_hash[MAX_PASS_LEN];
+    int is_active;
+} User;
+
+User users[MAX_USERS];
+int user_count = 0;
+
+// 簡單的雜湊函數（實際應用請使用 bcrypt 或 Argon2）
+unsigned long simple_hash(const char* str) {
+    unsigned long hash = 5381;
+    int c;
+    
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c; // hash * 33 + c
+    }
+    
+    return hash;
+}
+
+int register_user(const char* username, const char* password) {
+    if (user_count >= MAX_USERS) {
+        printf("使用者數量已達上限\n");
+        return 0;
+    }
+    
+    // 檢查使用者名稱是否已存在
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].username, username) == 0) {
+            printf("使用者名稱已存在\n");
+            return 0;
+        }
+    }
+    
+    // 註冊新使用者
+    strcpy(users[user_count].username, username);
+    sprintf(users[user_count].password_hash, "%lu", simple_hash(password));
+    users[user_count].is_active = 1;
+    user_count++;
+    
+    printf("✓ 使用者 '%s' 註冊成功\n", username);
+    return 1;
+}
+
+int authenticate(const char* username, const char* password) {
+    char hash[MAX_PASS_LEN];
+    sprintf(hash, "%lu", simple_hash(password));
+    
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].username, username) == 0 && users[i].is_active) {
+            if (strcmp(users[i].password_hash, hash) == 0) {
+                return 1; // 認證成功
+            }
+        }
+    }
+    
+    return 0; // 認證失敗
+}
+
+void login() {
+    char username[MAX_NAME_LEN];
+    char password[MAX_PASS_LEN];
+    
+    printf("\n=== 使用者登入 ===\n");
+    printf("使用者名稱: ");
+    scanf("%s", username);
+    printf("密碼: ");
+    scanf("%s", password);
+    
+    if (authenticate(username, password)) {
+        printf("✓ 登入成功！歡迎，%s\n", username);
+    } else {
+        printf("✗ 登入失敗：使用者名稱或密碼錯誤\n");
+    }
+}
+
+int main() {
+    int choice;
+    char username[MAX_NAME_LEN];
+    char password[MAX_PASS_LEN];
+    
+    printf("=== 簡易認證系統 ===\n\n");
+    
+    // 預設建立一些測試帳號
+    register_user("admin", "admin123");
+    register_user("alice", "password1");
+    register_user("bob", "password2");
+    
+    while (1) {
+        printf("\n1. 註冊新使用者\n");
+        printf("2. 登入\n");
+        printf("3. 列出所有使用者\n");
+        printf("4. 離開\n");
+        printf("選擇: ");
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                printf("新使用者名稱: ");
+                scanf("%s", username);
+                printf("密碼: ");
+                scanf("%s", password);
+                register_user(username, password);
+                break;
+            case 2:
+                login();
+                break;
+            case 3:
+                printf("\n已註冊使用者:\n");
+                for (int i = 0; i < user_count; i++) {
+                    printf("  - %s\n", users[i].username);
+                }
+                break;
+            case 4:
+                printf("再見！\n");
+                return 0;
+            default:
+                printf("無效選擇\n");
+        }
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.2 檔案權限檢查</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>file_permissions.c</span>
+                        <span>檔案權限檢查工具</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;pwd.h&gt;
+#include &lt;grp.h&gt;
+#include &lt;time.h&gt;
+
+void print_permissions(mode_t mode) {
+    printf((S_ISDIR(mode)) ? "d" : "-");
+    printf((mode & S_IRUSR) ? "r" : "-");
+    printf((mode & S_IWUSR) ? "w" : "-");
+    printf((mode & S_IXUSR) ? "x" : "-");
+    printf((mode & S_IRGRP) ? "r" : "-");
+    printf((mode & S_IWGRP) ? "w" : "-");
+    printf((mode & S_IXGRP) ? "x" : "-");
+    printf((mode & S_IROTH) ? "r" : "-");
+    printf((mode & S_IWOTH) ? "w" : "-");
+    printf((mode & S_IXOTH) ? "x" : "-");
+}
+
+void print_special_permissions(mode_t mode) {
+    if (mode & S_ISUID) printf(" SUID");
+    if (mode & S_ISGID) printf(" SGID");
+    if (mode & S_ISVTX) printf(" Sticky");
+}
+
+void check_file_permissions(const char* filename) {
+    struct stat file_stat;
+    
+    if (stat(filename, &file_stat) == -1) {
+        perror("無法取得檔案資訊");
+        return;
+    }
+    
+    printf("\n=== 檔案資訊: %s ===\n\n", filename);
+    
+    // 檔案類型
+    printf("類型: ");
+    if (S_ISREG(file_stat.st_mode)) {
+        printf("普通檔案\n");
+    } else if (S_ISDIR(file_stat.st_mode)) {
+        printf("目錄\n");
+    } else if (S_ISLNK(file_stat.st_mode)) {
+        printf("符號連結\n");
+    } else {
+        printf("其他\n");
+    }
+    
+    // 權限
+    printf("權限: ");
+    print_permissions(file_stat.st_mode);
+    print_special_permissions(file_stat.st_mode);
+    printf("\n");
+    
+    // 八進位表示
+    printf("八進位: %o\n", file_stat.st_mode & 0777);
+    
+    // 擁有者資訊
+    struct passwd* pw = getpwuid(file_stat.st_uid);
+    struct group* gr = getgrgid(file_stat.st_gid);
+    printf("擁有者: %s (UID: %d)\n", pw ? pw->pw_name : "unknown", file_stat.st_uid);
+    printf("群組: %s (GID: %d)\n", gr ? gr->gr_name : "unknown", file_stat.st_gid);
+    
+    // 大小
+    printf("大小: %ld bytes\n", file_stat.st_size);
+    
+    // Inode
+    printf("Inode: %lu\n", file_stat.st_ino);
+    
+    // 時間
+    printf("最後存取: %s", ctime(&file_stat.st_atime));
+    printf("最後修改: %s", ctime(&file_stat.st_mtime));
+    printf("狀態變更: %s", ctime(&file_stat.st_ctime));
+    
+    // 權限檢查
+    printf("\n當前使用者的權限:\n");
+    if (file_stat.st_mode & S_IRUSR) printf("  ✓ 可讀\n");
+    if (file_stat.st_mode & S_IWUSR) printf("  ✓ 可寫\n");
+    if (file_stat.st_mode & S_IXUSR) printf("  ✓ 可執行\n");
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("用法: %s <檔案名稱>\n", argv[0]);
+        return 1;
+    }
+    
+    check_file_permissions(argv[1]);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.3 簡易加密程式</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>simple_encryption.c</span>
+                        <span>XOR 加密示範</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+// XOR 加密/解密（對稱式）
+void xor_encrypt_decrypt(char* data, const char* key, int data_len) {
+    int key_len = strlen(key);
+    
+    for (int i = 0; i < data_len; i++) {
+        data[i] ^= key[i % key_len];
+    }
+}
+
+void print_hex(const char* data, int len) {
+    for (int i = 0; i < len; i++) {
+        printf("%02x ", (unsigned char)data[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    char message[256];
+    char key[256];
+    char encrypted[256];
+    char decrypted[256];
+    
+    printf("=== XOR 加密示範 ===\n\n");
+    
+    printf("請輸入訊息: ");
+    fgets(message, sizeof(message), stdin);
+    message[strcspn(message, "\n")] = 0; // 移除換行
+    
+    printf("請輸入金鑰: ");
+    fgets(key, sizeof(key), stdin);
+    key[strcspn(key, "\n")] = 0;
+    
+    int msg_len = strlen(message);
+    
+    // 加密
+    strcpy(encrypted, message);
+    xor_encrypt_decrypt(encrypted, key, msg_len);
+    
+    printf("\n原始訊息: %s\n", message);
+    printf("加密後 (hex): ");
+    print_hex(encrypted, msg_len);
+    
+    // 解密
+    strcpy(decrypted, encrypted);
+    xor_encrypt_decrypt(decrypted, key, msg_len);
+    
+    printf("解密後: %s\n", decrypted);
+    
+    // 驗證
+    if (strcmp(message, decrypted) == 0) {
+        printf("\n✓ 加解密成功！\n");
+    } else {
+        printf("\n✗ 加解密失敗！\n");
+    }
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.4 密碼強度檢查</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>password_strength.c</span>
+                        <span>密碼強度驗證工具</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+typedef struct {
+    int has_lower;
+    int has_upper;
+    int has_digit;
+    int has_special;
+    int length;
+} PasswordAnalysis;
+
+PasswordAnalysis analyze_password(const char* password) {
+    PasswordAnalysis analysis = {0, 0, 0, 0, 0};
+    
+    analysis.length = strlen(password);
+    
+    for (int i = 0; i < analysis.length; i++) {
+        if (islower(password[i])) analysis.has_lower = 1;
+        else if (isupper(password[i])) analysis.has_upper = 1;
+        else if (isdigit(password[i])) analysis.has_digit = 1;
+        else analysis.has_special = 1;
+    }
+    
+    return analysis;
+}
+
+int calculate_strength(PasswordAnalysis analysis) {
+    int strength = 0;
+    
+    if (analysis.length >= 8) strength += 1;
+    if (analysis.length >= 12) strength += 1;
+    if (analysis.length >= 16) strength += 1;
+    
+    if (analysis.has_lower) strength += 1;
+    if (analysis.has_upper) strength += 1;
+    if (analysis.has_digit) strength += 1;
+    if (analysis.has_special) strength += 2;
+    
+    return strength;
+}
+
+void print_strength_report(const char* password) {
+    PasswordAnalysis analysis = analyze_password(password);
+    int strength = calculate_strength(analysis);
+    
+    printf("\n=== 密碼強度分析 ===\n");
+    printf("密碼長度: %d\n", analysis.length);
+    printf("包含小寫字母: %s\n", analysis.has_lower ? "✓" : "✗");
+    printf("包含大寫字母: %s\n", analysis.has_upper ? "✓" : "✗");
+    printf("包含數字: %s\n", analysis.has_digit ? "✓" : "✗");
+    printf("包含特殊符號: %s\n", analysis.has_special ? "✓" : "✗");
+    
+    printf("\n強度評分: %d/9\n", strength);
+    
+    if (strength <= 3) {
+        printf("評級: ✗ 弱 (不建議使用)\n");
+    } else if (strength <= 6) {
+        printf("評級: ⚠ 中等 (建議加強)\n");
+    } else {
+        printf("評級: ✓ 強 (安全)\n");
+    }
+    
+    // 建議
+    printf("\n改進建議:\n");
+    if (analysis.length < 12) {
+        printf("  - 增加密碼長度至少 12 個字元\n");
+    }
+    if (!analysis.has_lower) {
+        printf("  - 加入小寫字母\n");
+    }
+    if (!analysis.has_upper) {
+        printf("  - 加入大寫字母\n");
+    }
+    if (!analysis.has_digit) {
+        printf("  - 加入數字\n");
+    }
+    if (!analysis.has_special) {
+        printf("  - 加入特殊符號 (!@#$%%^&* 等)\n");
+    }
+}
+
+int main() {
+    char password[256];
+    
+    printf("=== 密碼強度檢查工具 ===\n\n");
+    
+    while (1) {
+        printf("請輸入密碼 (輸入 'quit' 離開): ");
+        fgets(password, sizeof(password), stdin);
+        password[strcspn(password, "\n")] = 0;
+        
+        if (strcmp(password, "quit") == 0) {
+            break;
+        }
+        
+        print_strength_report(password);
+        printf("\n");
+    }
+    
+    printf("再見！\n");
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.5 存取控制列表（ACL）模擬</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>acl_simulation.c</span>
+                        <span>ACL 存取控制模擬</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX_USERS 50
+#define MAX_RESOURCES 50
+#define MAX_NAME 50
+
+typedef enum {
+    NONE = 0,
+    READ = 1,
+    WRITE = 2,
+    EXECUTE = 4
+} Permission;
+
+typedef struct {
+    char username[MAX_NAME];
+    Permission permissions;
+} ACLEntry;
+
+typedef struct {
+    char resource_name[MAX_NAME];
+    ACLEntry entries[MAX_USERS];
+    int entry_count;
+} Resource;
+
+Resource resources[MAX_RESOURCES];
+int resource_count = 0;
+
+void add_resource(const char* name) {
+    strcpy(resources[resource_count].resource_name, name);
+    resources[resource_count].entry_count = 0;
+    resource_count++;
+    printf("✓ 已建立資源: %s\n", name);
+}
+
+void grant_permission(const char* resource, const char* user, Permission perm) {
+    for (int i = 0; i < resource_count; i++) {
+        if (strcmp(resources[i].resource_name, resource) == 0) {
+            // 檢查使用者是否已存在
+            for (int j = 0; j < resources[i].entry_count; j++) {
+                if (strcmp(resources[i].entries[j].username, user) == 0) {
+                    resources[i].entries[j].permissions |= perm;
+                    printf("✓ 已更新 %s 對 %s 的權限\n", user, resource);
+                    return;
+                }
+            }
+            
+            // 新增使用者權限
+            strcpy(resources[i].entries[resources[i].entry_count].username, user);
+            resources[i].entries[resources[i].entry_count].permissions = perm;
+            resources[i].entry_count++;
+            printf("✓ 已授予 %s 對 %s 的權限\n", user, resource);
+            return;
+        }
+    }
+    printf("✗ 找不到資源: %s\n", resource);
+}
+
+int check_permission(const char* resource, const char* user, Permission perm) {
+    for (int i = 0; i < resource_count; i++) {
+        if (strcmp(resources[i].resource_name, resource) == 0) {
+            for (int j = 0; j < resources[i].entry_count; j++) {
+                if (strcmp(resources[i].entries[j].username, user) == 0) {
+                    return (resources[i].entries[j].permissions & perm) == perm;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void list_acl(const char* resource) {
+    for (int i = 0; i < resource_count; i++) {
+        if (strcmp(resources[i].resource_name, resource) == 0) {
+            printf("\n=== ACL for %s ===\n", resource);
+            printf("使用者\t\t權限\n");
+            printf("--------------------------------\n");
+            
+            for (int j = 0; j < resources[i].entry_count; j++) {
+                printf("%s\t\t", resources[i].entries[j].username);
+                
+                Permission p = resources[i].entries[j].permissions;
+                if (p & READ) printf("R");
+                if (p & WRITE) printf("W");
+                if (p & EXECUTE) printf("X");
+                printf("\n");
+            }
+            return;
+        }
+    }
+    printf("✗ 找不到資源: %s\n", resource);
+}
+
+int main() {
+    printf("=== ACL 存取控制系統 ===\n\n");
+    
+    // 建立資源
+    add_resource("project.txt");
+    add_resource("database");
+    add_resource("script.sh");
+    
+    // 授予權限
+    grant_permission("project.txt", "alice", READ | WRITE);
+    grant_permission("project.txt", "bob", READ);
+    grant_permission("database", "alice", READ | WRITE | EXECUTE);
+    grant_permission("script.sh", "charlie", READ | EXECUTE);
+    
+    // 列出 ACL
+    list_acl("project.txt");
+    list_acl("database");
+    list_acl("script.sh");
+    
+    // 檢查權限
+    printf("\n=== 權限檢查 ===\n");
+    printf("Alice 可以寫入 project.txt? %s\n", 
+           check_permission("project.txt", "alice", WRITE) ? "是" : "否");
+    printf("Bob 可以寫入 project.txt? %s\n", 
+           check_permission("project.txt", "bob", WRITE) ? "是" : "否");
+    printf("Charlie 可以執行 script.sh? %s\n", 
+           check_permission("script.sh", "charlie", EXECUTE) ? "是" : "否");
+    
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：密碼管理器</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>建立簡易密碼管理器。</p>
+                        <ul>
+                            <li>支援儲存多組帳號密碼</li>
+                            <li>使用主密碼保護</li>
+                            <li>密碼以加密方式儲存</li>
+                            <li>支援密碼強度檢查</li>
+                            <li>自動產生安全密碼功能</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：檔案加密工具</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作檔案加密與解密程式。</p>
+                        <ul>
+                            <li>支援對稱式加密（如 AES）</li>
+                            <li>可加密/解密任意檔案</li>
+                            <li>使用密碼或金鑰檔案</li>
+                            <li>計算檔案雜湊值驗證完整性</li>
+                            <li>支援批次處理多個檔案</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：權限管理系統</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立完整的權限管理系統。</p>
+                        <ul>
+                            <li>實作使用者、群組、角色管理</li>
+                            <li>支援 ACL 和 RBAC</li>
+                            <li>權限繼承機制</li>
+                            <li>審計日誌記錄</li>
+                            <li>權限檢查與驗證</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：入侵偵測系統</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作簡易入侵偵測系統。</p>
+                        <ul>
+                            <li>監控系統登入嘗試</li>
+                            <li>偵測暴力破解攻擊</li>
+                            <li>記錄可疑活動</li>
+                            <li>自動封鎖 IP（模擬）</li>
+                            <li>生成安全報告</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：安全通訊系統</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立安全的訊息傳輸系統。</p>
+                        <ul>
+                            <li>實作使用者註冊與認證</li>
+                            <li>訊息端到端加密</li>
+                            <li>數位簽章驗證訊息來源</li>
+                            <li>金鑰交換機制</li>
+                            <li>防重送攻擊（Replay Attack）</li>
+                            <li>安全的會話管理</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. CIA 安全三要素不包括？</strong></p>
+                        <p>A. 機密性</p>
+                        <p>B. 完整性</p>
+                        <p>C. 可用性</p>
+                        <p>D. 效率性</p>
+                        <p><em>答案：D</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 下列何者是「你擁有什麼」的認證因素？</strong></p>
+                        <p>A. 密碼</p>
+                        <p>B. 智慧卡</p>
+                        <p>C. 指紋</p>
+                        <p>D. PIN 碼</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. Linux 檔案權限 rwxr-xr-- 的八進位表示為？</strong></p>
+                        <p>A. 644</p>
+                        <p>B. 755</p>
+                        <p>C. 754</p>
+                        <p>D. 764</p>
+                        <p><em>答案：C（7=rwx, 5=r-x, 4=r--）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. 對稱式加密的主要缺點是？</strong></p>
+                        <p>A. 速度慢</p>
+                        <p>B. 金鑰分發問題</p>
+                        <p>C. 安全性低</p>
+                        <p>D. 無法解密</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 雜湊函數的特性不包括？</strong></p>
+                        <p>A. 單向性</p>
+                        <p>B. 可逆性</p>
+                        <p>C. 確定性</p>
+                        <p>D. 抗碰撞</p>
+                        <p><em>答案：B（雜湊函數是單向的，不可逆）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. SUID 權限的作用是？</strong></p>
+                        <p>A. 防止檔案被刪除</p>
+                        <p>B. 以檔案擁有者權限執行</p>
+                        <p>C. 繼承父目錄群組</p>
+                        <p>D. 加密檔案內容</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明多因素認證（MFA）的優勢</strong></p>
+                        <p><em>參考答案：多因素認證結合兩個或以上的認證方法（如密碼 + 手機驗證碼），大幅提高安全性。即使攻擊者取得其中一個因素（如密碼被盜），仍無法通過認證，因為還需要其他因素（如手機 OTP）。這種分層防禦可以有效防止帳號被盜用，是目前最佳的認證實務。常見組合包括：密碼 + OTP、密碼 + 生物辨識、智慧卡 + PIN 碼等。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：解釋為什麼密碼不應以明文儲存，以及正確的儲存方式</strong></p>
+                        <p><em>參考答案：密碼絕對不應以明文儲存，因為：(1) 資料庫若被入侵，所有密碼立即外洩；(2) 管理員或內部人員可以看到使用者密碼；(3) 違反隱私保護原則。正確做法是：使用強雜湊函數（如 bcrypt、Argon2）對密碼進行雜湊，並加入隨機鹽值（Salt）。鹽值可防止彩虹表攻擊。此外應使用多輪雜湊（如 bcrypt 預設 10 輪）增加破解難度。驗證時，將使用者輸入的密碼用相同方式雜湊後，與儲存的雜湊值比對。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week10.html" class="nav-button">上一週：磁碟排程與 I/O</a>
+                <a href="week12.html" class="nav-button">下一週：分散式系統</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 11 © 2026</p>
+        <p>建議學習時間：10-12 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

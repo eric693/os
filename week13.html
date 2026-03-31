@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 13: 虛擬化技術 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .vm-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 13: 虛擬化技術</h1>
+            <p class="week-info">Virtualization Technology</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第十三週的課程！虛擬化技術是現代雲端運算的基石，它讓我們能夠在單一實體機器上執行多個隔離的作業系統，大幅提高硬體資源的使用效率。</p>
+                <p>本週我們將學習虛擬化的基本概念、不同類型的虛擬化技術、Hypervisor 架構、容器技術（Docker）、資源隔離機制，以及虛擬化的效能考量。這些知識是理解雲端平台和現代資料中心的關鍵。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解虛擬化的概念與優勢</li>
+                    <li>學習不同類型的虛擬化技術</li>
+                    <li>了解 Hypervisor 的運作原理</li>
+                    <li>掌握容器技術與 Docker 的使用</li>
+                    <li>認識 Linux Namespace 和 Cgroups</li>
+                    <li>比較虛擬機與容器的差異</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、虛擬化基礎概念</h2>
+                
+                <h3>1.1 什麼是虛擬化？</h3>
+                <p>虛擬化是一種技術，可以在單一實體硬體上建立多個模擬的環境或專用資源。透過虛擬化，一台實體伺服器可以執行多個虛擬機器，每個虛擬機器都有自己的作業系統和應用程式。</p>
+
+                <div class="concept-box">
+                    <h4>虛擬化的優勢</h4>
+                    <ul>
+                        <li><strong>資源利用率提升：</strong>充分使用硬體資源</li>
+                        <li><strong>成本降低：</strong>減少實體伺服器數量</li>
+                        <li><strong>隔離性：</strong>各虛擬機器互不影響</li>
+                        <li><strong>靈活性：</strong>快速建立和部署新環境</li>
+                        <li><strong>易於管理：</strong>集中管理多個系統</li>
+                        <li><strong>災難復原：</strong>快照和遷移功能</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 虛擬化的類型</h3>
+
+                <h4>伺服器虛擬化</h4>
+                <p>在單一實體伺服器上執行多個虛擬伺服器。</p>
+
+                <h4>桌面虛擬化（VDI）</h4>
+                <p>在伺服器上執行桌面作業系統，使用者透過網路存取。</p>
+
+                <h4>應用程式虛擬化</h4>
+                <p>將應用程式與底層作業系統隔離。</p>
+
+                <h4>儲存虛擬化</h4>
+                <p>將多個實體儲存裝置整合為單一虛擬儲存池。</p>
+
+                <h4>網路虛擬化</h4>
+                <p>將網路資源虛擬化，如 VLAN、VPN。</p>
+
+                <h2>二、Hypervisor 架構</h2>
+
+                <h3>2.1 什麼是 Hypervisor？</h3>
+                <p>Hypervisor（虛擬機器監視器，VMM）是一個軟體層，負責建立和管理虛擬機器，並在實體硬體和虛擬機器之間進行資源分配。</p>
+
+                <h3>2.2 Type 1 vs Type 2 Hypervisor</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>Type 1（Bare-Metal）</th>
+                            <th>Type 2（Hosted）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>安裝位置</td>
+                            <td>直接在硬體上</td>
+                            <td>在主機作業系統上</td>
+                        </tr>
+                        <tr>
+                            <td>效能</td>
+                            <td>高（直接存取硬體）</td>
+                            <td>較低（需透過主機 OS）</td>
+                        </tr>
+                        <tr>
+                            <td>複雜度</td>
+                            <td>較複雜</td>
+                            <td>較簡單</td>
+                        </tr>
+                        <tr>
+                            <td>安全性</td>
+                            <td>較高</td>
+                            <td>較低</td>
+                        </tr>
+                        <tr>
+                            <td>應用場景</td>
+                            <td>資料中心、雲端平台</td>
+                            <td>開發測試、個人使用</td>
+                        </tr>
+                        <tr>
+                            <td>範例</td>
+                            <td>VMware ESXi, Xen, Hyper-V</td>
+                            <td>VirtualBox, VMware Workstation</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="vm-diagram">
+<strong>Type 1 Hypervisor 架構：</strong>
+
+┌──────────┐  ┌──────────┐  ┌──────────┐
+│   VM 1   │  │   VM 2   │  │   VM 3   │
+│  (Linux) │  │ (Windows)│  │  (Linux) │
+├──────────┤  ├──────────┤  ├──────────┤
+│ Guest OS │  │ Guest OS │  │ Guest OS │
+└─────┬────┘  └─────┬────┘  └─────┬────┘
+      │             │             │
+      └─────────────┴─────────────┘
+                    │
+        ┌───────────┴───────────┐
+        │    Hypervisor (VMM)   │
+        │   (Type 1 - Bare Metal)
+        └───────────┬───────────┘
+                    │
+        ┌───────────┴───────────┐
+        │   實體硬體 (Hardware)  │
+        │  CPU, Memory, Disk... │
+        └───────────────────────┘
+
+<strong>Type 2 Hypervisor 架構：</strong>
+
+┌──────────┐  ┌──────────┐
+│   VM 1   │  │   VM 2   │
+├──────────┤  ├──────────┤
+│ Guest OS │  │ Guest OS │
+└─────┬────┘  └─────┬────┘
+      │             │
+      └──────┬──────┘
+             │
+    ┌────────┴────────┐
+    │   Hypervisor    │
+    │   (Type 2)      │
+    ├─────────────────┤
+    │   Host OS       │
+    ├─────────────────┤
+    │   Hardware      │
+    └─────────────────┘
+                </div>
+
+                <h3>2.3 虛擬化技術</h3>
+
+                <h4>完全虛擬化（Full Virtualization）</h4>
+                <div class="concept-box">
+                    <h4>特性</h4>
+                    <ul>
+                        <li>Guest OS 無需修改</li>
+                        <li>使用二進位轉譯技術</li>
+                        <li>硬體輔助虛擬化（VT-x, AMD-V）</li>
+                        <li>效能較好但有額外負擔</li>
+                        <li>範例：VMware, KVM</li>
+                    </ul>
+                </div>
+
+                <h4>半虛擬化（Para-virtualization）</h4>
+                <div class="concept-box">
+                    <h4>特性</h4>
+                    <ul>
+                        <li>Guest OS 需要修改</li>
+                        <li>透過 Hypercall 直接與 Hypervisor 通訊</li>
+                        <li>效能較完全虛擬化好</li>
+                        <li>但 Guest OS 需特別支援</li>
+                        <li>範例：Xen</li>
+                    </ul>
+                </div>
+
+                <h3>2.4 硬體輔助虛擬化</h3>
+                <p>現代 CPU 提供硬體層級的虛擬化支援：</p>
+                <ul>
+                    <li><strong>Intel VT-x：</strong>Intel 虛擬化技術</li>
+                    <li><strong>AMD-V：</strong>AMD 虛擬化技術</li>
+                    <li><strong>EPT/NPT：</strong>記憶體虛擬化加速</li>
+                    <li><strong>VT-d/AMD-Vi：</strong>I/O 虛擬化</li>
+                </ul>
+
+                <h2>三、容器技術</h2>
+
+                <h3>3.1 什麼是容器？</h3>
+                <p>容器是作業系統層級的虛擬化技術，多個容器共享同一個作業系統核心，但彼此隔離。</p>
+
+                <div class="concept-box">
+                    <h4>容器 vs 虛擬機器</h4>
+                    <ul>
+                        <li><strong>容器：</strong>
+                            <ul>
+                                <li>共享主機核心</li>
+                                <li>啟動快速（秒級）</li>
+                                <li>資源占用少</li>
+                                <li>適合微服務</li>
+                            </ul>
+                        </li>
+                        <li><strong>虛擬機器：</strong>
+                            <ul>
+                                <li>完整的 Guest OS</li>
+                                <li>啟動較慢（分鐘級）</li>
+                                <li>資源占用多</li>
+                                <li>隔離性更強</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="vm-diagram">
+<strong>容器 vs 虛擬機器架構比較：</strong>
+
+虛擬機器:                    容器:
+┌───────┐ ┌───────┐       ┌────┐ ┌────┐ ┌────┐
+│ App A │ │ App B │       │App │ │App │ │App │
+├───────┤ ├───────┤       │ A  │ │ B  │ │ C  │
+│  Bins │ │  Bins │       ├────┤ ├────┤ ├────┤
+│  Libs │ │  Libs │       │Bins│ │Bins│ │Bins│
+├───────┤ ├───────┤       │Libs│ │Libs│ │Libs│
+│Guest  │ │Guest  │       └─┬──┘ └─┬──┘ └─┬──┘
+│  OS   │ │  OS   │         └──────┴──────┘
+└───┬───┘ └───┬───┘                │
+    └─────┬───┘         ┌──────────┴─────────┐
+          │             │  Container Engine  │
+    ┌─────┴─────┐       │     (Docker)       │
+    │Hypervisor │       ├────────────────────┤
+    ├───────────┤       │     Host OS        │
+    │  Host OS  │       ├────────────────────┤
+    ├───────────┤       │     Hardware       │
+    │ Hardware  │       └────────────────────┘
+    └───────────┘
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>虛擬機器</th>
+                            <th>容器</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>啟動時間</td>
+                            <td>分鐘級</td>
+                            <td>秒級</td>
+                        </tr>
+                        <tr>
+                            <td>磁碟空間</td>
+                            <td>GB 級</td>
+                            <td>MB 級</td>
+                        </tr>
+                        <tr>
+                            <td>效能</td>
+                            <td>有虛擬化開銷</td>
+                            <td>接近原生</td>
+                        </tr>
+                        <tr>
+                            <td>隔離性</td>
+                            <td>完全隔離</td>
+                            <td>行程級隔離</td>
+                        </tr>
+                        <tr>
+                            <td>作業系統</td>
+                            <td>可執行不同 OS</td>
+                            <td>必須相同核心</td>
+                        </tr>
+                        <tr>
+                            <td>密度</td>
+                            <td>10-100 個/主機</td>
+                            <td>100-1000 個/主機</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>3.2 Docker 基礎</h3>
+                <p>Docker 是最流行的容器平台，提供完整的容器生命週期管理。</p>
+
+                <div class="concept-box">
+                    <h4>Docker 核心概念</h4>
+                    <ul>
+                        <li><strong>映像檔（Image）：</strong>容器的模板，唯讀</li>
+                        <li><strong>容器（Container）：</strong>映像檔的執行實例</li>
+                        <li><strong>Dockerfile：</strong>建立映像檔的腳本</li>
+                        <li><strong>Docker Hub：</strong>映像檔倉庫</li>
+                        <li><strong>Volume：</strong>持久化資料儲存</li>
+                        <li><strong>Network：</strong>容器間的網路通訊</li>
+                    </ul>
+                </div>
+
+                <h3>3.3 Linux Namespace</h3>
+                <p>Namespace 提供隔離的執行環境，讓容器看起來像是獨立的系統。</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Namespace</th>
+                            <th>隔離內容</th>
+                            <th>說明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PID</td>
+                            <td>行程 ID</td>
+                            <td>容器內的行程看不到主機的行程</td>
+                        </tr>
+                        <tr>
+                            <td>NET</td>
+                            <td>網路</td>
+                            <td>獨立的網路堆疊（IP、路由表）</td>
+                        </tr>
+                        <tr>
+                            <td>MNT</td>
+                            <td>掛載點</td>
+                            <td>獨立的檔案系統視圖</td>
+                        </tr>
+                        <tr>
+                            <td>UTS</td>
+                            <td>主機名稱</td>
+                            <td>獨立的主機名稱和域名</td>
+                        </tr>
+                        <tr>
+                            <td>IPC</td>
+                            <td>行程間通訊</td>
+                            <td>隔離訊息佇列、信號量</td>
+                        </tr>
+                        <tr>
+                            <td>USER</td>
+                            <td>使用者 ID</td>
+                            <td>使用者和群組 ID 的映射</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>3.4 Cgroups（Control Groups）</h3>
+                <p>Cgroups 用於限制、記錄和隔離行程群組使用的資源。</p>
+
+                <div class="concept-box">
+                    <h4>Cgroups 可控制的資源</h4>
+                    <ul>
+                        <li><strong>CPU：</strong>限制 CPU 使用率和核心分配</li>
+                        <li><strong>Memory：</strong>限制記憶體使用量</li>
+                        <li><strong>Disk I/O：</strong>限制磁碟讀寫速度</li>
+                        <li><strong>Network：</strong>限制網路頻寬</li>
+                        <li><strong>Device：</strong>控制裝置存取權限</li>
+                    </ul>
+                </div>
+
+                <h2>四、虛擬化效能</h2>
+
+                <h3>4.1 虛擬化開銷</h3>
+                <ul>
+                    <li><strong>CPU 虛擬化：</strong>指令模擬和轉譯的開銷</li>
+                    <li><strong>記憶體虛擬化：</strong>頁表轉換的額外層級</li>
+                    <li><strong>I/O 虛擬化：</strong>虛擬裝置的開銷</li>
+                    <li><strong>網路虛擬化：</strong>虛擬交換器的處理</li>
+                </ul>
+
+                <h3>4.2 效能優化技術</h3>
+
+                <div class="note-box">
+                    <strong>優化方法</strong>
+                    <ul>
+                        <li><strong>CPU Pinning：</strong>將虛擬 CPU 綁定到實體核心</li>
+                        <li><strong>NUMA 感知：</strong>考慮記憶體位置</li>
+                        <li><strong>大頁面：</strong>減少 TLB miss</li>
+                        <li><strong>SR-IOV：</strong>硬體輔助的 I/O 虛擬化</li>
+                        <li><strong>準虛擬化驅動：</strong>使用 virtio 等</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>五、實作練習</h2>
+
+                <h3>5.1 Docker 基本操作</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>docker_basics.sh</span>
+                        <span>Docker 基本指令</span>
+                    </div>
+                    <pre><code class="language-bash"># 檢查 Docker 版本
+docker --version
+
+# 搜尋映像檔
+docker search ubuntu
+
+# 下載映像檔
+docker pull ubuntu:latest
+
+# 列出本地映像檔
+docker images
+
+# 執行容器（互動模式）
+docker run -it ubuntu:latest /bin/bash
+
+# 在背景執行容器
+docker run -d --name my-container ubuntu:latest sleep infinity
+
+# 列出執行中的容器
+docker ps
+
+# 列出所有容器（包含停止的）
+docker ps -a
+
+# 停止容器
+docker stop my-container
+
+# 啟動容器
+docker start my-container
+
+# 進入執行中的容器
+docker exec -it my-container /bin/bash
+
+# 查看容器日誌
+docker logs my-container
+
+# 查看容器資源使用
+docker stats my-container
+
+# 刪除容器
+docker rm my-container
+
+# 刪除映像檔
+docker rmi ubuntu:latest
+
+# 清理所有停止的容器
+docker container prune</code></pre>
+                </div>
+
+                <h3>5.2 建立 Dockerfile</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Dockerfile</span>
+                        <span>建立自訂映像檔</span>
+                    </div>
+                    <pre><code class="language-dockerfile"># 基礎映像檔
+FROM ubuntu:22.04
+
+# 維護者資訊
+LABEL maintainer="your-email@example.com"
+
+# 更新套件並安裝軟體
+RUN apt-get update && \
+    apt-get install -y \
+    nginx \
+    curl \
+    vim && \
+    rm -rf /var/lib/apt/lists/*
+
+# 設定工作目錄
+WORKDIR /app
+
+# 複製檔案到容器
+COPY index.html /var/www/html/
+
+# 暴露 port
+EXPOSE 80
+
+# 設定環境變數
+ENV APP_ENV=production
+
+# 容器啟動時執行的指令
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>build_and_run.sh</span>
+                        <span>建立並執行容器</span>
+                    </div>
+                    <pre><code class="language-bash">#!/bin/bash
+
+# 建立映像檔
+docker build -t my-nginx:1.0 .
+
+# 執行容器
+docker run -d \
+  --name my-nginx-container \
+  -p 8080:80 \
+  my-nginx:1.0
+
+# 測試
+curl http://localhost:8080
+
+echo "Nginx 容器正在 http://localhost:8080 運行"</code></pre>
+                </div>
+
+                <h3>5.3 Docker Compose 範例</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>docker-compose.yml</span>
+                        <span>多容器應用程式</span>
+                    </div>
+                    <pre><code class="language-yaml">version: '3.8'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: myapp
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:alpine
+    networks:
+      - app-network
+    ports:
+      - "6379:6379"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:</code></pre>
+                </div>
+
+                <div class="output-block">
+<span class="prompt">$</span> docker-compose up -d
+<span class="output">Creating network "app_app-network" with driver "bridge"
+Creating volume "app_db-data" with default driver
+Creating app_db_1    ... done
+Creating app_redis_1 ... done
+Creating app_web_1   ... done</span>
+
+<span class="prompt">$</span> docker-compose ps
+<span class="output">   Name                  Command               State           Ports
+--------------------------------------------------------------------------------
+app_db_1      docker-entrypoint.sh mysqld      Up      0.0.0.0:3306->3306/tcp
+app_redis_1   docker-entrypoint.sh redis ...   Up      0.0.0.0:6379->6379/tcp
+app_web_1     /docker-entrypoint.sh ngin ...   Up      0.0.0.0:8080->80/tcp</span>
+                </div>
+
+                <h3>5.4 Namespace 實驗</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>namespace_demo.c</span>
+                        <span>建立 PID Namespace</span>
+                    </div>
+                    <pre><code class="language-c">#define _GNU_SOURCE
+#include &lt;sched.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define STACK_SIZE (1024 * 1024)
+
+static char child_stack[STACK_SIZE];
+
+int child_function(void* arg) {
+    printf("子行程 PID: %d\n", getpid());
+    printf("父行程 PID: %d\n", getppid());
+    
+    // 執行 bash
+    execl("/bin/bash", "bash", NULL);
+    
+    return 0;
+}
+
+int main() {
+    printf("主行程 PID: %d\n", getpid());
+    
+    // 建立新的 PID namespace
+    pid_t child_pid = clone(
+        child_function,
+        child_stack + STACK_SIZE,
+        CLONE_NEWPID | SIGCHLD,
+        NULL
+    );
+    
+    if (child_pid == -1) {
+        perror("clone failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("建立的子行程 PID: %d\n", child_pid);
+    
+    // 等待子行程
+    waitpid(child_pid, NULL, 0);
+    
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.5 Cgroups 資源限制</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>cgroup_limit.sh</span>
+                        <span>使用 Cgroups 限制資源</span>
+                    </div>
+                    <pre><code class="language-bash">#!/bin/bash
+
+# 限制 Docker 容器的 CPU 和記憶體
+
+# 限制 CPU（50% 的一個核心）
+docker run -d --name cpu-limited \
+  --cpus="0.5" \
+  ubuntu:latest \
+  /bin/bash -c "while true; do echo test; done"
+
+# 限制記憶體（512MB）
+docker run -d --name memory-limited \
+  --memory="512m" \
+  --memory-swap="512m" \
+  ubuntu:latest \
+  sleep infinity
+
+# 限制 CPU 和記憶體
+docker run -d --name resource-limited \
+  --cpus="1.0" \
+  --memory="1g" \
+  --memory-swap="1g" \
+  ubuntu:latest \
+  sleep infinity
+
+# 查看資源使用
+docker stats resource-limited
+
+# 清理
+docker stop cpu-limited memory-limited resource-limited
+docker rm cpu-limited memory-limited resource-limited</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：Docker 基礎練習</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>熟悉 Docker 基本操作。</p>
+                        <ul>
+                            <li>建立自訂 Dockerfile（包含 Web 伺服器）</li>
+                            <li>建立映像檔並執行容器</li>
+                            <li>配置 port mapping 和 volume</li>
+                            <li>練習容器的啟動、停止、刪除</li>
+                            <li>撰寫操作文件</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：多容器應用</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>使用 Docker Compose 建立多容器應用。</p>
+                        <ul>
+                            <li>設計三層架構（Web、App、DB）</li>
+                            <li>配置容器間的網路通訊</li>
+                            <li>設定環境變數和 volume</li>
+                            <li>實作健康檢查</li>
+                            <li>撰寫部署文件</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：容器化應用程式</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>將現有應用程式容器化。</p>
+                        <ul>
+                            <li>選擇一個 Web 應用（如 Flask、Express）</li>
+                            <li>撰寫 Dockerfile</li>
+                            <li>優化映像檔大小（多階段建置）</li>
+                            <li>配置 CI/CD pipeline</li>
+                            <li>推送到 Docker Hub</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：虛擬化效能分析</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>比較不同虛擬化技術的效能。</p>
+                        <ul>
+                            <li>比較原生、虛擬機、容器的效能</li>
+                            <li>測試 CPU、記憶體、磁碟 I/O、網路</li>
+                            <li>使用 benchmark 工具（如 sysbench）</li>
+                            <li>分析結果並繪製圖表</li>
+                            <li>撰寫效能報告</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：自製容器引擎</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>使用 Namespace 和 Cgroups 實作簡易容器。</p>
+                        <ul>
+                            <li>使用 C 語言實作基本容器功能</li>
+                            <li>實作 PID、NET、MNT namespace</li>
+                            <li>使用 Cgroups 限制資源</li>
+                            <li>實作簡單的映像檔管理</li>
+                            <li>支援基本的容器操作（run、stop）</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. Type 1 Hypervisor 的特性是？</strong></p>
+                        <p>A. 安裝在主機作業系統上</p>
+                        <p>B. 直接安裝在硬體上</p>
+                        <p>C. 效能較 Type 2 差</p>
+                        <p>D. 適合個人使用</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. 容器相比虛擬機器的優勢不包括？</strong></p>
+                        <p>A. 啟動速度快</p>
+                        <p>B. 資源占用少</p>
+                        <p>C. 隔離性更強</p>
+                        <p>D. 部署更靈活</p>
+                        <p><em>答案：C（虛擬機器的隔離性更強）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. Linux Namespace 不包括哪一種？</strong></p>
+                        <p>A. PID</p>
+                        <p>B. NET</p>
+                        <p>C. CPU</p>
+                        <p>D. UTS</p>
+                        <p><em>答案：C（CPU 資源限制由 Cgroups 管理）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. Cgroups 的功能是？</strong></p>
+                        <p>A. 提供行程隔離</p>
+                        <p>B. 限制資源使用</p>
+                        <p>C. 管理網路設定</p>
+                        <p>D. 建立虛擬機器</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. Dockerfile 中的 CMD 指令作用是？</strong></p>
+                        <p>A. 建立映像檔時執行</p>
+                        <p>B. 容器啟動時執行</p>
+                        <p>C. 安裝套件</p>
+                        <p>D. 設定環境變數</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 硬體輔助虛擬化技術不包括？</strong></p>
+                        <p>A. Intel VT-x</p>
+                        <p>B. AMD-V</p>
+                        <p>C. Docker</p>
+                        <p>D. EPT</p>
+                        <p><em>答案：C（Docker 是容器技術）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明容器和虛擬機器的主要差異及各自的適用場景</strong></p>
+                        <p><em>參考答案：容器和虛擬機器的主要差異：(1) 架構：容器共享主機核心，虛擬機器有完整的 Guest OS；(2) 啟動速度：容器秒級，虛擬機器分鐘級；(3) 資源占用：容器 MB 級，虛擬機器 GB 級；(4) 隔離性：虛擬機器隔離性更強，容器為行程級隔離。適用場景：容器適合微服務架構、快速部署、CI/CD、開發測試環境；虛擬機器適合需要完全隔離的場景、執行不同作業系統、傳統應用遷移、需要完整系統控制的情況。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：解釋 Namespace 和 Cgroups 如何共同實現容器隔離</strong></p>
+                        <p><em>參考答案：Namespace 和 Cgroups 是 Linux 容器的兩大核心技術。Namespace 提供資源的隔離視圖：PID namespace 讓容器有獨立的行程空間；NET namespace 提供獨立的網路堆疊；MNT namespace 隔離檔案系統；UTS namespace 隔離主機名稱；IPC 和 USER namespace 分別隔離行程間通訊和使用者權限。Cgroups 則負責資源限制與計量：限制 CPU 使用率、記憶體上限、磁碟 I/O 頻寬、網路頻寬等。兩者結合：Namespace 確保容器看到的是獨立的系統資源，Cgroups 確保容器不會消耗過多資源影響其他容器，共同實現輕量級但有效的隔離。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week12.html" class="nav-button">上一週：分散式系統</a>
+                <a href="week14.html" class="nav-button">下一週：效能監控與除錯</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 13 © 2026</p>
+        <p>建議學習時間：12-14 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

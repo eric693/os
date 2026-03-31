@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 12: 分散式系統 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #1e40af;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #1e40af;
+        }
+
+        .intro-box h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .concept-box {
+            background: #fef3c7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .concept-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .network-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .exercise-section {
+            background: #fff7ed;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #fb923c;
+        }
+
+        .exercise-section h3 {
+            color: #c2410c;
+            margin-top: 0;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #fb923c;
+        }
+
+        .exercise-item h4 {
+            color: #ea580c;
+            margin-top: 0;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .difficulty-hard {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .quiz-section {
+            background: #f0f9ff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .quiz-section h3 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(30, 64, 175, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 12: 分散式系統</h1>
+            <p class="week-info">Distributed Systems</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">課程介紹</a></li>
+                <li><a href="#theory">理論學習</a></li>
+                <li><a href="#practice">實作練習</a></li>
+                <li><a href="#exercises">作業</a></li>
+                <li><a href="#quiz">測驗</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>本週課程介紹</h3>
+                <p>歡迎來到第十二週的課程！隨著網際網路的普及，分散式系統已成為現代運算的核心。從雲端服務到大數據處理，從社群網路到線上遊戲，都建立在分散式系統之上。</p>
+                <p>本週我們將學習分散式系統的基本概念、網路通訊基礎、Socket 程式設計、客戶端-伺服器架構，以及分散式系統面臨的挑戰。這些知識是理解現代網路應用的基礎。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>學習目標</h3>
+                <ul>
+                    <li>理解分散式系統的定義與特性</li>
+                    <li>學習網路通訊的基本概念（TCP/IP、UDP）</li>
+                    <li>掌握 Socket 程式設計</li>
+                    <li>了解客戶端-伺服器架構</li>
+                    <li>學習多執行緒伺服器的實作</li>
+                    <li>認識分散式系統的挑戰與解決方案</li>
+                </ul>
+            </div>
+
+            <section id="theory">
+                <h2>一、分散式系統基礎</h2>
+                
+                <h3>1.1 什麼是分散式系統？</h3>
+                <p>分散式系統是由多個獨立的電腦組成，透過網路互相通訊與協調，對使用者呈現為單一系統的電腦系統。</p>
+
+                <div class="concept-box">
+                    <h4>分散式系統的特性</h4>
+                    <ul>
+                        <li><strong>資源共享：</strong>硬體、軟體、資料可以被多個使用者共享</li>
+                        <li><strong>透明性：</strong>使用者感覺不到系統是分散的</li>
+                        <li><strong>並行性：</strong>多個節點可以同時執行任務</li>
+                        <li><strong>可擴展性：</strong>可以增加節點來提升效能</li>
+                        <li><strong>容錯性：</strong>部分節點故障不影響整體運作</li>
+                    </ul>
+                </div>
+
+                <h3>1.2 分散式系統的優勢</h3>
+                <ul>
+                    <li><strong>效能提升：</strong>工作可以分散到多台電腦處理</li>
+                    <li><strong>資源共享：</strong>共用昂貴的硬體資源</li>
+                    <li><strong>可靠性：</strong>透過備份提高系統可用性</li>
+                    <li><strong>擴展性：</strong>可以逐步增加資源</li>
+                    <li><strong>地理分散：</strong>服務可以接近使用者</li>
+                </ul>
+
+                <h3>1.3 分散式系統的挑戰</h3>
+
+                <div class="warning-box">
+                    <strong>主要挑戰</strong>
+                    <ul>
+                        <li><strong>網路延遲：</strong>通訊需要時間</li>
+                        <li><strong>部分失效：</strong>某些節點可能故障</li>
+                        <li><strong>並行控制：</strong>多個節點同時存取資源</li>
+                        <li><strong>一致性：</strong>保持資料一致性困難</li>
+                        <li><strong>安全性：</strong>網路傳輸的安全問題</li>
+                        <li><strong>時鐘同步：</strong>不同節點的時間可能不同步</li>
+                    </ul>
+                </div>
+
+                <h2>二、網路通訊基礎</h2>
+
+                <h3>2.1 OSI 七層模型與 TCP/IP 模型</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>OSI 層次</th>
+                            <th>TCP/IP 層次</th>
+                            <th>功能</th>
+                            <th>協定範例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>應用層</td>
+                            <td rowspan="3">應用層</td>
+                            <td>應用程式介面</td>
+                            <td>HTTP, FTP, SMTP</td>
+                        </tr>
+                        <tr>
+                            <td>表示層</td>
+                            <td>資料格式轉換</td>
+                            <td>SSL/TLS</td>
+                        </tr>
+                        <tr>
+                            <td>會話層</td>
+                            <td>會話管理</td>
+                            <td>NetBIOS</td>
+                        </tr>
+                        <tr>
+                            <td>傳輸層</td>
+                            <td>傳輸層</td>
+                            <td>端對端傳輸</td>
+                            <td>TCP, UDP</td>
+                        </tr>
+                        <tr>
+                            <td>網路層</td>
+                            <td>網路層</td>
+                            <td>路由與定址</td>
+                            <td>IP, ICMP</td>
+                        </tr>
+                        <tr>
+                            <td>資料鏈結層</td>
+                            <td rowspan="2">網路介面層</td>
+                            <td>幀傳輸</td>
+                            <td>Ethernet</td>
+                        </tr>
+                        <tr>
+                            <td>實體層</td>
+                            <td>實體傳輸</td>
+                            <td>電纜、光纖</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.2 TCP vs UDP</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>特性</th>
+                            <th>TCP</th>
+                            <th>UDP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>連線</td>
+                            <td>連線導向</td>
+                            <td>無連線</td>
+                        </tr>
+                        <tr>
+                            <td>可靠性</td>
+                            <td>可靠（保證傳送）</td>
+                            <td>不可靠</td>
+                        </tr>
+                        <tr>
+                            <td>順序</td>
+                            <td>保證順序</td>
+                            <td>不保證</td>
+                        </tr>
+                        <tr>
+                            <td>速度</td>
+                            <td>較慢</td>
+                            <td>較快</td>
+                        </tr>
+                        <tr>
+                            <td>額外負擔</td>
+                            <td>較大</td>
+                            <td>較小</td>
+                        </tr>
+                        <tr>
+                            <td>應用場景</td>
+                            <td>HTTP, FTP, Email</td>
+                            <td>影音串流, DNS, 遊戲</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.3 Socket 概念</h3>
+                <p>Socket 是網路通訊的端點，提供程式與網路之間的介面。</p>
+
+                <div class="network-diagram">
+<strong>TCP Socket 通訊流程：</strong>
+
+伺服器端:                    客戶端:
+socket()                    socket()
+  ↓                           ↓
+bind()                      connect() ──┐
+  ↓                           ↓         │
+listen()                   (等待連線)    │
+  ↓                           ↓         │
+accept() ←──────────────────────────────┘
+  ↓                           ↓
+read()/write() ←────────→ write()/read()
+  ↓                           ↓
+close()                     close()
+                </div>
+
+                <h2>三、客戶端-伺服器架構</h2>
+
+                <h3>3.1 基本架構</h3>
+
+                <div class="concept-box">
+                    <h4>客戶端-伺服器模型</h4>
+                    <ul>
+                        <li><strong>伺服器（Server）：</strong>
+                            <ul>
+                                <li>提供服務</li>
+                                <li>持續運行等待請求</li>
+                                <li>處理多個客戶端</li>
+                            </ul>
+                        </li>
+                        <li><strong>客戶端（Client）：</strong>
+                            <ul>
+                                <li>發起請求</li>
+                                <li>主動連線伺服器</li>
+                                <li>接收回應</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>3.2 伺服器類型</h3>
+
+                <h4>迭代伺服器（Iterative Server）</h4>
+                <ul>
+                    <li>一次處理一個客戶端請求</li>
+                    <li>簡單但效率低</li>
+                    <li>適合簡單、快速的服務</li>
+                </ul>
+
+                <h4>並行伺服器（Concurrent Server）</h4>
+                <ul>
+                    <li>同時處理多個客戶端</li>
+                    <li>使用多執行緒或多行程</li>
+                    <li>適合複雜、耗時的服務</li>
+                </ul>
+
+                <h3>3.3 多工 I/O</h3>
+
+                <div class="concept-box">
+                    <h4>I/O 多工技術</h4>
+                    <ul>
+                        <li><strong>select()：</strong>
+                            <ul>
+                                <li>傳統的多工方式</li>
+                                <li>可監控多個檔案描述符</li>
+                                <li>效能限制（FD_SETSIZE）</li>
+                            </ul>
+                        </li>
+                        <li><strong>poll()：</strong>
+                            <ul>
+                                <li>改進的 select</li>
+                                <li>無描述符數量限制</li>
+                                <li>但仍需線性掃描</li>
+                            </ul>
+                        </li>
+                        <li><strong>epoll()（Linux）：</strong>
+                            <ul>
+                                <li>高效能的事件通知</li>
+                                <li>適合大量連線</li>
+                                <li>O(1) 時間複雜度</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h2>四、遠端程序呼叫（RPC）</h2>
+
+                <h3>4.1 RPC 概念</h3>
+                <p>RPC 讓程式可以呼叫另一台電腦上的函數，就像呼叫本地函數一樣。</p>
+
+                <div class="network-diagram">
+<strong>RPC 運作流程：</strong>
+
+客戶端                     伺服器
+  │                          │
+  ├─ 呼叫本地存根           │
+  │  (Client Stub)          │
+  ├─ 封裝參數               │
+  │  (Marshalling)          │
+  ├─ 透過網路傳送 ────────→ │
+  │                         ├─ 接收請求
+  │                         ├─ 解析參數
+  │                         │  (Unmarshalling)
+  │                         ├─ 執行實際函數
+  │                         ├─ 封裝結果
+  │ ←──────── 傳回結果 ────├
+  ├─ 解析結果               │
+  └─ 返回給呼叫者           │
+                </div>
+
+                <h3>4.2 分散式檔案系統</h3>
+                <p>允許多台電腦透過網路共享檔案系統。</p>
+
+                <div class="concept-box">
+                    <h4>常見的分散式檔案系統</h4>
+                    <ul>
+                        <li><strong>NFS（Network File System）：</strong>
+                            <ul>
+                                <li>Unix/Linux 常用</li>
+                                <li>透明的遠端檔案存取</li>
+                            </ul>
+                        </li>
+                        <li><strong>CIFS/SMB：</strong>
+                            <ul>
+                                <li>Windows 檔案共享</li>
+                                <li>跨平台支援</li>
+                            </ul>
+                        </li>
+                        <li><strong>HDFS（Hadoop）：</strong>
+                            <ul>
+                                <li>大數據應用</li>
+                                <li>高吞吐量</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="practice">
+                <h2>五、實作練習</h2>
+
+                <h3>5.1 TCP 伺服器</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>tcp_server.c</span>
+                        <span>簡易 TCP 伺服器</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main() {
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+    
+    // 建立 socket
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        perror("Socket 建立失敗");
+        exit(EXIT_FAILURE);
+    }
+    
+    // 設定 socket 選項（允許重用位址）
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    
+    // 設定伺服器位址
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    
+    // 綁定 socket
+    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Bind 失敗");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    // 監聽連線
+    if (listen(server_fd, 5) == -1) {
+        perror("Listen 失敗");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("伺服器正在 Port %d 監聽...\n", PORT);
+    
+    while (1) {
+        // 接受連線
+        client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &addr_len);
+        if (client_fd == -1) {
+            perror("Accept 失敗");
+            continue;
+        }
+        
+        printf("收到來自 %s:%d 的連線\n", 
+               inet_ntoa(client_addr.sin_addr), 
+               ntohs(client_addr.sin_port));
+        
+        // 接收資料
+        memset(buffer, 0, BUFFER_SIZE);
+        int bytes_received = recv(client_fd, buffer, BUFFER_SIZE - 1, 0);
+        
+        if (bytes_received > 0) {
+            printf("收到訊息: %s\n", buffer);
+            
+            // 回覆訊息
+            const char* response = "訊息已收到！";
+            send(client_fd, response, strlen(response), 0);
+        }
+        
+        close(client_fd);
+        printf("連線已關閉\n\n");
+    }
+    
+    close(server_fd);
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.2 TCP 客戶端</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>tcp_client.c</span>
+                        <span>簡易 TCP 客戶端</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define SERVER_IP "127.0.0.1"
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sock_fd;
+    struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
+    char message[BUFFER_SIZE];
+    
+    // 建立 socket
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd == -1) {
+        perror("Socket 建立失敗");
+        exit(EXIT_FAILURE);
+    }
+    
+    // 設定伺服器位址
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    
+    if (inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr) <= 0) {
+        perror("無效的位址");
+        close(sock_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    // 連線到伺服器
+    if (connect(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        perror("連線失敗");
+        close(sock_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("已連線到伺服器 %s:%d\n", SERVER_IP, PORT);
+    
+    // 輸入訊息
+    printf("請輸入訊息: ");
+    fgets(message, BUFFER_SIZE, stdin);
+    message[strcspn(message, "\n")] = 0; // 移除換行
+    
+    // 傳送訊息
+    send(sock_fd, message, strlen(message), 0);
+    printf("訊息已傳送\n");
+    
+    // 接收回覆
+    memset(buffer, 0, BUFFER_SIZE);
+    int bytes_received = recv(sock_fd, buffer, BUFFER_SIZE - 1, 0);
+    
+    if (bytes_received > 0) {
+        printf("伺服器回覆: %s\n", buffer);
+    }
+    
+    close(sock_fd);
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.3 多執行緒伺服器</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>multithreaded_server.c</span>
+                        <span>多執行緒 TCP 伺服器</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+#define MAX_CLIENTS 10
+
+int client_count = 0;
+pthread_mutex_t count_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct {
+    int socket;
+    struct sockaddr_in address;
+    int id;
+} client_info_t;
+
+void* handle_client(void* arg) {
+    client_info_t* client = (client_info_t*)arg;
+    char buffer[BUFFER_SIZE];
+    int bytes_received;
+    
+    printf("[Client %d] 連線來自 %s:%d\n", 
+           client->id,
+           inet_ntoa(client->address.sin_addr),
+           ntohs(client->address.sin_port));
+    
+    // 歡迎訊息
+    const char* welcome = "歡迎連線到多執行緒伺服器！\n";
+    send(client->socket, welcome, strlen(welcome), 0);
+    
+    // 處理客戶端請求
+    while ((bytes_received = recv(client->socket, buffer, BUFFER_SIZE - 1, 0)) > 0) {
+        buffer[bytes_received] = '\0';
+        
+        printf("[Client %d] 收到: %s\n", client->id, buffer);
+        
+        // 檢查是否要離開
+        if (strcmp(buffer, "quit") == 0) {
+            const char* goodbye = "再見！\n";
+            send(client->socket, goodbye, strlen(goodbye), 0);
+            break;
+        }
+        
+        // 回覆訊息
+        char response[BUFFER_SIZE];
+        snprintf(response, BUFFER_SIZE, "[伺服器] 已收到: %s\n", buffer);
+        send(client->socket, response, strlen(response), 0);
+        
+        memset(buffer, 0, BUFFER_SIZE);
+    }
+    
+    printf("[Client %d] 連線關閉\n", client->id);
+    
+    close(client->socket);
+    
+    pthread_mutex_lock(&count_mutex);
+    client_count--;
+    pthread_mutex_unlock(&count_mutex);
+    
+    free(client);
+    pthread_detach(pthread_self());
+    
+    return NULL;
+}
+
+int main() {
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    pthread_t thread_id;
+    
+    // 建立 socket
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        perror("Socket 建立失敗");
+        exit(EXIT_FAILURE);
+    }
+    
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    
+    // 設定伺服器位址
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    
+    // 綁定與監聽
+    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Bind 失敗");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    if (listen(server_fd, MAX_CLIENTS) == -1) {
+        perror("Listen 失敗");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("多執行緒伺服器正在 Port %d 監聽...\n", PORT);
+    printf("最多支援 %d 個同時連線\n\n", MAX_CLIENTS);
+    
+    while (1) {
+        client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &addr_len);
+        
+        if (client_fd == -1) {
+            perror("Accept 失敗");
+            continue;
+        }
+        
+        pthread_mutex_lock(&count_mutex);
+        if (client_count >= MAX_CLIENTS) {
+            pthread_mutex_unlock(&count_mutex);
+            const char* msg = "伺服器已滿，請稍後再試\n";
+            send(client_fd, msg, strlen(msg), 0);
+            close(client_fd);
+            continue;
+        }
+        client_count++;
+        pthread_mutex_unlock(&count_mutex);
+        
+        // 建立客戶端資訊
+        client_info_t* client = malloc(sizeof(client_info_t));
+        client->socket = client_fd;
+        client->address = client_addr;
+        client->id = client_count;
+        
+        // 建立執行緒處理客戶端
+        if (pthread_create(&thread_id, NULL, handle_client, (void*)client) != 0) {
+            perror("執行緒建立失敗");
+            free(client);
+            close(client_fd);
+            
+            pthread_mutex_lock(&count_mutex);
+            client_count--;
+            pthread_mutex_unlock(&count_mutex);
+        }
+    }
+    
+    close(server_fd);
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.4 簡易聊天室伺服器</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>chat_server.c</span>
+                        <span>多人聊天室伺服器</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+#define MAX_CLIENTS 10
+
+typedef struct {
+    int socket;
+    char name[50];
+    int active;
+} client_t;
+
+client_t clients[MAX_CLIENTS];
+int client_count = 0;
+pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void broadcast_message(const char* message, int sender_socket) {
+    pthread_mutex_lock(&clients_mutex);
+    
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (clients[i].active && clients[i].socket != sender_socket) {
+            send(clients[i].socket, message, strlen(message), 0);
+        }
+    }
+    
+    pthread_mutex_unlock(&clients_mutex);
+}
+
+void* handle_client(void* arg) {
+    int client_socket = *(int*)arg;
+    free(arg);
+    
+    char buffer[BUFFER_SIZE];
+    char name[50];
+    int client_index = -1;
+    
+    // 接收使用者名稱
+    recv(client_socket, name, sizeof(name), 0);
+    name[strcspn(name, "\n")] = 0;
+    
+    // 加入客戶端列表
+    pthread_mutex_lock(&clients_mutex);
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (!clients[i].active) {
+            clients[i].socket = client_socket;
+            strcpy(clients[i].name, name);
+            clients[i].active = 1;
+            client_index = i;
+            client_count++;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&clients_mutex);
+    
+    if (client_index == -1) {
+        const char* msg = "聊天室已滿\n";
+        send(client_socket, msg, strlen(msg), 0);
+        close(client_socket);
+        return NULL;
+    }
+    
+    printf("%s 加入聊天室\n", name);
+    
+    // 廣播加入訊息
+    char join_msg[BUFFER_SIZE];
+    snprintf(join_msg, BUFFER_SIZE, "*** %s 加入聊天室 ***\n", name);
+    broadcast_message(join_msg, client_socket);
+    
+    // 接收訊息
+    while (recv(client_socket, buffer, BUFFER_SIZE, 0) > 0) {
+        buffer[strcspn(buffer, "\n")] = 0;
+        
+        if (strlen(buffer) > 0) {
+            char message[BUFFER_SIZE];
+            snprintf(message, BUFFER_SIZE, "[%s]: %s\n", name, buffer);
+            printf("%s", message);
+            broadcast_message(message, -1); // 廣播給所有人
+        }
+        
+        memset(buffer, 0, BUFFER_SIZE);
+    }
+    
+    // 客戶端離開
+    pthread_mutex_lock(&clients_mutex);
+    clients[client_index].active = 0;
+    client_count--;
+    pthread_mutex_unlock(&clients_mutex);
+    
+    printf("%s 離開聊天室\n", name);
+    
+    char leave_msg[BUFFER_SIZE];
+    snprintf(leave_msg, BUFFER_SIZE, "*** %s 離開聊天室 ***\n", name);
+    broadcast_message(leave_msg, -1);
+    
+    close(client_socket);
+    pthread_detach(pthread_self());
+    
+    return NULL;
+}
+
+int main() {
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    pthread_t thread_id;
+    
+    // 初始化客戶端列表
+    memset(clients, 0, sizeof(clients));
+    
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    
+    bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    listen(server_fd, MAX_CLIENTS);
+    
+    printf("聊天室伺服器啟動於 Port %d\n", PORT);
+    printf("等待客戶端連線...\n\n");
+    
+    while (1) {
+        client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &addr_len);
+        
+        if (client_fd == -1) {
+            continue;
+        }
+        
+        int* socket_ptr = malloc(sizeof(int));
+        *socket_ptr = client_fd;
+        
+        pthread_create(&thread_id, NULL, handle_client, (void*)socket_ptr);
+    }
+    
+    close(server_fd);
+    return 0;
+}</code></pre>
+                </div>
+
+                <h3>5.5 UDP 通訊範例</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>udp_server.c</span>
+                        <span>UDP 伺服器（無連線）</span>
+                    </div>
+                    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sock_fd;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+    
+    // 建立 UDP socket
+    sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock_fd == -1) {
+        perror("Socket 建立失敗");
+        exit(EXIT_FAILURE);
+    }
+    
+    // 設定伺服器位址
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    
+    // 綁定
+    if (bind(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Bind 失敗");
+        close(sock_fd);
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("UDP 伺服器正在 Port %d 監聽...\n", PORT);
+    
+    while (1) {
+        memset(buffer, 0, BUFFER_SIZE);
+        
+        // 接收資料
+        int bytes_received = recvfrom(sock_fd, buffer, BUFFER_SIZE - 1, 0,
+                                     (struct sockaddr*)&client_addr, &addr_len);
+        
+        if (bytes_received > 0) {
+            printf("收到來自 %s:%d 的訊息: %s\n",
+                   inet_ntoa(client_addr.sin_addr),
+                   ntohs(client_addr.sin_port),
+                   buffer);
+            
+            // 回覆
+            const char* response = "UDP 訊息已收到";
+            sendto(sock_fd, response, strlen(response), 0,
+                   (struct sockaddr*)&client_addr, addr_len);
+        }
+    }
+    
+    close(sock_fd);
+    return 0;
+}</code></pre>
+                </div>
+
+            </section>
+
+            <section id="exercises">
+                <div class="exercise-section">
+                    <h3>本週作業</h3>
+
+                    <div class="exercise-item">
+                        <h4>作業 1：Echo 伺服器</h4>
+                        <span class="difficulty difficulty-easy">簡單</span>
+                        <p><strong>要求：</strong>實作 Echo 伺服器和客戶端。</p>
+                        <ul>
+                            <li>伺服器接收訊息後原樣回傳</li>
+                            <li>支援 TCP 和 UDP 兩種版本</li>
+                            <li>處理多個客戶端</li>
+                            <li>加入錯誤處理</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 2：檔案傳輸系統</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>建立檔案傳輸程式。</p>
+                        <ul>
+                            <li>客戶端可上傳檔案到伺服器</li>
+                            <li>客戶端可從伺服器下載檔案</li>
+                            <li>顯示傳輸進度</li>
+                            <li>支援斷點續傳</li>
+                            <li>驗證檔案完整性（MD5/SHA256）</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 3：分散式計算系統</h4>
+                        <span class="difficulty difficulty-medium">中等</span>
+                        <p><strong>要求：</strong>實作簡易的分散式計算框架。</p>
+                        <ul>
+                            <li>主節點分配任務給工作節點</li>
+                            <li>工作節點執行計算並回報結果</li>
+                            <li>支援任務分割與合併</li>
+                            <li>處理節點失效</li>
+                            <li>範例應用：質數搜尋、蒙地卡羅模擬</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 4：簡易 HTTP 伺服器</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>實作支援基本 HTTP 協定的 Web 伺服器。</p>
+                        <ul>
+                            <li>處理 GET、POST 請求</li>
+                            <li>提供靜態檔案服務</li>
+                            <li>支援 MIME 類型</li>
+                            <li>多執行緒或 I/O 多工</li>
+                            <li>基本的 HTTP 標頭處理</li>
+                            <li>錯誤頁面（404、500）</li>
+                        </ul>
+                    </div>
+
+                    <div class="exercise-item">
+                        <h4>作業 5：分散式聊天系統</h4>
+                        <span class="difficulty difficulty-hard">困難</span>
+                        <p><strong>要求：</strong>建立功能完整的分散式聊天系統。</p>
+                        <ul>
+                            <li>多房間支援</li>
+                            <li>私人訊息</li>
+                            <li>使用者認證</li>
+                            <li>訊息歷史記錄</li>
+                            <li>檔案傳輸功能</li>
+                            <li>使用者上線/離線通知</li>
+                            <li>圖形化介面（選擇性）</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="quiz">
+                <div class="quiz-section">
+                    <h3>本週測驗</h3>
+
+                    <div class="quiz-question">
+                        <p><strong>1. 分散式系統的特性不包括？</strong></p>
+                        <p>A. 資源共享</p>
+                        <p>B. 並行性</p>
+                        <p>C. 集中控制</p>
+                        <p>D. 可擴展性</p>
+                        <p><em>答案：C（分散式系統沒有集中控制）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>2. TCP 相比 UDP 的特性是？</strong></p>
+                        <p>A. 速度較快</p>
+                        <p>B. 無連線</p>
+                        <p>C. 保證可靠傳輸</p>
+                        <p>D. 適合即時應用</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>3. Socket 程式設計中，伺服器端不需要的步驟是？</strong></p>
+                        <p>A. socket()</p>
+                        <p>B. bind()</p>
+                        <p>C. connect()</p>
+                        <p>D. listen()</p>
+                        <p><em>答案：C（connect() 是客戶端使用的）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>4. RPC 的全名是？</strong></p>
+                        <p>A. Remote Process Call</p>
+                        <p>B. Remote Procedure Call</p>
+                        <p>C. Recursive Process Call</p>
+                        <p>D. Reliable Protocol Connection</p>
+                        <p><em>答案：B</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>5. 下列何者是 I/O 多工技術？</strong></p>
+                        <p>A. fork()</p>
+                        <p>B. pthread_create()</p>
+                        <p>C. select()</p>
+                        <p>D. malloc()</p>
+                        <p><em>答案：C</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>6. 分散式系統的主要挑戰不包括？</strong></p>
+                        <p>A. 網路延遲</p>
+                        <p>B. 部分失效</p>
+                        <p>C. 單點故障</p>
+                        <p>D. 時鐘同步</p>
+                        <p><em>答案：C（單點故障是集中式系統的問題）</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>7. 問答題：說明客戶端-伺服器架構的優缺點</strong></p>
+                        <p><em>參考答案：優點包括：(1) 集中管理資源和資料；(2) 容易維護和更新；(3) 安全性較好，可以集中控制存取；(4) 客戶端程式較簡單。缺點包括：(1) 伺服器是單點故障；(2) 伺服器可能成為效能瓶頸；(3) 擴展性受限於伺服器容量；(4) 網路依賴性高。適合需要集中管理的應用，如資料庫系統、Web 服務等。</em></p>
+                    </div>
+
+                    <div class="quiz-question">
+                        <p><strong>8. 問答題：為什麼多執行緒伺服器優於迭代伺服器？並說明潛在問題</strong></p>
+                        <p><em>參考答案：多執行緒伺服器的優勢：(1) 可同時處理多個客戶端請求，提高並行度；(2) 單一客戶端的長時間操作不會阻塞其他客戶端；(3) 充分利用多核心 CPU。潛在問題：(1) 執行緒管理的額外開銷；(2) 需要處理執行緒同步問題；(3) 共享資源的競爭條件；(4) 執行緒數量過多會降低效能。解決方案包括使用執行緒池、適當的同步機制（mutex）、以及考慮使用 I/O 多工（如 epoll）作為替代方案。</em></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="navigation">
+                <a href="week11.html" class="nav-button">上一週：安全性與保護</a>
+                <a href="week13.html" class="nav-button">下一週：虛擬化技術</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>作業系統課程 Week 12 © 2026</p>
+        <p>建議學習時間：12-14 小時</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

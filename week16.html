@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 16: Side Project 實戰開發 - 作業系統課程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/c.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background: #f7fafc;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .week-info {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: #edf2f7;
+            color: #ea580c;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.875rem;
+            margin: 2.5rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #ea580c;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: #4a5568;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #ea580c;
+        }
+
+        .intro-box h3 {
+            color: #7c2d12;
+            margin-top: 0;
+        }
+
+        .intro-box p {
+            color: #7c2d12;
+        }
+
+        .learning-objectives {
+            background: #f0fdf4;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #10b981;
+            margin: 1.5rem 0;
+        }
+
+        .learning-objectives h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+
+        .learning-objectives ul {
+            margin-top: 1rem;
+        }
+
+        .learning-objectives li {
+            color: #047857;
+        }
+
+        .project-box {
+            background: #fef3c7;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .project-box h4 {
+            color: #92400e;
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .concept-box {
+            background: #e0f2fe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #0284c7;
+        }
+
+        .concept-box h4 {
+            color: #075985;
+            margin-top: 0;
+        }
+
+        .note-box {
+            background: #dbeafe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .note-box strong {
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fee2e2;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+        }
+
+        .warning-box strong {
+            color: #991b1b;
+        }
+
+        .success-box {
+            background: #dcfce7;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #16a34a;
+        }
+
+        .success-box strong {
+            color: #166534;
+        }
+
+        .code-block {
+            margin: 2rem 0;
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-block pre {
+            margin: 0;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .checklist {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid #e2e8f0;
+            margin: 1.5rem 0;
+        }
+
+        .checklist h4 {
+            margin-top: 0;
+            color: #ea580c;
+        }
+
+        .checklist ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: #ea580c;
+            font-size: 1.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #fff7ed;
+            color: #7c2d12;
+            font-weight: 600;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #ea580c;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.25rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #ea580c;
+        }
+
+        .timeline-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: #ea580c;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .nav-button {
+            padding: 0.75rem 2rem;
+            background: #ea580c;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #c2410c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(234, 88, 12, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #718096;
+            margin-top: 3rem;
+            background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+            border-radius: 0.5rem;
+        }
+
+        .footer p {
+            color: #7c2d12;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Week 16: Side Project 實戰開發</h1>
+            <p class="week-info">Final Project - Building a Complete Operating System Application</p>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">課程首頁</a></li>
+                <li><a href="#introduction">專案介紹</a></li>
+                <li><a href="#projects">專案選項</a></li>
+                <li><a href="#guidelines">開發指南</a></li>
+                <li><a href="#evaluation">評分標準</a></li>
+                <li><a href="#resources">參考資源</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            
+            <div class="intro-box" id="introduction">
+                <h3>🎯 最終專案：展現你的作業系統實力</h3>
+                <p>恭喜你來到課程的最後一週！經過 15 週的學習，你已經掌握了作業系統的核心概念，從行程管理、記憶體管理、檔案系統，到分散式系統、虛擬化、雲端運算。</p>
+                <p>現在是時候將所學知識整合起來，完成一個展現你實力的 Side Project。這個專案將成為你的作品集，展示你對作業系統的深入理解和實作能力。</p>
+            </div>
+
+            <div class="learning-objectives">
+                <h3>專案目標</h3>
+                <ul>
+                    <li>整合前 15 週所學的作業系統核心概念</li>
+                    <li>展現系統程式設計與問題解決能力</li>
+                    <li>完成一個可運行、有實用價值的專案</li>
+                    <li>撰寫清晰的文件與測試</li>
+                    <li>學習專案管理與開發流程</li>
+                    <li>建立個人技術作品集</li>
+                </ul>
+            </div>
+
+            <section id="projects">
+                <h2>一、專案選項</h2>
+                
+                <p>選擇一個你最感興趣且能充分展現所學知識的專案。每個專案都有不同的難度和技術重點。</p>
+
+                <div class="project-box">
+                    <h4>專案 1：迷你作業系統模擬器 🖥️</h4>
+                    <p><strong>難度：⭐⭐⭐⭐⭐ 困難</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>建立一個完整的作業系統模擬器，整合行程管理、記憶體管理、檔案系統等核心功能。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>行程管理：建立、排程、終止行程</li>
+                        <li>CPU 排程：實作多種排程演算法（FCFS、SJF、Round Robin、Priority）</li>
+                        <li>記憶體管理：分頁、分段、虛擬記憶體</li>
+                        <li>檔案系統：檔案 CRUD、目錄管理、權限控制</li>
+                        <li>同步機制：Mutex、Semaphore、死結處理</li>
+                        <li>Shell 介面：互動式命令列</li>
+                    </ul>
+                    
+                    <p><strong>加分功能：</strong></p>
+                    <ul>
+                        <li>圖形化介面（GUI）</li>
+                        <li>效能監控儀表板</li>
+                        <li>支援多執行緒</li>
+                        <li>實作 I/O 排程</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>C/C++, Python (GUI)</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 2：分散式任務排程系統 🌐</h4>
+                    <p><strong>難度：⭐⭐⭐⭐ 中高</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>建立一個分散式系統，可以將計算任務分配到多個節點執行。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>主節點（Master）：接收任務、分配工作、收集結果</li>
+                        <li>工作節點（Worker）：執行計算任務</li>
+                        <li>任務佇列：支援優先權排程</li>
+                        <li>負載平衡：動態分配任務</li>
+                        <li>容錯機制：節點失效處理</li>
+                        <li>Web 儀表板：監控系統狀態</li>
+                    </ul>
+                    
+                    <p><strong>範例應用：</strong></p>
+                    <ul>
+                        <li>分散式質數搜尋</li>
+                        <li>影像處理（批次縮放、濾鏡）</li>
+                        <li>蒙地卡羅模擬</li>
+                        <li>資料分析任務</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>Python/Node.js, Docker, Socket, REST API</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 3：容器化微服務平台 🐳</h4>
+                    <p><strong>難度：⭐⭐⭐⭐ 中高</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>建立一個完整的微服務應用，展現雲端原生技術。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>至少 4 個微服務（如：用戶、訂單、商品、通知）</li>
+                        <li>API Gateway：統一入口</li>
+                        <li>服務發現與註冊</li>
+                        <li>負載平衡</li>
+                        <li>資料庫（每個服務獨立 DB）</li>
+                        <li>Docker Compose / Kubernetes 部署</li>
+                    </ul>
+                    
+                    <p><strong>進階功能：</strong></p>
+                    <ul>
+                        <li>CI/CD Pipeline</li>
+                        <li>日誌收集與監控（ELK/Prometheus）</li>
+                        <li>分散式追蹤</li>
+                        <li>自動擴展</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>Docker, Kubernetes, Python/Node.js/Go</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 4：高效能多執行緒伺服器 ⚡</h4>
+                    <p><strong>難度：⭐⭐⭐⭐ 中高</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>實作一個高效能的網路伺服器，處理大量並行連線。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>HTTP 伺服器：支援 GET、POST、PUT、DELETE</li>
+                        <li>執行緒池：高效處理並行請求</li>
+                        <li>連線管理：Keep-Alive、Timeout</li>
+                        <li>靜態檔案服務</li>
+                        <li>動態內容生成（CGI 或內建）</li>
+                        <li>日誌系統</li>
+                    </ul>
+                    
+                    <p><strong>進階功能：</strong></p>
+                    <ul>
+                        <li>SSL/TLS 支援</li>
+                        <li>WebSocket 支援</li>
+                        <li>快取機制</li>
+                        <li>壓縮（gzip）</li>
+                        <li>效能測試與優化</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>C/C++, POSIX Threads, epoll/kqueue</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 5：系統監控與管理平台 📊</h4>
+                    <p><strong>難度：⭐⭐⭐ 中等</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>建立一個完整的系統監控工具，收集、分析、視覺化系統資源。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>資源監控：CPU、記憶體、磁碟、網路</li>
+                        <li>行程管理：查看、終止、優先權調整</li>
+                        <li>歷史資料記錄</li>
+                        <li>即時圖表：折線圖、儀表板</li>
+                        <li>告警系統：閾值通知</li>
+                        <li>Web 介面：響應式設計</li>
+                    </ul>
+                    
+                    <p><strong>進階功能：</strong></p>
+                    <ul>
+                        <li>多主機監控</li>
+                        <li>日誌分析</li>
+                        <li>效能剖析工具</li>
+                        <li>自動化建議</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>Python, Flask/Django, JavaScript, Chart.js</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 6：虛擬檔案系統 📁</h4>
+                    <p><strong>難度：⭐⭐⭐⭐ 中高</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>實作一個完整的檔案系統，支援檔案 CRUD、目錄、權限等。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>檔案操作：建立、讀取、寫入、刪除、重新命名</li>
+                        <li>目錄管理：樹狀結構、路徑解析</li>
+                        <li>檔案配置：實作索引配置或鏈結配置</li>
+                        <li>權限控制：rwx 權限系統</li>
+                        <li>元資料管理：檔案大小、時間戳記</li>
+                        <li>磁碟空間管理：bitmap 或 free list</li>
+                    </ul>
+                    
+                    <p><strong>進階功能：</strong></p>
+                    <ul>
+                        <li>檔案快取</li>
+                        <li>日誌系統（Journaling）</li>
+                        <li>碎片整理</li>
+                        <li>壓縮支援</li>
+                        <li>FUSE 整合（掛載為真實檔案系統）</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>C/C++, FUSE (optional)</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 7：記憶體管理模擬器 🧠</h4>
+                    <p><strong>難度：⭐⭐⭐ 中等</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>實作完整的記憶體管理系統，包含分頁、分段、虛擬記憶體。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>記憶體配置演算法：First Fit、Best Fit、Worst Fit</li>
+                        <li>分頁系統：頁表、TLB 模擬</li>
+                        <li>虛擬記憶體：需求分頁</li>
+                        <li>頁面置換：FIFO、LRU、Optimal</li>
+                        <li>碎片分析</li>
+                        <li>視覺化記憶體狀態</li>
+                    </ul>
+                    
+                    <p><strong>進階功能：</strong></p>
+                    <ul>
+                        <li>多層頁表</li>
+                        <li>Working Set 分析</li>
+                        <li>Thrashing 偵測</li>
+                        <li>效能比較工具</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>C/Python, GUI (Tkinter/Qt)</p>
+                </div>
+
+                <div class="project-box">
+                    <h4>專案 8：簡易容器引擎 🏗️</h4>
+                    <p><strong>難度：⭐⭐⭐⭐⭐ 困難</strong></p>
+                    
+                    <p><strong>專案描述：</strong></p>
+                    <p>使用 Linux Namespace 和 Cgroups 實作簡易容器引擎。</p>
+                    
+                    <p><strong>核心功能：</strong></p>
+                    <ul>
+                        <li>容器建立與執行</li>
+                        <li>Namespace 隔離：PID、NET、MNT、UTS</li>
+                        <li>Cgroups 資源限制：CPU、Memory</li>
+                        <li>檔案系統隔離（chroot）</li>
+                        <li>映像檔管理</li>
+                        <li>容器生命週期管理</li>
+                    </ul>
+                    
+                    <p><strong>進階功能：</strong></p>
+                    <ul>
+                        <li>網路橋接</li>
+                        <li>Volume 掛載</li>
+                        <li>容器日誌</li>
+                        <li>簡易 Dockerfile 支援</li>
+                    </ul>
+                    
+                    <p><strong>技術棧：</strong>C/Go, Linux Kernel API</p>
+                </div>
+
+            </section>
+
+            <section id="guidelines">
+                <h2>二、開發指南</h2>
+
+                <h3>2.1 專案時程規劃</h3>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>Day 1-2：規劃與設計</h4>
+                        <ul>
+                            <li>選擇專案</li>
+                            <li>定義功能需求</li>
+                            <li>設計系統架構</li>
+                            <li>規劃資料結構</li>
+                            <li>建立開發環境</li>
+                        </ul>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h4>Day 3-5：核心功能開發</h4>
+                        <ul>
+                            <li>實作基本架構</li>
+                            <li>開發核心模組</li>
+                            <li>單元測試</li>
+                            <li>整合測試</li>
+                        </ul>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h4>Day 6：進階功能與優化</h4>
+                        <ul>
+                            <li>實作進階功能</li>
+                            <li>效能優化</li>
+                            <li>錯誤處理</li>
+                            <li>使用者體驗改善</li>
+                        </ul>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h4>Day 7：文件與展示</h4>
+                        <ul>
+                            <li>撰寫 README</li>
+                            <li>程式碼註解</li>
+                            <li>使用手冊</li>
+                            <li>Demo 影片</li>
+                            <li>專案報告</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2.2 開發建議</h3>
+
+                <div class="concept-box">
+                    <h4>💡 成功秘訣</h4>
+                    <ul>
+                        <li><strong>從簡單開始：</strong>先實作核心功能，再逐步擴展</li>
+                        <li><strong>持續測試：</strong>寫一點測一點，不要累積問題</li>
+                        <li><strong>版本控制：</strong>使用 Git，頻繁 commit</li>
+                        <li><strong>清晰命名：</strong>變數、函數名稱要有意義</li>
+                        <li><strong>寫好註解：</strong>解釋複雜邏輯和設計決策</li>
+                        <li><strong>模組化設計：</strong>功能分離，降低耦合</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 常見陷阱</strong>
+                    <ul>
+                        <li>功能範圍過大，無法在時限內完成</li>
+                        <li>過度優化，忽略核心功能</li>
+                        <li>沒有測試，到最後才發現問題</li>
+                        <li>文件不完整，別人看不懂</li>
+                        <li>沒有備份，資料遺失</li>
+                    </ul>
+                </div>
+
+                <h3>2.3 品質檢查清單</h3>
+
+                <div class="checklist">
+                    <h4>提交前檢查項目</h4>
+                    <ul>
+                        <li>核心功能完整運作</li>
+                        <li>沒有明顯的 bug</li>
+                        <li>程式碼有適當的註解</li>
+                        <li>README 包含安裝和使用說明</li>
+                        <li>有測試案例或測試腳本</li>
+                        <li>錯誤處理完善</li>
+                        <li>記憶體沒有洩漏</li>
+                        <li>程式碼風格一致</li>
+                        <li>專案結構清晰</li>
+                        <li>有 Demo 展示</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="evaluation">
+                <h2>三、評分標準</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>項目</th>
+                            <th>配分</th>
+                            <th>評分重點</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>功能完整性</strong></td>
+                            <td>30%</td>
+                            <td>
+                                • 核心功能是否完整實作<br>
+                                • 功能是否正確運作<br>
+                                • 是否有進階功能
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>程式碼品質</strong></td>
+                            <td>25%</td>
+                            <td>
+                                • 程式碼結構與組織<br>
+                                • 命名規範<br>
+                                • 註解完整度<br>
+                                • 錯誤處理<br>
+                                • 效能優化
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>技術深度</strong></td>
+                            <td>20%</td>
+                            <td>
+                                • 運用作業系統概念<br>
+                                • 演算法選擇與實作<br>
+                                • 系統設計能力<br>
+                                • 問題解決能力
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>文件與展示</strong></td>
+                            <td>15%</td>
+                            <td>
+                                • README 清晰度<br>
+                                • 使用說明完整性<br>
+                                • 架構設計文件<br>
+                                • Demo 展示效果
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>創新性</strong></td>
+                            <td>10%</td>
+                            <td>
+                                • 獨特的功能或設計<br>
+                                • 創意的解決方案<br>
+                                • 使用者體驗
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>3.1 加分項目</h3>
+
+                <div class="success-box">
+                    <strong>✨ 可獲得額外加分</strong>
+                    <ul>
+                        <li>完整的單元測試與整合測試（+5 分）</li>
+                        <li>CI/CD Pipeline（+5 分）</li>
+                        <li>Docker 容器化（+3 分）</li>
+                        <li>詳細的效能分析報告（+5 分）</li>
+                        <li>優秀的 UI/UX 設計（+5 分）</li>
+                        <li>開源貢獻（發布到 GitHub 並維護）（+5 分）</li>
+                        <li>技術部落格文章（+3 分）</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section id="resources">
+                <h2>四、參考資源與範例</h2>
+
+                <h3>4.1 專案結構範例</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>project_structure.txt</span>
+                        <span>推薦的專案目錄結構</span>
+                    </div>
+                    <pre><code>my-os-project/
+├── README.md               # 專案說明
+├── docs/                   # 文件目錄
+│   ├── design.md          # 設計文件
+│   ├── api.md             # API 文件
+│   └── user_guide.md      # 使用手冊
+├── src/                    # 原始碼
+│   ├── main.c             # 主程式
+│   ├── process.c          # 行程管理模組
+│   ├── memory.c           # 記憶體管理模組
+│   ├── filesystem.c       # 檔案系統模組
+│   └── utils.c            # 工具函數
+├── include/                # 標頭檔
+│   ├── process.h
+│   ├── memory.h
+│   └── filesystem.h
+├── tests/                  # 測試程式
+│   ├── test_process.c
+│   ├── test_memory.c
+│   └── test_filesystem.c
+├── examples/               # 範例與 Demo
+│   └── demo.sh
+├── Makefile               # 編譯設定
+├── Dockerfile             # Docker 配置（選擇性）
+└── LICENSE                # 授權</code></pre>
+                </div>
+
+                <h3>4.2 README 範本</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>README.md</span>
+                        <span>README 文件範本</span>
+                    </div>
+                    <pre><code># 專案名稱
+
+簡短描述專案的核心功能和目的。
+
+## 功能特色
+
+- 功能 1：描述
+- 功能 2：描述
+- 功能 3：描述
+
+## 系統需求
+
+- 作業系統：Linux / macOS / Windows
+- 編譯器：GCC 9.0+ / Clang
+- 依賴套件：列出所有依賴
+
+## 安裝
+
+```bash
+# 克隆專案
+git clone https://github.com/yourusername/project.git
+cd project
+
+# 編譯
+make
+
+# 執行
+./bin/program
+```
+
+## 使用方式
+
+```bash
+# 基本使用
+./program --help
+
+# 範例 1
+./program -option1 value1
+
+# 範例 2
+./program -option2 value2
+```
+
+## 架構設計
+
+簡述系統架構和主要模組。
+
+```
+[架構圖或流程圖]
+```
+
+## 測試
+
+```bash
+# 執行測試
+make test
+
+# 效能測試
+./scripts/benchmark.sh
+```
+
+## 專案展示
+
+[Demo 影片連結或 GIF]
+
+## 技術亮點
+
+- 使用的技術 1
+- 解決的難題 2
+- 優化方法 3
+
+## 未來改進
+
+- [ ] 功能擴展 1
+- [ ] 功能擴展 2
+- [ ] 效能優化
+
+## 授權
+
+MIT License
+
+## 作者
+
+你的名字 - [個人網站/GitHub]
+
+## 致謝
+
+感謝...
+</code></pre>
+                </div>
+
+                <h3>4.3 有用的資源</h3>
+
+                <div class="note-box">
+                    <strong>📚 推薦閱讀</strong>
+                    <ul>
+                        <li><strong>書籍：</strong>
+                            <ul>
+                                <li>Operating System Concepts (Dinosaur Book)</li>
+                                <li>Modern Operating Systems (Tanenbaum)</li>
+                                <li>Linux Kernel Development</li>
+                            </ul>
+                        </li>
+                        <li><strong>線上資源：</strong>
+                            <ul>
+                                <li>OSDev Wiki: https://wiki.osdev.org/</li>
+                                <li>Linux Kernel Documentation</li>
+                                <li>GitHub 開源專案</li>
+                            </ul>
+                        </li>
+                        <li><strong>工具：</strong>
+                            <ul>
+                                <li>GDB：除錯工具</li>
+                                <li>Valgrind：記憶體檢查</li>
+                                <li>perf：效能分析</li>
+                                <li>Draw.io：架構圖繪製</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>4.4 提交方式</h3>
+
+                <div class="concept-box">
+                    <h4>📦 專案提交</h4>
+                    <ul>
+                        <li><strong>GitHub 倉庫：</strong>建立公開倉庫，包含完整原始碼</li>
+                        <li><strong>README.md：</strong>完整的專案說明</li>
+                        <li><strong>Demo 影片：</strong>3-5 分鐘展示影片（YouTube/錄影檔）</li>
+                        <li><strong>專案報告：</strong>PDF 格式，包含：
+                            <ul>
+                                <li>專案動機與目標</li>
+                                <li>系統架構設計</li>
+                                <li>核心技術說明</li>
+                                <li>遇到的挑戰與解決方法</li>
+                                <li>效能測試結果</li>
+                                <li>心得與反思</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <section>
+                <h2>五、課程總結</h2>
+
+                <div class="intro-box">
+                    <h3>🎓 恭喜完成作業系統課程！</h3>
+                    <p>經過 16 週的學習，你已經從作業系統的基礎概念，一路學到雲端運算與現代技術。你掌握了：</p>
+                    <ul>
+                        <li>✅ 行程管理與 CPU 排程</li>
+                        <li>✅ 記憶體管理與虛擬記憶體</li>
+                        <li>✅ 檔案系統與儲存管理</li>
+                        <li>✅ 同步機制與死結處理</li>
+                        <li>✅ 分散式系統與網路程式設計</li>
+                        <li>✅ 虛擬化與容器技術</li>
+                        <li>✅ 系統監控與效能優化</li>
+                        <li>✅ 雲端運算與微服務</li>
+                    </ul>
+                    <p>這個 Side Project 是你展現所學的最佳機會。認真完成它，將成為你求職或進修時最有力的證明。</p>
+                    <p><strong>祝你專案開發順利！加油！💪</strong></p>
+                </div>
+
+                <div class="success-box">
+                    <strong>🚀 下一步建議</strong>
+                    <ul>
+                        <li>持續深入學習感興趣的主題（Linux Kernel、分散式系統、雲端架構）</li>
+                        <li>閱讀開源專案的原始碼（如 Redis、Nginx）</li>
+                        <li>參與開源貢獻</li>
+                        <li>建立技術部落格，分享學習心得</li>
+                        <li>參加技術社群與會議</li>
+                        <li>考慮相關認證（如 CKA、AWS Solutions Architect）</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <div class="navigation">
+                <a href="week15.html" class="nav-button">上一週：雲端運算</a>
+                <a href="index.html" class="nav-button">返回課程首頁</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p><strong>🎉 作業系統課程 Week 16 - Final Project 🎉</strong></p>
+            <p>16 週的旅程到此結束，但學習永不止步</p>
+            <p>期待看到你精彩的專案成果！</p>
+            <p style="margin-top: 1rem;">© 2026 Operating System Course. 祝專案開發順利！</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
